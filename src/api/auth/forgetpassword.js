@@ -1,34 +1,28 @@
-import { baseURL } from "../config.js"; // Adjust the path if needed
+import { baseURL } from "../config.js";
 
-const forgetPassword = async ({ email }) => {
+export const sendForgetPasswordCode = async ({ email }) => {
     try {
-        const response = await fetch(`${baseURL}auth/verification-code/forget-password?email=${email}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
+        const response = await fetch(
+            `${baseURL}auth/verification-code/forget-password?email=${encodeURIComponent(email)}`, 
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                }
             }
-        });
+        );
 
         const data = await response.json();
 
         if (!response.ok) {
             console.error("Server error response:", data);
-            throw new Error(data.detail || "Validation failed");
+            throw new Error(data.detail || "Failed to send forget password code");
         }
 
         return data;
     } catch (error) {
-        console.error("Password validation failed:", error.message);
+        console.error("Forget password error:", error.message);
         throw error;
     }
 };
-
-forgetPassword({
-    email: "saleemalmohidi@gmail.com" // Replace with the email to validate
-}).then(data => {
-    console.log("Password validation successful:");
-    console.log(data);
-}).catch(error => {
-    console.error(" Password validation failed:");
-    console.error(error.message);
-});

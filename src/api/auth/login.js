@@ -1,6 +1,12 @@
-import { baseURL } from "../config.js"; // تأكد من تعديل المسار إذا لزم الأمر
+import { baseURL } from "../config.js";
 
-const login = async ({ username, password, client_id, client_secret, scope = "" }) => {
+const login = async ({
+  username,
+  password,
+  client_id = "",
+  client_secret = "",
+  scope = "",
+}) => {
   try {
     const body = new URLSearchParams({
       grant_type: "password",
@@ -8,13 +14,16 @@ const login = async ({ username, password, client_id, client_secret, scope = "" 
       password,
       scope,
       client_id,
-      client_secret
+      client_secret,
     });
 
     const response = await fetch(`${baseURL}auth/token`, {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: body.toString()
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "application/json",
+      },
+      body: body.toString(),
     });
 
     const data = await response.json();
@@ -24,23 +33,21 @@ const login = async ({ username, password, client_id, client_secret, scope = "" 
       throw new Error(data.detail || "Login failed");
     }
 
-    return data; // سيُرجع التوكن
+    return data; // Returns the token data
   } catch (error) {
     console.error("Login failed:", error.message);
     throw error;
   }
 };
 
-// Example usage
 login({
-  username: "saleemtestuser2@gmail.com",
-  password: "newPassword123",
-  client_id: "your-client-id", // استبدله بالـ client_id الفعلي
-  client_secret: "your-client-secret" // استبدله بالـ client_secret الفعلي
-}).then(data => {
-  console.log("Login successful. Token received:");
-  console.log(data);
-}).catch(error => {
-  console.error("Login failed:");
-  console.error(error.message);
-});
+  username: "husam.a.awadi@outlook.com",
+  password: "husam@2001",
+  client_id: "your_client_id",
+  client_secret: "your_client_secret",
+  scope: "your_scope",
+})
+  .then((data) => console.log("Login successful:", data))
+  .catch((error) => console.error("Login error:", error.message));
+
+export { login };

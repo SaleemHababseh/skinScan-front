@@ -1,59 +1,153 @@
-import { delay } from '../utils';
-import { mockUsers, mockAppointments, mockSystemLogs } from './mockData';
+import { baseURL } from "./config.js";
+import { tokenStorage } from "./auth";
+
+// Utility function to get auth headers
+const getAuthHeaders = () => {
+  const token = tokenStorage.getAccessToken();
+  return {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  };
+};
 
 // Get all users
 export const getAllUsers = async () => {
-  await delay(800);
-  return mockUsers.map(user => {
-    const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
-  });
+  try {
+    const response = await fetch(`${baseURL}admin/users`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error getting all users:', error);
+    throw error;
+  }
 };
 
-// Update user status
+// Update user status (activate, suspend, delete)
 export const updateUserStatus = async (userId, status) => {
-  await delay(600);
-  
-  const user = mockUsers.find(user => user.id === userId);
-  
-  if (!user) {
-    throw new Error('User not found');
+  try {
+    const response = await fetch(`${baseURL}admin/users/${userId}/status`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ status })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error updating user status:', error);
+    throw error;
   }
-  
-  // Handle different status actions
-  switch (status) {
-    case 'activate':
-      user.status = 'active';
-      break;
-    case 'suspend':
-      user.status = 'suspended';
-      break;
-    case 'delete':
-      // In a real app, we might soft delete or remove from the array
-      user.status = 'deleted';
-      break;
-    default:
-      throw new Error('Invalid status action');
-  }
-  
-  const { password, ...userWithoutPassword } = user;
-  return userWithoutPassword;
 };
 
 // Get all appointments
 export const getAllAppointments = async () => {
-  await delay(1000);
-  return mockAppointments;
+  try {
+    const response = await fetch(`${baseURL}admin/appointments`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error getting all appointments:', error);
+    throw error;
+  }
 };
 
 // Get system logs
 export const getSystemLogs = async () => {
-  await delay(1200);
-  return mockSystemLogs;
+  try {
+    const response = await fetch(`${baseURL}admin/logs`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error getting system logs:', error);
+    throw error;
+  }
 };
 
 // Send global notification
 export const sendNotification = async (message) => {
-  await delay(500);
-  return { success: true, message: 'Notification sent successfully' };
+  try {
+    const response = await fetch(`${baseURL}admin/notifications`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ message })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error sending notification:', error);
+    throw error;
+  }
+};
+
+// Get admin dashboard statistics
+export const getAdminStats = async () => {
+  try {
+    const response = await fetch(`${baseURL}admin/stats`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error getting admin stats:', error);
+    throw error;
+  }
+};
+
+// Get system reports
+export const getSystemReports = async (reportType = 'all') => {
+  try {
+    const response = await fetch(`${baseURL}admin/reports?type=${reportType}`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error getting system reports:', error);
+    throw error;
+  }
 };

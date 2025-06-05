@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import AuthLayout from '../../components/layout/AuthLayout';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
@@ -12,11 +12,11 @@ const Login = () => {
   });
   const [formErrors, setFormErrors] = useState({});
   const { login, error, clearError } = useAuthStore();
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);  const navigate = useNavigate();
   const location = useLocation();
   
-  const from = location.state?.from?.pathname || '/';
+  // Store the intended destination for redirecting after login
+  const _from = location.state?.from?.pathname || '/';
   
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -45,8 +45,7 @@ const Login = () => {
     setFormErrors(errors);
     return isValid;
   };
-  
-  const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!validateForm()) return;
@@ -55,7 +54,16 @@ const Login = () => {
     
     try {
       const user = await login(formData.email, formData.password);
-      navigate(`/${user.role}/dashboard`);
+      
+      // Navigate based on user role
+      const roleDashboards = {
+        patient: '/patient/dashboard',
+        doctor: '/doctor/dashboard', 
+        admin: '/admin/dashboard'
+      };
+      
+      const destination = roleDashboards[user.role] || '/patient/dashboard';
+      navigate(destination);
     } catch (err) {
       console.error('Login failed:', err);
     } finally {
@@ -163,11 +171,13 @@ const Login = () => {
               Remember me
             </label>
           </div>
-          
-          <div className="text-sm">
-            <a href="#" className="font-medium text-primary-500 hover:text-primary-600">
+            <div className="text-sm">
+            <Link 
+              to="/auth/forgot-password" 
+              className="font-medium text-primary-500 hover:text-primary-600"
+            >
               Forgot your password?
-            </a>
+            </Link>
           </div>
         </div>
         

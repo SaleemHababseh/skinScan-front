@@ -8,30 +8,21 @@ export const sendVerificationCode = async ({ email }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Accept": "application/json"
         },
       }
     );
 
-    console.log("Status:", response.status);
-
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Raw response body:", errorText);
-      throw new Error(`Request failed with status ${response.status}`);
+      const errorData = await response.json();
+      console.error("Raw response body:", errorData);
+      throw new Error(errorData.detail || `Request failed with status ${response.status}`);
     }
 
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Send verification code error:", error);
     throw error;
   }
 };
-
-sendVerificationCode ({ email: "syntaxbootkjcamp@gmail.com" })
-  .then((res) => {
-    console.log("Success:", res);
-  })
-  .catch((err) => {
-    console.log("error:", err);
-  });

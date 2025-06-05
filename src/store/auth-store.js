@@ -1,5 +1,15 @@
 import { create } from 'zustand';
-import { loginUser, logoutUser, registerUser, getCurrentUser } from '../api/auth';
+import { 
+  loginUser, 
+  logoutUser, 
+  registerUser, 
+  getCurrentUser,
+  sendVerificationCode,
+  sendForgetPasswordCode,
+  validateVerificationCode,
+  refreshAccessToken,
+  tokenStorage
+} from '../api/auth';
 
 const useAuthStore = create((set) => ({
   user: null,
@@ -7,7 +17,7 @@ const useAuthStore = create((set) => ({
   isAuthenticated: false,
   isLoading: true,
   error: null,
-
+  verificationStep: null, // For tracking verification process
   initialize: async () => {
     set({ isLoading: true, error: null });
     try {
@@ -28,10 +38,10 @@ const useAuthStore = create((set) => ({
     }
   },
 
-  login: async (email, password) => {
+  login: async (email, password, clientId = "", clientSecret = "") => {
     set({ isLoading: true, error: null });
     try {
-      const { user } = await loginUser(email, password);
+      const { user } = await loginUser(email, password, clientId, clientSecret);
       set({ user, role: user.role, isAuthenticated: true, isLoading: false });
       return user;
     } catch (error) {
@@ -44,10 +54,64 @@ const useAuthStore = create((set) => ({
     set({ isLoading: true, error: null });
     try {
       const { user } = await registerUser(userData);
-      set({ user, role: user.role, isAuthenticated: true, isLoading: false });
+      set({ user, role: user.role, isAuthenticated: true, isLoading: false, verificationStep: 'verification_sent' });
       return user;
     } catch (error) {
       set({ isLoading: false, error: error.message });
+      throw error;
+    }
+  },
+
+  sendVerificationCode: async (email) => {
+    set({ isLoading: true, error: null });
+    try {
+      const result = await sendVerificationCode(email);
+      set({ isLoading: false, verificationStep: 'code_sent' });
+      return result;
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      throw error;
+    }
+  },
+
+  sendForgetPasswordCode: async (email) => {
+    set({ isLoading: true, error: null });
+    try {
+      const result = await sendForgetPasswordCode(email);
+      set({ isLoading: false, verificationStep: 'reset_code_sent' });
+      return result;
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      throw error;
+    }
+  },
+
+  validateVerificationCode: async (email, code) => {
+    set({ isLoading: true, error: null });
+    try {
+      const result = await validateVerificationCode(email, code);
+      set({ isLoading: false, verificationStep: 'verified' });
+      return result;
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      throw error;
+    }
+  },
+
+  refreshToken: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const result = await refreshAccessToken();
+      set({ isLoading: false });
+      return result;
+    } catch (error) {
+      set({ 
+        user: null, 
+        role: null, 
+        isAuthenticated: false, 
+        isLoading: false, 
+        error: error.message 
+      });
       throw error;
     }
   },
@@ -56,7 +120,13 @@ const useAuthStore = create((set) => ({
     set({ isLoading: true, error: null });
     try {
       await logoutUser();
-      set({ user: null, role: null, isAuthenticated: false, isLoading: false });
+      set({ 
+        user: null, 
+        role: null, 
+        isAuthenticated: false, 
+        isLoading: false, 
+        verificationStep: null 
+      });
     } catch (error) {
       set({ isLoading: false, error: error.message });
       throw error;
@@ -64,6 +134,22 @@ const useAuthStore = create((set) => ({
   },
 
   clearError: () => set({ error: null }),
+  
+  resetVerificationStep: () => set({ verificationStep: null }),
+
+  // Check if user is authenticated and token is valid
+  checkAuth: () => {
+    const accessToken = tokenStorage.getAccessToken();
+    const user = tokenStorage.getUser();
+    
+    if (accessToken && user) {
+      set({ user, role: user.role, isAuthenticated: true, isLoading: false });
+      return true;
+    } else {
+      set({ user: null, role: null, isAuthenticated: false, isLoading: false });
+      return false;
+    }
+  },
 }));
 
 export default useAuthStore;

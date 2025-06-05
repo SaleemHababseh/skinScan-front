@@ -4,19 +4,31 @@ import AuthLayout from '../../components/layout/AuthLayout';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import useAuthStore from '../../store/auth-store';
+import useUserStore from '../../store/user-store';
 
 const Register = () => {
-  const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
+  const [step, setStep] = useState(1);  const [formData, setFormData] = useState({
     email: '',
     verificationCode: '',
     firstName: '',
     lastName: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    age: '',
+    sex: '',
+    role: 'patient' // Default role
   });
   const [formErrors, setFormErrors] = useState({});
-  const { register, error, clearError } = useAuthStore();
+  
+  const { 
+    register, 
+    sendVerificationCode, 
+    validateVerificationCode,
+    error, 
+    clearError
+  } = useAuthStore();
+  
+  const { createUserAccount } = useUserStore();
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -55,7 +67,6 @@ const Register = () => {
     setFormErrors(errors);
     return isValid;
   };
-
   const validateFinalForm = () => {
     let errors = {};
     let isValid = true;
@@ -66,6 +77,14 @@ const Register = () => {
     }
     if (!formData.lastName.trim()) {
       errors.lastName = 'Last name is required';
+      isValid = false;
+    }
+    if (!formData.age || formData.age < 1) {
+      errors.age = 'Please enter a valid age';
+      isValid = false;
+    }
+    if (!formData.sex) {
+      errors.sex = 'Please select your gender';
       isValid = false;
     }
     if (!formData.password) {
@@ -84,12 +103,24 @@ const Register = () => {
     return isValid;
   };
 
-  const handleNext = (e) => {
+  const handleNext = async (e) => {
     e.preventDefault();
-    if (step === 1 && validateEmail()) {
-      setStep(2);
-    } else if (step === 2 && validateCode()) {
-      setStep(3);
+    setIsLoading(true);
+    
+    try {
+      if (step === 1 && validateEmail()) {
+        // Send verification code
+        await sendVerificationCode(formData.email);
+        setStep(2);
+      } else if (step === 2 && validateCode()) {
+        // Validate verification code
+        await validateVerificationCode(formData.email, formData.verificationCode);
+        setStep(3);
+      }
+    } catch (err) {
+      console.error('Step validation failed:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -104,9 +135,14 @@ const Register = () => {
         lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
-        role: 'patient'
+        role: 'patient',
+        age: parseInt(formData.age),
+        sex: formData.sex
       };
+      
       await register(userData);
+      
+      // Navigate to dashboard after successful registration
       navigate('/patient/dashboard');
     } catch (err) {
       console.error('Registration failed:', err);
@@ -176,8 +212,7 @@ const Register = () => {
         )}
 
         {step === 3 && (
-          <>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <>            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="firstName" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">First Name</label>
                 <div className="mt-1">
@@ -206,6 +241,47 @@ const Register = () => {
                     placeholder="Doe"
                     required
                   />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label htmlFor="age" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Age</label>
+                <div className="mt-1">
+                  <Input
+                    id="age"
+                    name="age"
+                    type="number"
+                    value={formData.age}
+                    onChange={handleChange}
+                    error={formErrors.age}
+                    placeholder="25"
+                    min="1"
+                    max="120"
+                    required
+                  />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="sex" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Gender</label>
+                <div className="mt-1">
+                  <select
+                    id="sex"
+                    name="sex"
+                    value={formData.sex}
+                    onChange={handleChange}
+                    className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm placeholder-neutral-500 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white dark:placeholder-neutral-400"
+                    required
+                  >
+                    <option value="">Select gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                  </select>
+                  {formErrors.sex && (
+                    <p className="mt-1 text-sm text-error-500">{formErrors.sex}</p>
+                  )}
                 </div>
               </div>
             </div>

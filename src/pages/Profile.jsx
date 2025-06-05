@@ -1,14 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { User, Mail, Phone, MapPin, Calendar, Camera, Lock, Shield, Save } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Calendar, Camera, Lock, Shield, Save, Upload } from 'lucide-react';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Avatar from '../components/ui/Avatar';
 import useAuthStore from '../store/auth-store';
+import useUserStore from '../store/user-store';
 
 const Profile = () => {
-  const { user, updateProfile } = useAuthStore();
+  const { user } = useAuthStore();
+  const { 
+    userInfo, 
+    profilePicture, 
+    isLoading, 
+    error,
+    fetchUserBasicInfo,
+    updateUserBasicInfo,
+    updateUserBio,
+    uploadUserProfilePicture,
+    updatePassword,
+    clearError
+  } = useUserStore();
+  
   const [isEditing, setIsEditing] = useState(false);
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [profileData, setProfileData] = useState({
     firstName: '',
     lastName: '',
@@ -20,46 +35,113 @@ const Profile = () => {
     avatarUrl: ''
   });
   
+  const [passwordData, setPasswordData] = useState({
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  
+  const [selectedFile, setSelectedFile] = useState(null);
+
   useEffect(() => {
-    if (user) {
+    // Fetch user basic info when component mounts
+    fetchUserBasicInfo();
+  }, [fetchUserBasicInfo]);
+  
+  useEffect(() => {
+    // Update form data when userInfo or user changes
+    const currentUser = userInfo || user;
+    if (currentUser) {
       setProfileData({
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-        email: user.email || '',
-        phone: user.phone || '',
-        address: user.address || '',
-        dateOfBirth: user.dateOfBirth || '',
-        bio: user.bio || '',
-        avatarUrl: user.avatarUrl || ''
+        firstName: currentUser.f_name || currentUser.firstName || '',
+        lastName: currentUser.l_name || currentUser.lastName || '',
+        email: currentUser.email || '',
+        phone: currentUser.phone || '',
+        address: currentUser.address || '',
+        dateOfBirth: currentUser.dateOfBirth || '',
+        bio: currentUser.bio || '',
+        avatarUrl: profilePicture || currentUser.avatarUrl || ''
       });
     }
-  }, [user]);
-  
-  const handleInputChange = (e) => {
+  }, [user, userInfo, profilePicture]);
+    const handleInputChange = (e) => {
     const { name, value } = e.target;
     setProfileData(prev => ({ ...prev, [name]: value }));
   };
+
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+    }
+  };
+
+  const handleUploadProfilePicture = async () => {
+    if (selectedFile) {
+      try {
+        await uploadUserProfilePicture(selectedFile);
+        setSelectedFile(null);
+      } catch (err) {
+        console.error('Error uploading profile picture:', err);
+      }
+    }
+  };
   
-  const handleSaveProfile = () => {
-    updateProfile(profileData);
-    setIsEditing(false);
+  const handleSaveProfile = async () => {
+    try {
+      // Update basic information
+      await updateUserBasicInfo(profileData.firstName, profileData.lastName);
+      
+      // Update bio if it changed
+      const currentUser = userInfo || user;
+      if (currentUser && profileData.bio !== currentUser.bio) {
+        await updateUserBio(profileData.bio);
+      }
+      
+      setIsEditing(false);
+    } catch (err) {
+      console.error('Error saving profile:', err);
+    }
+  };
+
+  const handlePasswordUpdate = async () => {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      alert('New passwords do not match');
+      return;
+    }
+
+    try {
+      await updatePassword(passwordData.oldPassword, passwordData.newPassword);
+      setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
+      setShowPasswordChange(false);
+      alert('Password updated successfully');
+    } catch (err) {
+      console.error('Error updating password:', err);
+      alert('Error updating password: ' + err.message);
+    }
   };
   
   const handleCancel = () => {
     // Reset form to current user data
-    if (user) {
+    const currentUser = userInfo || user;
+    if (currentUser) {
       setProfileData({
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-        email: user.email || '',
-        phone: user.phone || '',
-        address: user.address || '',
-        dateOfBirth: user.dateOfBirth || '',
-        bio: user.bio || '',
-        avatarUrl: user.avatarUrl || ''
+        firstName: currentUser.f_name || currentUser.firstName || '',
+        lastName: currentUser.l_name || currentUser.lastName || '',
+        email: currentUser.email || '',
+        phone: currentUser.phone || '',
+        address: currentUser.address || '',
+        dateOfBirth: currentUser.dateOfBirth || '',
+        bio: currentUser.bio || '',
+        avatarUrl: profilePicture || currentUser.avatarUrl || ''
       });
-    }
-    setIsEditing(false);
+    }    setIsEditing(false);
+    clearError();
   };
 
   return (
@@ -86,8 +168,7 @@ const Profile = () => {
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         {/* Profile Card */}
         <Card className="md:col-span-1">
-          <div className="flex flex-col items-center p-6 text-center">
-            <div className="relative">
+          <div className="flex flex-col items-center p-6 text-center">            <div className="relative">
               <Avatar 
                 src={profileData.avatarUrl} 
                 alt={`${profileData.firstName} ${profileData.lastName}`}
@@ -95,9 +176,32 @@ const Profile = () => {
                 className="h-24 w-24"
               />
               {isEditing && (
-                <button className="absolute bottom-0 right-0 rounded-full bg-primary-500 p-1.5 text-white hover:bg-primary-600 dark:bg-primary-600 dark:hover:bg-primary-700">
-                  <Camera className="h-4 w-4" />
-                </button>
+                <div className="absolute bottom-0 right-0">
+                  <input
+                    type="file"
+                    id="profile-picture"
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+                  <label 
+                    htmlFor="profile-picture"
+                    className="flex cursor-pointer items-center justify-center rounded-full bg-primary-500 p-1.5 text-white hover:bg-primary-600 dark:bg-primary-600 dark:hover:bg-primary-700"
+                  >
+                    <Camera className="h-4 w-4" />
+                  </label>
+                  {selectedFile && (
+                    <Button
+                      size="sm"
+                      onClick={handleUploadProfilePicture}
+                      className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap"
+                      disabled={isLoading}
+                    >
+                      <Upload className="mr-1 h-3 w-3" />
+                      Upload
+                    </Button>
+                  )}
+                </div>
               )}
             </div>
             <h2 className="mt-4 text-xl font-bold text-neutral-900 dark:text-neutral-100">
@@ -275,8 +379,7 @@ const Profile = () => {
           <div className="p-6">
             <h2 className="text-lg font-medium text-neutral-900 dark:text-neutral-100">Security</h2>
             
-            <div className="mt-6 space-y-6">
-              <div className="flex items-center justify-between border-b border-neutral-200 pb-4 dark:border-neutral-800">
+            <div className="mt-6 space-y-6">              <div className="flex items-center justify-between border-b border-neutral-200 pb-4 dark:border-neutral-800">
                 <div>
                   <div className="flex items-center">
                     <Lock className="mr-2 h-5 w-5 text-neutral-500" />
@@ -286,8 +389,80 @@ const Profile = () => {
                     Update your password to keep your account secure
                   </p>
                 </div>
-                <Button variant="outline">Change Password</Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowPasswordChange(!showPasswordChange)}
+                >
+                  Change Password
+                </Button>
               </div>
+              
+              {showPasswordChange && (
+                <div className="space-y-4 rounded-md border border-neutral-200 p-4 dark:border-neutral-700">
+                  <div>
+                    <label htmlFor="oldPassword" className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                      Current Password
+                    </label>
+                    <Input
+                      id="oldPassword"
+                      name="oldPassword"
+                      type="password"
+                      value={passwordData.oldPassword}
+                      onChange={handlePasswordChange}
+                      placeholder="Enter current password"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="newPassword" className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                      New Password
+                    </label>
+                    <Input
+                      id="newPassword"
+                      name="newPassword"
+                      type="password"
+                      value={passwordData.newPassword}
+                      onChange={handlePasswordChange}
+                      placeholder="Enter new password"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="confirmPassword" className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                      Confirm New Password
+                    </label>
+                    <Input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type="password"
+                      value={passwordData.confirmPassword}
+                      onChange={handlePasswordChange}
+                      placeholder="Confirm new password"
+                    />
+                  </div>
+                  <div className="flex space-x-3">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        setShowPasswordChange(false);
+                        setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={handlePasswordUpdate}
+                      disabled={isLoading || !passwordData.oldPassword || !passwordData.newPassword || !passwordData.confirmPassword}
+                    >
+                      Update Password
+                    </Button>
+                  </div>
+                </div>
+              )}
+              
+              {error && (
+                <div className="rounded-md bg-red-50 p-4 dark:bg-red-900/20">
+                  <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+                </div>
+              )}
               
               <div className="flex items-center justify-between border-b border-neutral-200 pb-4 dark:border-neutral-800">
                 <div>

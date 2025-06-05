@@ -1,153 +1,83 @@
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDropzone } from 'react-dropzone';
-import { Upload, Image, AlertCircle } from 'lucide-react';
+import { Upload, Image, AlertCircle, Brain, CheckCircle, Camera, X } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
-import useAuthStore from '../../store/auth-store';
-import usePatientStore from '../../store/patient-store';
-
-const BODY_PARTS = [
-  'Face', 'Scalp', 'Neck', 'Chest', 'Back', 'Arms', 
-  'Hands', 'Abdomen', 'Legs', 'Feet', 'Other'
-];
+import useMLStore from '../../store/ml-store';
+import { fileToBase64 } from '../../api/ml';
 
 const PatientUpload = () => {
-  const { user } = useAuthStore();
-  const { uploadImage, isLoading, error, clearError } = usePatientStore();
+  const { 
+    selectedImage,
+    imagePreview,
+    scanResult,
+    isScanning,
+    error,
+    scanHistory,
+    setSelectedImage,
+    scanImage,
+    clearSelectedImage,
+    clearScanResult,
+    clearError
+  } = useMLStore();
   const navigate = useNavigate();
-  
-  const [formData, setFormData] = useState({
-    bodyPart: '',
-    concernDescription: '',
-    otherBodyPart: '',
-  });
-  
-  const [imageFile, setImageFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
-  const [uploadError, setUploadError] = useState('');
-  const [analysisResult, setAnalysisResult] = useState(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  
-  const onDrop = useCallback(acceptedFiles => {
+    const onDrop = useCallback(async (acceptedFiles) => {
     if (acceptedFiles && acceptedFiles.length > 0) {
       const file = acceptedFiles[0];
       
-      // Check file type
-      if (!file.type.startsWith('image/')) {
-        setUploadError('Please upload an image file (JPEG, PNG, etc.)');
-        return;
+      try {
+        // Convert file to base64 for preview
+        const preview = await fileToBase64(file);
+        setSelectedImage(file, preview);
+        clearError();
+      } catch (error) {
+        console.error('Error processing file:', error);
       }
-      
-      // Check file size (5MB limit)
-      if (file.size > 5 * 1024 * 1024) {
-        setUploadError('File size exceeds 5MB limit');
-        return;
-      }
-      
-      setImageFile(file);
-      setPreviewUrl(URL.createObjectURL(file));
-      setUploadError('');
     }
-  }, []);
+  }, [setSelectedImage, clearError]);
   
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/*': ['.jpeg', '.jpg', '.png', '.gif']
+      'image/*': ['.jpeg', '.jpg', '.png', '.webp']
     },
-    maxFiles: 1
+    maxFiles: 1,
+    maxSize: 10 * 1024 * 1024 // 10MB
   });
   
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-  
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!imageFile) {
-      setUploadError('Please upload an image');
+  const handleScanImage = async () => {
+    if (!selectedImage) {
       return;
     }
-    
-    if (!formData.bodyPart) {
-      setUploadError('Please select a body part');
-      return;
-    }
-    
-    const bodyPart = formData.bodyPart === 'Other' ? formData.otherBodyPart : formData.bodyPart;
-    
-    // Simulate upload progress
-    const progressInterval = setInterval(() => {
-      setUploadProgress(prev => {
-        if (prev >= 90) {
-          clearInterval(progressInterval);
-          return 90;
-        }
-        return prev + 10;
-      });
-    }, 300);
     
     try {
-      // Create a file object with additional properties
-      const fileWithMetadata = {
-        ...imageFile,
-        bodyPart,
-        concernDescription: formData.concernDescription
-      };
-      
-      // Upload the image and get analysis
-      setIsAnalyzing(true);
-      const result = await uploadImage(fileWithMetadata, user.id);
-      
-      // Complete the progress bar
-      setUploadProgress(100);
-      clearInterval(progressInterval);
-      
-      // Show the analysis result
-      setAnalysisResult(result);
-      setIsAnalyzing(false);
-      
+      await scanImage();
     } catch (error) {
-      clearInterval(progressInterval);
-      setUploadProgress(0);
-      setUploadError('Failed to upload image: ' + error.message);
-      setIsAnalyzing(false);
+      console.error('Error scanning image:', error);
     }
   };
   
   const handleNewUpload = () => {
-    setImageFile(null);
-    setPreviewUrl(null);
-    setAnalysisResult(null);
-    setUploadProgress(0);
-    setFormData({
-      bodyPart: '',
-      concernDescription: '',
-      otherBodyPart: '',
-    });
+    clearSelectedImage();
+    clearScanResult();
   };
   
   const handleBookAppointment = () => {
     // Navigate to appointment booking with pre-filled analysis data
-    navigate('/patient/appointments', { state: { analysisResult } });
+    navigate('/patient/appointments', { state: { scanResult } });
   };
-  
-  return (
+    return (
     <div className="max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Upload Skin Image</h1>
       
-      {analysisResult ? (
+      {scanResult ? (
         <div className="space-y-6 animate-fade-in">
           <Card className="overflow-hidden">
             <div className="flex flex-col md:flex-row">
               <div className="md:w-1/3">
                 <img
-                  src={previewUrl}
+                  src={imagePreview}
                   alt="Uploaded skin"
                   className="w-full h-64 md:h-full object-cover"
                 />
@@ -155,54 +85,18 @@ const PatientUpload = () => {
               <div className="p-6 md:w-2/3">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-bold">Analysis Results</h2>
-                  <span className="px-3 py-1 rounded-full bg-success-50 text-success-500 text-sm dark:bg-success-900/30">Completed</span>
-                </div>
-                
-                <div className="mb-6">
-                  <h3 className="font-medium mb-2">AI Diagnosis</h3>
-                  <p className="text-lg font-semibold">{analysisResult.aiDiagnosis}</p>
-                </div>
-                
-                <div className="mb-6">
-                  <h3 className="font-medium mb-2">Possible Conditions</h3>
-                  <div className="space-y-2">
-                    {analysisResult.possibleConditions.map((condition, index) => (
-                      <div key={index} className="flex items-center justify-between">
-                        <span>{condition.name}</span>
-                        <div className="flex items-center">
-                          <div className="w-32 h-2 bg-neutral-200 rounded-full mr-2 dark:bg-neutral-700">
-                            <div
-                              className="h-full bg-primary-500 rounded-full"
-                              style={{ width: `${condition.probability * 100}%` }}
-                            ></div>
-                          </div>
-                          <span className="text-sm">{(condition.probability * 100).toFixed(0)}%</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="mb-6">
-                  <h3 className="font-medium mb-2">Recommended Actions</h3>
-                  <ul className="list-disc list-inside space-y-1">
-                    {analysisResult.recommendedActions.map((action, index) => (
-                      <li key={index} className="text-neutral-700 dark:text-neutral-300">{action}</li>
-                    ))}
-                  </ul>
-                </div>
-                
-                <div className="mb-6">
-                  <h3 className="font-medium mb-2">Severity</h3>
-                  <span className={`px-3 py-1 rounded-full text-sm ${
-                    analysisResult.severity === 'Low' 
-                      ? 'bg-success-50 text-success-500 dark:bg-success-900/30' 
-                      : analysisResult.severity === 'Moderate'
-                      ? 'bg-warning-50 text-warning-500 dark:bg-warning-900/30'
-                      : 'bg-error-50 text-error-500 dark:bg-error-900/30'
-                  }`}>
-                    {analysisResult.severity}
+                  <span className="px-3 py-1 rounded-full bg-success-50 text-success-500 text-sm dark:bg-success-900/30">
+                    <CheckCircle className="w-4 h-4 inline mr-1" />
+                    Completed
                   </span>
+                </div>
+                  <div className="mb-6">
+                  <h3 className="font-medium mb-2">ML Analysis Result</h3>
+                  <div className="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg">
+                    <p className="text-sm">
+                      {scanResult}
+                    </p>
+                  </div>
                 </div>
                 
                 <div className="flex flex-col sm:flex-row gap-3 mt-6">
@@ -236,10 +130,9 @@ const PatientUpload = () => {
             </p>
           </div>
         </div>
-      ) : (
-        <div className="space-y-6">
+      ) : (        <div className="space-y-6">
           <Card>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-6">
               {/* Image Upload */}
               <div>
                 <label className="block text-sm font-medium mb-2">Skin Image</label>
@@ -249,14 +142,14 @@ const PatientUpload = () => {
                     isDragActive 
                       ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/10' 
                       : 'border-neutral-300 dark:border-neutral-700'
-                  } ${previewUrl ? 'bg-neutral-50 dark:bg-neutral-800' : ''}`}
+                  } ${imagePreview ? 'bg-neutral-50 dark:bg-neutral-800' : ''}`}
                 >
                   <input {...getInputProps()} />
                   
-                  {previewUrl ? (
+                  {imagePreview ? (
                     <div className="relative mx-auto max-w-xs">
                       <img 
-                        src={previewUrl} 
+                        src={imagePreview} 
                         alt="Preview" 
                         className="mx-auto max-h-48 rounded-lg object-contain" 
                       />
@@ -264,14 +157,11 @@ const PatientUpload = () => {
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setImageFile(null);
-                          setPreviewUrl(null);
+                          clearSelectedImage();
                         }}
                         className="absolute -right-2 -top-2 rounded-full bg-error-500 p-1 text-white hover:bg-error-600"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M18 6L6 18M6 6l12 12" />
-                        </svg>
+                        <X className="h-4 w-4" />
                       </button>
                     </div>
                   ) : (
@@ -281,96 +171,41 @@ const PatientUpload = () => {
                         Drag and drop an image, or <span className="text-primary-500">browse</span>
                       </p>
                       <p className="text-xs text-neutral-500 mt-1 dark:text-neutral-400">
-                        Supported formats: JPEG, PNG, GIF (Max 5MB)
+                        Supported formats: JPEG, PNG, WebP (Max 10MB)
                       </p>
                     </div>
                   )}
                 </div>
                 
-                {uploadError && (
-                  <p className="mt-2 text-sm text-error-500">{uploadError}</p>
+                {error && (
+                  <p className="mt-2 text-sm text-error-500">{error}</p>
                 )}
               </div>
               
-              {/* Form Fields */}
-              <div>
-                <label htmlFor="bodyPart" className="block text-sm font-medium mb-2">
-                  Body Part
-                </label>
-                <select
-                  id="bodyPart"
-                  name="bodyPart"
-                  value={formData.bodyPart}
-                  onChange={handleChange}
-                  className="input w-full"
-                  required
-                >
-                  <option value="">Select body part</option>
-                  {BODY_PARTS.map(part => (
-                    <option key={part} value={part}>{part}</option>
-                  ))}
-                </select>
-                
-                {formData.bodyPart === 'Other' && (
-                  <div className="mt-3">
-                    <label htmlFor="otherBodyPart" className="block text-sm font-medium mb-2">
-                      Specify Body Part
-                    </label>
-                    <Input
-                      id="otherBodyPart"
-                      name="otherBodyPart"
-                      value={formData.otherBodyPart}
-                      onChange={handleChange}
-                      placeholder="Please specify"
-                      required={formData.bodyPart === 'Other'}
-                    />
-                  </div>
-                )}
-              </div>
-              
-              <div>
-                <label htmlFor="concernDescription" className="block text-sm font-medium mb-2">
-                  Describe Your Concern
-                </label>
-                <textarea
-                  id="concernDescription"
-                  name="concernDescription"
-                  value={formData.concernDescription}
-                  onChange={handleChange}
-                  rows={4}
-                  className="input w-full"
-                  placeholder="Describe your skin concern, when it appeared, any symptoms, etc."
-                  required
-                ></textarea>
-              </div>
-              
-              {/* Submit Button */}
-              <div>
-                <Button
-                  type="submit"
-                  className="w-full"
-                  isLoading={isLoading || isAnalyzing}
-                >
-                  {isAnalyzing ? 'Analyzing Image...' : 'Upload & Analyze'}
-                </Button>
-                
-                {/* Upload Progress */}
-                {(uploadProgress > 0 && uploadProgress < 100) && (
-                  <div className="mt-4">
-                    <div className="mb-1 flex justify-between">
-                      <span className="text-sm font-medium">Uploading...</span>
-                      <span className="text-sm">{uploadProgress}%</span>
-                    </div>
-                    <div className="h-2 w-full rounded-full bg-neutral-200 dark:bg-neutral-700">
-                      <div
-                        className="h-full rounded-full bg-primary-500"
-                        style={{ width: `${uploadProgress}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </form>
+              {/* Scan Button */}
+              {selectedImage && (
+                <div>
+                  <Button
+                    onClick={handleScanImage}
+                    className="w-full"
+                    isLoading={isScanning}
+                    disabled={!selectedImage || isScanning}
+                  >
+                    {isScanning ? (
+                      <>
+                        <Brain className="w-4 h-4 mr-2 animate-spin" />
+                        Analyzing Image...
+                      </>
+                    ) : (
+                      <>
+                        <Camera className="w-4 h-4 mr-2" />
+                        Analyze Image
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+            </div>
           </Card>
           
           <Card className="bg-neutral-50 dark:bg-neutral-800">
@@ -390,6 +225,32 @@ const PatientUpload = () => {
               </div>
             </div>
           </Card>
+
+          {/* Scan History */}
+          {scanHistory.length > 0 && (
+            <Card>
+              <h3 className="font-medium mb-4">Recent Scans</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {scanHistory.slice(0, 6).map((scan) => (                  <div key={scan.id} className="border rounded-lg p-3 hover:bg-neutral-50 dark:hover:bg-neutral-800 cursor-pointer">
+                    <img 
+                      src={scan.imagePreview} 
+                      alt={scan.fileName}
+                      className="w-full h-32 object-cover rounded mb-2"
+                    />
+                    <p className="text-sm font-medium truncate">{scan.fileName}</p>
+                    <p className="text-xs text-neutral-500 mb-1">
+                      {new Date(scan.timestamp).toLocaleDateString()}
+                    </p>
+                    {scan.description && (
+                      <p className="text-xs text-neutral-600 dark:text-neutral-400 truncate">
+                        {scan.description}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
         </div>
       )}
     </div>

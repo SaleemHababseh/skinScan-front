@@ -1,163 +1,161 @@
-import { delay } from '../utils';
+import { baseURL } from "./config.js";
+import { tokenStorage } from "./auth";
 
-// Mock skin images
-const mockSkinImages = [
-  {
-    id: '1',
-    patientId: '1',
-    imageUrl: '',
-    uploadDate: '2024-05-10T14:30:00Z',
-    bodyPart: 'Arm',
-    concernDescription: 'Red rash that appeared 3 days ago',
-    diagnosisStatus: 'completed'
-  },
-  {
-    id: '2',
-    patientId: '1',
-    imageUrl: '',
-    uploadDate: '2024-04-25T09:15:00Z',
-    bodyPart: 'Face',
-    concernDescription: 'Dark spot growing in size',
-    diagnosisStatus: 'completed'
-  }
-];
-
-// Mock analysis results
-const mockAnalysisResults = {
-  '1': {
-    imageId: '1',
-    aiDiagnosis: 'Eczema (78% confidence)',
-    possibleConditions: [
-      { name: 'Eczema', probability: 0.78 },
-      { name: 'Contact Dermatitis', probability: 0.15 },
-      { name: 'Psoriasis', probability: 0.07 }
-    ],
-    recommendedActions: [
-      'Apply hydrocortisone cream',
-      'Avoid scratching the affected area',
-      'Consult with a dermatologist for proper treatment'
-    ],
-    severity: 'Moderate',
-    analysisDate: '2024-05-10T14:35:00Z'
-  },
-  '2': {
-    imageId: '2',
-    aiDiagnosis: 'Benign melanocytic nevus (95% confidence)',
-    possibleConditions: [
-      { name: 'Benign melanocytic nevus', probability: 0.95 },
-      { name: 'Seborrheic keratosis', probability: 0.04 },
-      { name: 'Melanoma', probability: 0.01 }
-    ],
-    recommendedActions: [
-      'Monitor for changes in size, shape, or color',
-      'Regular skin examinations are recommended',
-      'Use sunscreen to prevent further sun damage'
-    ],
-    severity: 'Low',
-    analysisDate: '2024-04-25T09:20:00Z'
-  }
+// Utility function to get auth headers
+const getAuthHeaders = () => {
+  const token = tokenStorage.getAccessToken();
+  return {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  };
 };
 
-// Mock appointments
-const mockAppointments = [
-  {
-    id: '1',
-    patientId: '1',
-    doctorId: '2',
-    doctorName: 'Dr. Sarah Smith',
-    dateTime: '2024-05-20T10:00:00Z',
-    status: 'confirmed',
-    imageId: '1',
-    notes: 'Follow-up for eczema diagnosis',
-    createdAt: '2024-05-11T08:30:00Z'
-  }
-];
-
-// Get all patient skin images
-export const getPatientImages = async (patientId) => {
-  await delay(800);
-  return mockSkinImages.filter(image => image.patientId === patientId);
-};
-
-// Upload skin image
+// Upload skin image for analysis
 export const uploadSkinImage = async (imageFile, patientId) => {
-  await delay(1500); // Simulate upload time
-  
-  const newImageId = String(mockSkinImages.length + 1);
-  
-  // In a real app, this would upload to a server and return the URL
-  // Here we're just using the File object's name and a mock URL
-  const newImage = {
-    id: newImageId,
-    patientId,
-    imageUrl: 'https://images.pexels.com/photos/4047418/pexels-photo-4047418.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-    uploadDate: new Date().toISOString(),
-    bodyPart: imageFile.bodyPart || 'Unknown',
-    concernDescription: imageFile.concernDescription || '',
-    diagnosisStatus: 'processing'
-  };
-  
-  mockSkinImages.push(newImage);
-  
-  return newImage;
+  try {
+    const formData = new FormData();
+    formData.append('file', imageFile);
+    formData.append('patient_id', patientId);
+
+    const token = tokenStorage.getAccessToken();
+    const response = await fetch(`${baseURL}patient/upload-image`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error uploading skin image:', error);
+    throw error;
+  }
 };
 
-// Get skin analysis based on image
+// Get skin analysis results
 export const getSkinAnalysis = async (imageId) => {
-  await delay(2000); // Simulate AI processing time
-  
-  // Return existing analysis or create a mock one
-  if (mockAnalysisResults[imageId]) {
-    return mockAnalysisResults[imageId];
+  try {
+    const response = await fetch(`${baseURL}patient/analysis/${imageId}`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error getting skin analysis:', error);
+    throw error;
   }
-  
-  // Create a new mock analysis
-  const newAnalysis = {
-    imageId,
-    aiDiagnosis: 'Atopic Dermatitis (85% confidence)',
-    possibleConditions: [
-      { name: 'Atopic Dermatitis', probability: 0.85 },
-      { name: 'Contact Dermatitis', probability: 0.10 },
-      { name: 'Psoriasis', probability: 0.05 }
-    ],
-    recommendedActions: [
-      'Keep the area moisturized',
-      'Avoid potential irritants',
-      'Consult with a dermatologist for prescription treatment'
-    ],
-    severity: 'Moderate',
-    analysisDate: new Date().toISOString()
-  };
-  
-  mockAnalysisResults[imageId] = newAnalysis;
-  
-  // Update the image status
-  const image = mockSkinImages.find(img => img.id === imageId);
-  if (image) {
-    image.diagnosisStatus = 'completed';
-  }
-  
-  return newAnalysis;
 };
 
-// Book appointment
+// Book appointment with doctor
 export const bookAppointment = async (appointmentData) => {
-  await delay(1000);
-  
-  const newAppointment = {
-    id: String(mockAppointments.length + 1),
-    ...appointmentData,
-    status: 'pending',
-    createdAt: new Date().toISOString()
-  };
-  
-  mockAppointments.push(newAppointment);
-  
-  return newAppointment;
+  try {
+    const response = await fetch(`${baseURL}patient/appointments`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(appointmentData)
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error booking appointment:', error);
+    throw error;
+  }
 };
 
-// Get patient appointments
+// Get patient's uploaded images
+export const getPatientImages = async (patientId) => {
+  try {
+    const response = await fetch(`${baseURL}patient/${patientId}/images`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error getting patient images:', error);
+    throw error;
+  }
+};
+
+// Get patient's appointments
 export const getPatientAppointments = async (patientId) => {
-  await delay(800);
-  return mockAppointments.filter(apt => apt.patientId === patientId);
+  try {
+    const response = await fetch(`${baseURL}patient/${patientId}/appointments`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error getting patient appointments:', error);
+    throw error;
+  }
+};
+
+// Get patient profile
+export const getPatientProfile = async (patientId) => {
+  try {
+    const response = await fetch(`${baseURL}patient/${patientId}/profile`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error getting patient profile:', error);
+    throw error;
+  }
+};
+
+// Update patient profile
+export const updatePatientProfile = async (patientId, profileData) => {
+  try {
+    const response = await fetch(`${baseURL}patient/${patientId}/profile`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(profileData)
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error updating patient profile:', error);
+    throw error;
+  }
 };
