@@ -40,14 +40,14 @@ const login = async ({
   }
 };
 
-login({
-  username: "husam.a.awadi@outlook.com",
-  password: "husam@2001",
-  client_id: "your_client_id",
-  client_secret: "your_client_secret",
-  scope: "your_scope",
-})
-  .then((data) => console.log("Login successful:", data))
-  .catch((error) => console.error("Login error:", error.message));
+// login({
+//   username: "husam.a.awadi@outlook.com",
+//   password: "husam@2001",
+//   client_id: "your_client_id",
+//   client_secret: "your_client_secret",
+//   scope: "your_scope",
+// })
+//   .then((data) => console.log("Login successful:", data))
+//   .catch((error) => console.error("Login error:", error.message));
 
 export { login };

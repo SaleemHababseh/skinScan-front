@@ -25,14 +25,14 @@ const updateBio = async ({ bio, token }) => {
   }
 };
 
-// Example usage:
-updateBio({
-  bio: "This is my new bio",
-  token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJKb2huIiwiaWQiOjEwLCJyb2xlIjoicGF0aWVudCIsImV4cCI6MTc0NTUyNjkzMX0.IhVCSzTtfCk0H2xx5B1plhpu8lfRdKW9BBOLKv1u13A",  // Replace with an actual token
-}).then(data => {
-  console.log("✅ Bio updated successfully:");
-  console.log(data);
-}).catch(error => {
-  console.error("Bio update failed:");
-  console.error(error.message);
-});
+// // Example usage:
+// updateBio({
+//   bio: "This is my new bio",
+//   token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJKb2huIiwiaWQiOjEwLCJyb2xlIjoicGF0aWVudCIsImV4cCI6MTc0NTUyNjkzMX0.IhVCSzTtfCk0H2xx5B1plhpu8lfRdKW9BBOLKv1u13A",  // Replace with an actual token
+// }).then(data => {
+//   console.log("✅ Bio updated successfully:");
+//   console.log(data);
+// }).catch(error => {
+//   console.error("Bio update failed:");
+//   console.error(error.message);
+// });

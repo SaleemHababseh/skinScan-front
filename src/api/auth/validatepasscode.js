@@ -1,6 +1,6 @@
 import { baseURL } from "../config.js"; // Adjust the path if needed
 
-const validatePassCode = async ({ email, validate_code, new_password }) => {
+export const validatePassCode = async ({ email, validate_code, new_password }) => {
     try {
         const response = await fetch(`${baseURL}auth/validatePassCode`, {
             method: "POST",
@@ -28,15 +28,15 @@ const validatePassCode = async ({ email, validate_code, new_password }) => {
     }
 };
 
-validatePassCode({
-    email: "saleemtestuser2@gmail.com", // User's email for the password reset
-    validate_code: "141915", // The validation code received by the user
-    new_password: "newStrongPassword123" // The new password the user wants to set
-}).then(data => {
-    console.log("Password reset successful:");
-    console.log(data);
-}).catch(error => {
-    console.error(" Password reset failed:");
-    console.error(error.message);
-});
+// validatePassCode({
+//     email: "saleemtestuser2@gmail.com", // User's email for the password reset
+//     validate_code: "141915", // The validation code received by the user
+//     new_password: "newStrongPassword123" // The new password the user wants to set
+// }).then(data => {
+//     console.log("Password reset successful:");
+//     console.log(data);
+// }).catch(error => {
+//     console.error(" Password reset failed:");
+//     console.error(error.message);
+// });
 

@@ -25,14 +25,14 @@ const changeName = async ({ firstName, lastName, token }) => {
   }
 };
 
-// Example usage:
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJTYWxlZW0iLCJpZCI6MTAsInJvbGUiOiJwYXRpZW50IiwiZXhwIjoxNzQ1NTI0OTEzfQ.jOZCNFwHBbLy72gxmAqG6hkfZsxg7o4AoKLZx5ZyId0";  // Replace with actual token
-changeName({
-  firstName: "John",
-  lastName: "Doe",
-  token: token
-}).then(data => {
-  console.log("✅ Name changed successfully:", data);
-}).catch(error => {
-  console.error("Name change failed:", error.message);
-});
+// // Example usage:
+// const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJTYWxlZW0iLCJpZCI6MTAsInJvbGUiOiJwYXRpZW50IiwiZXhwIjoxNzQ1NTI0OTEzfQ.jOZCNFwHBbLy72gxmAqG6hkfZsxg7o4AoKLZx5ZyId0";  // Replace with actual token
+// changeName({
+//   firstName: "John",
+//   lastName: "Doe",
+//   token: token
+// }).then(data => {
+//   console.log("✅ Name changed successfully:", data);
+// }).catch(error => {
+//   console.error("Name change failed:", error.message);
+// });

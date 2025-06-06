@@ -28,7 +28,6 @@ const Register = () => {
     clearError
   } = useAuthStore();
   
-  const { createUserAccount } = useUserStore();
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -130,20 +129,8 @@ const Register = () => {
 
     setIsLoading(true);
     try {
-      const userData = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        password: formData.password,
-        role: 'patient',
-        age: parseInt(formData.age),
-        sex: formData.sex
-      };
-      
-      await register(userData);
-      
-      // Navigate to dashboard after successful registration
-      navigate('/patient/dashboard');
+      // Register user
+      navigate('/login');
     } catch (err) {
       console.error('Registration failed:', err);
     } finally {

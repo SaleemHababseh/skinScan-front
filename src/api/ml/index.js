@@ -1,9 +1,9 @@
 import { baseURL } from "../config.js";
-import { tokenStorage } from "../auth";
+import useAuthStore from "../../store/auth-store.js";
 
 // Utility function to get auth headers for form data
 const getAuthHeadersFormData = () => {
-  const token = tokenStorage.getAccessToken();
+  const token = useAuthStore.getState().token;
   return {
     'Authorization': `Bearer ${token}`
   };
@@ -32,15 +32,15 @@ export const scanSampleImage = async (imageFile) => {
       }
     }
 
-    // Handle successful response - API returns a JSON string
+    // Handle successful response - API returns a JSON object with response and ratio
     const contentType = response.headers.get('content-type');
     if (contentType && contentType.includes('application/json')) {
       const data = await response.json();
-      // The API returns a JSON-encoded string, so we need to handle it properly
-      return typeof data === 'string' ? data : JSON.stringify(data);
+      return data; // Return the full object with response and ratio
     } else {
       // Fallback to text response
-      return await response.text();
+      const text = await response.text();
+      return { response: text, ratio: null };
     }
   } catch (error) {
     console.error('Error scanning image:', error);

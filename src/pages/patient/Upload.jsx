@@ -7,6 +7,21 @@ import Button from '../../components/ui/Button';
 import useMLStore from '../../store/ml-store';
 import { fileToBase64 } from '../../api/ml';
 
+// Helper function to get user-friendly classification names
+const getClassificationDisplay = (classification) => {
+  const classificationMap = {
+    'bcc': 'Basal Cell Carcinoma (BCC)',
+    'mel': 'Melanoma',
+    'nv': 'Nevus (Mole)',
+    'bkl': 'Benign Keratosis-like Lesion',
+    'akiec': 'Actinic Keratosis',
+    'vasc': 'Vascular Lesion',
+    'df': 'Dermatofibroma'
+  };
+  
+  return classificationMap[classification?.toLowerCase()] || classification?.toUpperCase() || 'Unknown';
+};
+
 const PatientUpload = () => {
   const { 
     selectedImage,
@@ -89,13 +104,44 @@ const PatientUpload = () => {
                     <CheckCircle className="w-4 h-4 inline mr-1" />
                     Completed
                   </span>
-                </div>
-                  <div className="mb-6">
+                </div>                <div className="mb-6">
                   <h3 className="font-medium mb-2">ML Analysis Result</h3>
                   <div className="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg">
-                    <p className="text-sm">
-                      {scanResult}
-                    </p>
+                    <div className="space-y-3">
+                      <div>                        <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Classification:</span>
+                        <p className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mt-1">
+                          {getClassificationDisplay(scanResult.response)}
+                        </p>
+                      </div>
+                      {scanResult.ratio && (
+                        <div>
+                          <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Confidence Level:</span>
+                          <div className="mt-1">
+                            <div className="flex justify-between text-sm mb-1">
+                              <span>{(scanResult.ratio * 100).toFixed(1)}%</span>
+                              <span className={`font-medium ${
+                                scanResult.ratio >= 0.8 ? 'text-success-600' : 
+                                scanResult.ratio >= 0.6 ? 'text-warning-600' : 
+                                'text-error-600'
+                              }`}>
+                                {scanResult.ratio >= 0.8 ? 'High' : 
+                                 scanResult.ratio >= 0.6 ? 'Medium' : 'Low'}
+                              </span>
+                            </div>
+                            <div className="w-full bg-neutral-200 rounded-full h-2 dark:bg-neutral-700">
+                              <div 
+                                className={`h-2 rounded-full transition-all duration-500 ${
+                                  scanResult.ratio >= 0.8 ? 'bg-success-500' : 
+                                  scanResult.ratio >= 0.6 ? 'bg-warning-500' : 
+                                  'bg-error-500'
+                                }`}
+                                style={{ width: `${(scanResult.ratio * 100)}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
                 
@@ -230,8 +276,8 @@ const PatientUpload = () => {
           {scanHistory.length > 0 && (
             <Card>
               <h3 className="font-medium mb-4">Recent Scans</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {scanHistory.slice(0, 6).map((scan) => (                  <div key={scan.id} className="border rounded-lg p-3 hover:bg-neutral-50 dark:hover:bg-neutral-800 cursor-pointer">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">                {scanHistory.slice(0, 6).map((scan) => (
+                  <div key={scan.id} className="border rounded-lg p-3 hover:bg-neutral-50 dark:hover:bg-neutral-800 cursor-pointer">
                     <img 
                       src={scan.imagePreview} 
                       alt={scan.fileName}
@@ -241,10 +287,16 @@ const PatientUpload = () => {
                     <p className="text-xs text-neutral-500 mb-1">
                       {new Date(scan.timestamp).toLocaleDateString()}
                     </p>
-                    {scan.description && (
-                      <p className="text-xs text-neutral-600 dark:text-neutral-400 truncate">
-                        {scan.description}
-                      </p>
+                    {scan.result && (
+                      <div className="text-xs space-y-1">                        <p className="text-neutral-600 dark:text-neutral-400">
+                          <span className="font-medium">Result:</span> {getClassificationDisplay(scan.result.response)}
+                        </p>
+                        {scan.result.ratio && (
+                          <p className="text-neutral-600 dark:text-neutral-400">
+                            <span className="font-medium">Confidence:</span> {(scan.result.ratio * 100).toFixed(1)}%
+                          </p>
+                        )}
+                      </div>
                     )}
                   </div>
                 ))}

@@ -24,14 +24,14 @@ const checkAcception = async ({ doctor_id, token }) => {
   }
 };
 
-// Example usage:
-checkAcception({
-  doctor_id: 5,  // حط ID الطبيب هون
-  token: "ضع_التوكن_هون"
-}).then(data => {
-  console.log("✅ Acception result:");
-  console.log(data);
-}).catch(error => {
-  console.error("Acception check failed:");
-  console.error(error.message);
-});
+// // Example usage:
+// checkAcception({
+//   doctor_id: 5,  // حط ID الطبيب هون
+//   token: "ضع_التوكن_هون"
+// }).then(data => {
+//   console.log("✅ Acception result:");
+//   console.log(data);
+// }).catch(error => {
+//   console.error("Acception check failed:");
+//   console.error(error.message);
+// });

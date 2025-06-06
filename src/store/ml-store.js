@@ -58,7 +58,7 @@ const useMLStore = create((set, get) => ({
         result,
         timestamp: new Date().toISOString(),
         fileName: selectedImage.name,
-        description: `Analysis: ${result.substring(0, 50)}${result.length > 50 ? '...' : ''}`
+        description: `Analysis: ${result.response || 'Unknown'} (${result.ratio ? (result.ratio * 100).toFixed(1) + '%' : 'N/A'})`
       };
 
       set(state => ({

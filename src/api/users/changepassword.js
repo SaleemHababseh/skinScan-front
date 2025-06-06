@@ -25,14 +25,14 @@ const changePassword = async ({ oldPass, newPass, token }) => {
   }
 };
 
-// Example usage:
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJKb2huIiwiaWQiOjEwLCJyb2xlIjoicGF0aWVudCIsImV4cCI6MTc0NjM3NTkxNX0.fEEsbb5h6dN_1bKmn_-eY-ccZ0pg7g95eWNVVTDEJZM";  // Replace with actual token
-changePassword({
-  oldPass: "newPassword123",  // Provide the current password
-  newPass: "newPassword123",  // Provide the new password
-  token: token
-}).then(data => {
-  console.log("✅ Password changed successfully:", data);
-}).catch(error => {
-  console.error("Password change failed:", error.message);
-});
+// // Example usage:
+// const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJKb2huIiwiaWQiOjEwLCJyb2xlIjoicGF0aWVudCIsImV4cCI6MTc0NjM3NTkxNX0.fEEsbb5h6dN_1bKmn_-eY-ccZ0pg7g95eWNVVTDEJZM";  // Replace with actual token
+// changePassword({
+//   oldPass: "newPassword123",  // Provide the current password
+//   newPass: "newPassword123",  // Provide the new password
+//   token: token
+// }).then(data => {
+//   console.log("✅ Password changed successfully:", data);
+// }).catch(error => {
+//   console.error("Password change failed:", error.message);
+// });

@@ -24,13 +24,13 @@ const getNews = async ({ token }) => {
   }
 };
 
-// Example usage:
-getNews({
-  token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJKb2huIiwiaWQiOjEwLCJyb2xlIjoicGF0aWVudCIsImV4cCI6MTc0NTUyNjkzMX0.IhVCSzTtfCk0H2xx5B1plhpu8lfRdKW9BBOLKv1u13A"
-}).then(data => {
-  console.log("✅ News fetched successfully:");
-  console.log(data.keys());
-}).catch(error => {
-  console.error("News fetch failed:");
-  console.error(error.message);
-});
+// // Example usage:
+// getNews({
+//   token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJKb2huIiwiaWQiOjEwLCJyb2xlIjoicGF0aWVudCIsImV4cCI6MTc0NTUyNjkzMX0.IhVCSzTtfCk0H2xx5B1plhpu8lfRdKW9BBOLKv1u13A"
+// }).then(data => {
+//   console.log("✅ News fetched successfully:");
+//   console.log(data.keys());
+// }).catch(error => {
+//   console.error("News fetch failed:");
+//   console.error(error.message);
+// });
