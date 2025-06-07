@@ -1,28 +1,31 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Clock, Users, FileText, BarChart2, Calendar, AlertTriangle } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Avatar from '../../components/ui/Avatar';
 import useAuthStore from '../../store/auth-store';
-import useDoctorStore from '../../store/doctor-store';
+import useAppointmentsStore from '../../store/appointments-store';
 import { formatDate } from '../../utils';
 
 const DoctorDashboard = () => {
   const { user } = useAuthStore();
   const { 
-    patients, 
-    pendingDiagnoses, 
-    appointments,
-    loadDoctorData,
+    appointments = [], 
+    getDoctorAppointments,
     isLoading 
-  } = useDoctorStore();
+  } = useAppointmentsStore();
+  
+  // Local state for patients and pending diagnoses (simplified for now)
+  const [patients] = useState([]);
+  const [pendingDiagnoses] = useState([]);
   
   useEffect(() => {
-    if (user) {
-      loadDoctorData(user.id);
+    // Load doctor appointments on component mount
+    if (user?.id) {
+      getDoctorAppointments();
     }
-  }, [user, loadDoctorData]);
+  }, [user?.id, getDoctorAppointments]);
   
   const todayAppointments = appointments
     ?.filter(apt => {

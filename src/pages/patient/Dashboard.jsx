@@ -1,34 +1,34 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Calendar, FileText, BarChart2, Clock, AlertTriangle } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Avatar from '../../components/ui/Avatar';
 import useAuthStore from '../../store/auth-store';
-import usePatientStore from '../../store/patient-store';
+import useAppointmentsStore from '../../store/appointments-store';
 import { formatDate } from '../../utils';
 
 const PatientDashboard = () => {
-  const { user } = useAuthStore();
+  const { user, token } = useAuthStore();
   const { 
-    skinImages, 
-    appointments, 
-    currentAnalysis,
-    loadPatientData,
+    appointments = [], 
+    fetchPatientAppointments,
     isLoading 
-  } = usePatientStore();
-  
+  } = useAppointmentsStore();
+    // Local state for skin images (will be integrated with API later)
+  const [skinImages] = useState([]);
   useEffect(() => {
-    if (user) {
-      loadPatientData(user.id);
+    // Load patient appointments on component mount
+    if (user?.id && token) {
+      fetchPatientAppointments(token);
     }
-  }, [user, loadPatientData]);
+  }, [user?.id, token, fetchPatientAppointments]);
   
-  const recentDiagnoses = skinImages.slice(0, 3);
+  const recentDiagnoses = (skinImages && Array.isArray(skinImages)) ? skinImages.slice(0, 3) : [];
   const upcomingAppointments = appointments
-    .filter(apt => new Date(apt.dateTime) > new Date())
-    .sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime))
-    .slice(0, 3);
+    ?.filter(apt => new Date(apt.dateTime) > new Date())
+    ?.sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime))
+    ?.slice(0, 3) || [];
   
   return (
     <div className="space-y-6">
@@ -36,7 +36,7 @@ const PatientDashboard = () => {
       <div className="rounded-xl bg-gradient-primary p-6 text-white shadow-md">
         <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div>
-            <h1 className="text-2xl font-bold">Welcome, {user?.firstName} 👋</h1>
+            <h1 className="text-2xl font-bold">Welcome, {user?.name || user?.firstName || 'User'} 👋</h1>
             <p className="mt-1">Track your skin health and manage your appointments</p>
           </div>
           <div className="flex space-x-3">
@@ -61,9 +61,8 @@ const PatientDashboard = () => {
             <div className="rounded-full bg-secondary-100 p-3 dark:bg-secondary-900">
               <FileText className="h-6 w-6 text-secondary-600 dark:text-secondary-400" />
             </div>
-            <div>
-              <p className="text-sm text-secondary-700 dark:text-secondary-400">Total Diagnoses</p>
-              <p className="text-2xl font-bold text-secondary-900 dark:text-secondary-50">{skinImages.length}</p>
+            <div>              <p className="text-sm text-secondary-700 dark:text-secondary-400">Total Diagnoses</p>
+              <p className="text-2xl font-bold text-secondary-900 dark:text-secondary-50">{skinImages?.length || 0}</p>
             </div>
           </div>
         </Card>
@@ -72,9 +71,8 @@ const PatientDashboard = () => {
             <div className="rounded-full bg-primary-100 p-3 dark:bg-primary-900">
               <Calendar className="h-6 w-6 text-primary-600 dark:text-primary-400" />
             </div>
-            <div>
-              <p className="text-sm text-primary-700 dark:text-primary-400">Appointments</p>
-              <p className="text-2xl font-bold text-primary-900 dark:text-primary-50">{appointments.length}</p>
+            <div>              <p className="text-sm text-primary-700 dark:text-primary-400">Appointments</p>
+              <p className="text-2xl font-bold text-primary-900 dark:text-primary-50">{appointments?.length || 0}</p>
             </div>
           </div>
         </Card>

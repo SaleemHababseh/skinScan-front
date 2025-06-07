@@ -5,20 +5,33 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Avatar from '../../components/ui/Avatar';
 import useAuthStore from '../../store/auth-store';
-import useAdminStore from '../../store/admin-store';
 
 const AdminUsers = () => {
-  const { user } = useAuthStore();
-  const { users, loadUsers, createUser, updateUser, deleteUser, isLoading } = useAdminStore();
+  const { user: currentAuthUser } = useAuthStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showUserModal, setShowUserModal] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Mock users data - will be replaced with actual API calls
+  const [users] = useState([
+    { id: 1, firstName: 'John', lastName: 'Doe', email: 'john@example.com', role: 'patient', status: 'active' },
+    { id: 2, firstName: 'Jane', lastName: 'Smith', email: 'jane@example.com', role: 'doctor', status: 'active' },
+    { id: 3, firstName: 'Admin', lastName: 'User', email: 'admin@example.com', role: 'admin', status: 'active' }
+  ]);
   
   useEffect(() => {
-    loadUsers();
-  }, [loadUsers]);
+    // Future: Load users from API
+    if (currentAuthUser?.id) {
+      setIsLoading(true);
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
+    }
+  }, [currentAuthUser?.id]);
+    // Handle user creation/update - placeholder functions will be integrated with API later
   
   // Filter users based on search term, role filter, and status filter
   const filteredUsers = users.filter(user => {
@@ -37,11 +50,11 @@ const AdminUsers = () => {
     setCurrentUser(user);
     setShowUserModal(true);
   };
-  
-  // Handle user deletion
+    // Handle user deletion
   const handleDeleteUser = (userId) => {
     if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-      deleteUser(userId);
+      console.log('Deleting user:', userId);
+      // Future: API call to delete user
     }
   };
 

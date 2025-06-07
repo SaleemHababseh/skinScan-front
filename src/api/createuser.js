@@ -32,9 +32,8 @@ export const createUser = async ({
         if (!response.ok) {
             console.error("Server error response:", data);
             throw new Error(data.detail || "Registration failed");
-        }
-
-        return data;    } catch (error) {
+        }        return data;
+    } catch (error) {
         console.log("Registration error:", error);
         throw error;
     }

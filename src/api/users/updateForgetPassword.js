@@ -1,11 +1,10 @@
 import { baseURL } from "../config.js";
 
-export const updateBio = async (bio, token) => {
+export const updateForgetPassword = async (new_password, email) => {
     try {
-        const response = await fetch(`${baseURL}users/update-bio/${encodeURIComponent(bio)}`, {
+        const response = await fetch(`${baseURL}users/info/update-forget-password?new_password=${encodeURIComponent(new_password)}&email=${encodeURIComponent(email)}`, {
             method: "PUT",
             headers: {
-                "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json",
                  "ngrok-skip-browser-warning": "true",
             }
@@ -15,12 +14,12 @@ export const updateBio = async (bio, token) => {
 
         if (!response.ok) {
             console.error("Server error response:", data);
-            throw new Error(data.detail || "Bio update failed");
+            throw new Error(data.detail || "Forget password update failed");
         }
 
         return data;
     } catch (error) {
-        console.error("Bio update error:", error);
+        console.error("Forget password update error:", error);
         throw error;
     }
 };

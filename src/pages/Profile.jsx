@@ -1,26 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { User, Mail, Phone, MapPin, Calendar, Camera, Lock, Shield, Save, Upload } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { User, Mail, Camera, Lock, Shield, Save, Upload, Edit2 } from 'lucide-react';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Avatar from '../components/ui/Avatar';
 import useAuthStore from '../store/auth-store';
-import useUserStore from '../store/user-store';
 
 const Profile = () => {
-  const { user } = useAuthStore();
   const { 
-    userInfo, 
-    profilePicture, 
-    isLoading, 
+    user,
+    isLoading,
     error,
     fetchUserBasicInfo,
-    updateUserBasicInfo,
+    updateProfile,
     updateUserBio,
     uploadUserProfilePicture,
     updatePassword,
     clearError
-  } = useUserStore();
+  } = useAuthStore();
   
   const [isEditing, setIsEditing] = useState(false);
   const [showPasswordChange, setShowPasswordChange] = useState(false);
@@ -28,9 +25,6 @@ const Profile = () => {
     firstName: '',
     lastName: '',
     email: '',
-    phone: '',
-    address: '',
-    dateOfBirth: '',
     bio: '',
     avatarUrl: ''
   });
@@ -42,29 +36,49 @@ const Profile = () => {
   });
   
   const [selectedFile, setSelectedFile] = useState(null);
+  const [hasLoadedUserInfo, setHasLoadedUserInfo] = useState(false);
+
+  const loadUserInfo = useCallback(async () => {
+    if (user?.id && !hasLoadedUserInfo) {
+      console.log(`loadUserInfo: Attempting to fetch for user ${user.id}. hasLoadedUserInfo: ${hasLoadedUserInfo}`);
+      try {
+        await fetchUserBasicInfo();
+        console.log('loadUserInfo: Fetch successful.');
+        
+        // Set profile picture URL directly
+        const avatarUrl = `https://f064-87-236-233-66.ngrok-free.app/users/get/user-profile-picture?user_id=${user.id}`;
+        setProfileData(prev => ({
+          ...prev,
+          avatarUrl: avatarUrl
+        }));
+      } catch (error) {
+        console.error('loadUserInfo: Error loading user info:', error);
+      } finally {
+        // Set to true regardless of success or failure to prevent re-fetching due to this flag.
+        console.log('loadUserInfo: Setting hasLoadedUserInfo to true in finally block.');
+        setHasLoadedUserInfo(true);
+      }
+    }
+  }, [user?.id, hasLoadedUserInfo, fetchUserBasicInfo]); // Corrected dependencies
 
   useEffect(() => {
-    // Fetch user basic info when component mounts
-    fetchUserBasicInfo();
-  }, [fetchUserBasicInfo]);
+    loadUserInfo();
+  }, [loadUserInfo]);
   
   useEffect(() => {
-    // Update form data when userInfo or user changes
-    const currentUser = userInfo || user;
-    if (currentUser) {
+    // Update form data when user changes
+    if (user) {
       setProfileData({
-        firstName: currentUser.f_name || currentUser.firstName || '',
-        lastName: currentUser.l_name || currentUser.lastName || '',
-        email: currentUser.email || '',
-        phone: currentUser.phone || '',
-        address: currentUser.address || '',
-        dateOfBirth: currentUser.dateOfBirth || '',
-        bio: currentUser.bio || '',
-        avatarUrl: profilePicture || currentUser.avatarUrl || ''
+        firstName: user.f_name || user.firstName || '',
+        lastName: user.l_name || user.lastName || '',
+        email: user.email || '',
+        bio: user.bio || '',
+        avatarUrl: user.profilePicture || user.avatarUrl || ''
       });
     }
-  }, [user, userInfo, profilePicture]);
-    const handleInputChange = (e) => {
+  }, [user]);
+
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
     setProfileData(prev => ({ ...prev, [name]: value }));
   };
@@ -86,6 +100,13 @@ const Profile = () => {
       try {
         await uploadUserProfilePicture(selectedFile);
         setSelectedFile(null);
+        
+        // Refresh profile picture after successful upload
+        const avatarUrl = `https://f064-87-236-233-66.ngrok-free.app/users/get/user-profile-picture?user_id=${user.id}`;
+        setProfileData(prev => ({
+          ...prev,
+          avatarUrl: avatarUrl
+        }));
       } catch (err) {
         console.error('Error uploading profile picture:', err);
       }
@@ -95,15 +116,15 @@ const Profile = () => {
   const handleSaveProfile = async () => {
     try {
       // Update basic information
-      await updateUserBasicInfo(profileData.firstName, profileData.lastName);
+      await updateProfile(profileData.firstName, profileData.lastName);
       
       // Update bio if it changed
-      const currentUser = userInfo || user;
-      if (currentUser && profileData.bio !== currentUser.bio) {
+      if (user && profileData.bio !== user.bio) {
         await updateUserBio(profileData.bio);
       }
       
       setIsEditing(false);
+      // Optionally show success message
     } catch (err) {
       console.error('Error saving profile:', err);
     }
@@ -128,19 +149,16 @@ const Profile = () => {
   
   const handleCancel = () => {
     // Reset form to current user data
-    const currentUser = userInfo || user;
-    if (currentUser) {
+    if (user) {
       setProfileData({
-        firstName: currentUser.f_name || currentUser.firstName || '',
-        lastName: currentUser.l_name || currentUser.lastName || '',
-        email: currentUser.email || '',
-        phone: currentUser.phone || '',
-        address: currentUser.address || '',
-        dateOfBirth: currentUser.dateOfBirth || '',
-        bio: currentUser.bio || '',
-        avatarUrl: profilePicture || currentUser.avatarUrl || ''
+        firstName: user.f_name || user.firstName || '',
+        lastName: user.l_name || user.lastName || '',
+        email: user.email || '',
+        bio: user.bio || '',
+        avatarUrl: user.profilePicture || user.avatarUrl || ''
       });
-    }    setIsEditing(false);
+    }
+    setIsEditing(false);
     clearError();
   };
 
@@ -150,25 +168,30 @@ const Profile = () => {
       <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div>
           <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Profile</h1>
-          <p className="mt-1 text-neutral-600 dark:text-neutral-400">Manage your personal information</p>
+          <p className="mt-1 text-neutral-600 dark:text-neutral-400">Manage your personal information and settings</p>
         </div>
         {!isEditing ? (
-          <Button onClick={() => setIsEditing(true)}>Edit Profile</Button>
+          <Button onClick={() => setIsEditing(true)}>
+            <Edit2 className="mr-2 h-4 w-4" />
+            Edit Profile
+          </Button>
         ) : (
           <div className="flex space-x-3">
             <Button variant="outline" onClick={handleCancel}>Cancel</Button>
-            <Button onClick={handleSaveProfile}>
+            <Button onClick={handleSaveProfile} disabled={isLoading}>
               <Save className="mr-2 h-4 w-4" />
               Save Changes
             </Button>
           </div>
         )}
       </div>
-      
+
+      {/* Main Profile Content */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         {/* Profile Card */}
         <Card className="md:col-span-1">
-          <div className="flex flex-col items-center p-6 text-center">            <div className="relative">
+          <div className="flex flex-col items-center p-6 text-center">
+            <div className="relative">
               <Avatar 
                 src={profileData.avatarUrl} 
                 alt={`${profileData.firstName} ${profileData.lastName}`}
@@ -204,35 +227,18 @@ const Profile = () => {
                 </div>
               )}
             </div>
+            
             <h2 className="mt-4 text-xl font-bold text-neutral-900 dark:text-neutral-100">
               {profileData.firstName} {profileData.lastName}
             </h2>
             <p className="text-neutral-600 dark:text-neutral-400">
-              {user?.role?.[0]?.toUpperCase()}{user?.role?.slice(1)}
+              {user?.role?.[0]?.toUpperCase()}{user?.role?.slice(1)} User
             </p>
             
             <div className="mt-6 w-full">
               <div className="flex items-center border-t border-neutral-200 py-3 dark:border-neutral-800">
                 <Mail className="h-5 w-5 text-neutral-500" />
                 <span className="ml-2 text-sm text-neutral-800 dark:text-neutral-200">{profileData.email}</span>
-              </div>
-              <div className="flex items-center border-t border-neutral-200 py-3 dark:border-neutral-800">
-                <Phone className="h-5 w-5 text-neutral-500" />
-                <span className="ml-2 text-sm text-neutral-800 dark:text-neutral-200">
-                  {profileData.phone || 'No phone number added'}
-                </span>
-              </div>
-              <div className="flex items-center border-t border-neutral-200 py-3 dark:border-neutral-800">
-                <MapPin className="h-5 w-5 text-neutral-500" />
-                <span className="ml-2 text-sm text-neutral-800 dark:text-neutral-200">
-                  {profileData.address || 'No address added'}
-                </span>
-              </div>
-              <div className="flex items-center border-t border-neutral-200 py-3 dark:border-neutral-800">
-                <Calendar className="h-5 w-5 text-neutral-500" />
-                <span className="ml-2 text-sm text-neutral-800 dark:text-neutral-200">
-                  {profileData.dateOfBirth ? new Date(profileData.dateOfBirth).toLocaleDateString() : 'No date of birth added'}
-                </span>
               </div>
             </div>
             
@@ -302,60 +308,6 @@ const Profile = () => {
               </div>
               
               <div>
-                <label htmlFor="phone" className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                  Phone Number
-                </label>
-                <div className="relative">
-                  <Input
-                    id="phone"
-                    name="phone"
-                    value={profileData.phone}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    placeholder="Enter your phone number"
-                    className="pl-9"
-                  />
-                  <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
-                </div>
-              </div>
-              
-              <div>
-                <label htmlFor="address" className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                  Address
-                </label>
-                <div className="relative">
-                  <Input
-                    id="address"
-                    name="address"
-                    value={profileData.address}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    placeholder="Enter your address"
-                    className="pl-9"
-                  />
-                  <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
-                </div>
-              </div>
-              
-              <div>
-                <label htmlFor="dateOfBirth" className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                  Date of Birth
-                </label>
-                <div className="relative">
-                  <Input
-                    id="dateOfBirth"
-                    name="dateOfBirth"
-                    type="date"
-                    value={profileData.dateOfBirth}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    className="pl-9"
-                  />
-                  <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
-                </div>
-              </div>
-              
-              <div>
                 <label htmlFor="bio" className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                   Bio
                 </label>
@@ -377,9 +329,10 @@ const Profile = () => {
         {/* Security Settings */}
         <Card className="md:col-span-3">
           <div className="p-6">
-            <h2 className="text-lg font-medium text-neutral-900 dark:text-neutral-100">Security</h2>
+            <h2 className="text-lg font-medium text-neutral-900 dark:text-neutral-100">Security Settings</h2>
             
-            <div className="mt-6 space-y-6">              <div className="flex items-center justify-between border-b border-neutral-200 pb-4 dark:border-neutral-800">
+            <div className="mt-6 space-y-6">
+              <div className="flex items-center justify-between border-b border-neutral-200 pb-4 dark:border-neutral-800">
                 <div>
                   <div className="flex items-center">
                     <Lock className="mr-2 h-5 w-5 text-neutral-500" />
@@ -463,32 +416,6 @@ const Profile = () => {
                   <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
                 </div>
               )}
-              
-              <div className="flex items-center justify-between border-b border-neutral-200 pb-4 dark:border-neutral-800">
-                <div>
-                  <div className="flex items-center">
-                    <Shield className="mr-2 h-5 w-5 text-neutral-500" />
-                    <h3 className="text-base font-medium text-neutral-900 dark:text-neutral-100">Two-Factor Authentication</h3>
-                  </div>
-                  <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-                    Add an extra layer of security to your account
-                  </p>
-                </div>
-                <Button variant="outline">Setup 2FA</Button>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center">
-                    <User className="mr-2 h-5 w-5 text-neutral-500" />
-                    <h3 className="text-base font-medium text-neutral-900 dark:text-neutral-100">Login History</h3>
-                  </div>
-                  <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-                    View your recent login activity
-                  </p>
-                </div>
-                <Button variant="outline">View History</Button>
-              </div>
             </div>
           </div>
         </Card>

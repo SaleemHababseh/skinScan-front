@@ -1,11 +1,10 @@
 import { baseURL } from "../config.js";
 
-export const updateBio = async (bio, token) => {
+export const getUserProfilePicture = async (user_id) => {
     try {
-        const response = await fetch(`${baseURL}users/update-bio/${encodeURIComponent(bio)}`, {
-            method: "PUT",
+        const response = await fetch(`${baseURL}users/get/user-profile-picture?user_id=${user_id}`, {
+            method: "GET",
             headers: {
-                "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json",
                  "ngrok-skip-browser-warning": "true",
             }
@@ -15,12 +14,12 @@ export const updateBio = async (bio, token) => {
 
         if (!response.ok) {
             console.error("Server error response:", data);
-            throw new Error(data.detail || "Bio update failed");
+            throw new Error(data.detail || "Failed to get user profile picture");
         }
 
         return data;
     } catch (error) {
-        console.error("Bio update error:", error);
+        console.error("User profile picture error:", error);
         throw error;
     }
 };

@@ -1,8 +1,8 @@
 import { baseURL } from "../config.js";
 
-export const updateBio = async (bio, token) => {
+export const acceptAppointment = async (appointment_id, token) => {
     try {
-        const response = await fetch(`${baseURL}users/update-bio/${encodeURIComponent(bio)}`, {
+        const response = await fetch(`${baseURL}users/accept/${appointment_id}`, {
             method: "PUT",
             headers: {
                 "Authorization": `Bearer ${token}`,
@@ -15,12 +15,12 @@ export const updateBio = async (bio, token) => {
 
         if (!response.ok) {
             console.error("Server error response:", data);
-            throw new Error(data.detail || "Bio update failed");
+            throw new Error(data.detail || "Failed to accept appointment");
         }
 
         return data;
     } catch (error) {
-        console.error("Bio update error:", error);
+        console.error("Accept appointment error:", error);
         throw error;
     }
 };

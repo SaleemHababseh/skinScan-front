@@ -1,26 +1,46 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Users, FileText, BarChart2, Activity, Settings, AlertTriangle } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import useAuthStore from '../../store/auth-store';
-import useAdminStore from '../../store/admin-store';
+import useAppointmentsStore from '../../store/appointments-store';
 
 const AdminDashboard = () => {
   const { user } = useAuthStore();
-  const { 
-    stats, 
-    recentActivities, 
-    systemAlerts,
-    loadAdminData,
-    isLoading 
-  } = useAdminStore();
+  const { appointments } = useAppointmentsStore();
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Mock admin stats - will be replaced with actual API calls
+  const [stats] = useState({
+    totalUsers: 1250,
+    totalDoctors: 45,
+    totalPatients: 1205,
+    activeAppointments: appointments?.length || 0,
+    totalDiagnoses: 2850,
+    systemHealth: 98.5
+  });
+  
+  const [recentActivities] = useState([
+    { id: 1, type: 'user_registration', message: 'New patient registered', time: '2 minutes ago' },
+    { id: 2, type: 'appointment_created', message: 'Appointment scheduled', time: '5 minutes ago' },
+    { id: 3, type: 'diagnosis_completed', message: 'Diagnosis completed', time: '10 minutes ago' }
+  ]);
+  
+  const [systemAlerts] = useState([
+    { id: 1, type: 'warning', message: 'High server load detected', priority: 'medium' },
+    { id: 2, type: 'info', message: 'System maintenance scheduled', priority: 'low' }
+  ]);
   
   useEffect(() => {
-    if (user) {
-      loadAdminData();
+    // Future: Load admin data from API
+    if (user?.id) {
+      setIsLoading(true);
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
     }
-  }, [user, loadAdminData]);
+  }, [user?.id]);
 
   return (
     <div className="space-y-6">

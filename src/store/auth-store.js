@@ -5,15 +5,21 @@ import { sendVerificationCode } from "../api/auth/sendVerificationCode";
 import { sendForgetPasswordCode } from "../api/auth/forgetpassword";
 import { refreshAccessToken } from "../api/auth/refreshToken";
 import { validateVerificationCode } from "../api/auth/validatecode";
-import {validatePassCode} from "../api/auth/validatepasscode";
+import { validatePassCode } from "../api/auth/validatepasscode";
+import { updateBasicInformation } from "../api/users/updateBasicInformation";
+import { updateUserPassword } from "../api/users/updateUserPassword";
+import { updateBio } from "../api/users/updatebio";
+import { uploadProfilePicture } from "../api/users/uploadProfilePicture";
+import { getUserBasicInfo } from "../api/users/getUserBasicInfo";
+import { getUserProfilePicture } from "../api/users/getUserProfilePicture";
 
 // Helper function to safely decode JWT token
 const decodeJWT = (token) => {
   try {
-    const payload = token.split('.')[1];
+    const payload = token.split(".")[1];
     return JSON.parse(atob(payload));
   } catch (error) {
-    console.error('Failed to decode JWT token:', error);
+    console.error("Failed to decode JWT token:", error);
     return null;
   }
 };
@@ -34,7 +40,8 @@ const useAuthStore = create(
       isAuthenticated: false,
       isLoading: false,
       error: null,
-      verificationStep: null,      login: async (
+      verificationStep: null,
+      login: async (
         username,
         password,
         client_id = "",
@@ -53,7 +60,7 @@ const useAuthStore = create(
 
           // Decode the access token to get user information
           const tokenPayload = decodeJWT(data.access_token);
-          
+
           if (!tokenPayload) {
             throw new Error("Invalid access token received");
           }
@@ -115,7 +122,8 @@ const useAuthStore = create(
           set({ isLoading: false, error: error.message });
           throw error;
         }
-      },      validatePassCode: async (email, validate_code, new_password) => {
+      },
+      validatePassCode: async (email, validate_code, new_password) => {
         set({ isLoading: true, error: null });
         try {
           const result = await validatePassCode({
@@ -123,12 +131,12 @@ const useAuthStore = create(
             validate_code,
             new_password,
           });
-          
+
           // If the response includes authentication tokens, update the auth state
           if (result.access_token && result.refresh_token) {
             // Decode the token to get user information
             const tokenPayload = decodeJWT(result.access_token);
-            
+
             if (tokenPayload) {
               set({
                 user: {
@@ -151,13 +159,14 @@ const useAuthStore = create(
           } else {
             set({ isLoading: false, verificationStep: "password_reset" });
           }
-          
+
           return result;
         } catch (error) {
           set({ isLoading: false, error: error.message });
           throw error;
         }
-      },      refreshToken: async () => {
+      },
+      refreshToken: async () => {
         const { refreshTokenValue, token } = get();
         if (!refreshTokenValue || !token) {
           throw new Error("No refresh token available");
@@ -169,7 +178,7 @@ const useAuthStore = create(
 
           // Decode the new access token to get user information
           const tokenPayload = decodeJWT(result.access_token);
-          
+
           if (tokenPayload) {
             // Update tokens and user info in store (persist will handle storage automatically)
             set({
@@ -234,14 +243,13 @@ const useAuthStore = create(
           set({ isLoading: false, error: error.message });
           throw error;
         }
-      },      clearError: () => set({ error: null }),
+      },
+      clearError: () => set({ error: null }),
 
-      resetVerificationStep: () => set({ verificationStep: null }),
-
-      // Helper function to manually set authentication state (useful for testing)
+      resetVerificationStep: () => set({ verificationStep: null }), // Helper function to manually set authentication state (useful for testing)
       setAuthState: (authData) => {
         const tokenPayload = decodeJWT(authData.access_token);
-        
+
         if (tokenPayload) {
           set({
             user: {
@@ -257,6 +265,115 @@ const useAuthStore = create(
             isAuthenticated: true,
             isLoading: false,
           });
+        }
+      },
+
+      // User profile management functions
+      updateProfile: async (f_name, l_name) => {
+        const { token } = get();
+        if (!token) throw new Error("No authentication token");
+
+        set({ isLoading: true, error: null });
+        try {
+          const result = await updateBasicInformation(f_name, l_name, token);
+
+          // Update user name in store
+          set((state) => ({
+            user: {
+              ...state.user,
+              name: `${f_name} ${l_name}`,
+            },
+            isLoading: false,
+          }));
+
+          return result;
+        } catch (error) {
+          set({ isLoading: false, error: error.message });
+          throw error;
+        }
+      },
+
+      updatePassword: async (old_password, new_password) => {
+        const { token } = get();
+        if (!token) throw new Error("No authentication token");
+
+        set({ isLoading: true, error: null });
+        try {
+          const result = await updateUserPassword(
+            old_password,
+            new_password,
+            token
+          );
+          set({ isLoading: false });
+          return result;
+        } catch (error) {
+          set({ isLoading: false, error: error.message });
+          throw error;
+        }
+      },
+
+      updateUserBio: async (bio) => {
+        const { token } = get();
+        if (!token) throw new Error("No authentication token");
+
+        set({ isLoading: true, error: null });
+        try {
+          const result = await updateBio(bio, token);
+          set({ isLoading: false });
+          return result;
+        } catch (error) {
+          set({ isLoading: false, error: error.message });
+          throw error;
+        }
+      },
+
+      uploadUserProfilePicture: async (file) => {
+        const { token } = get();
+        if (!token) throw new Error("No authentication token");
+
+        set({ isLoading: true, error: null });
+        try {
+          const result = await uploadProfilePicture(file, token);
+          set({ isLoading: false });
+          return result;
+        } catch (error) {
+          set({ isLoading: false, error: error.message });
+          throw error;
+        }
+      },
+      fetchUserBasicInfo: async () => {
+        const { token } = get();
+        if (!token) throw new Error("No authentication token");
+
+        set({ isLoading: true, error: null });
+        try {
+          const result = await getUserBasicInfo(token);
+
+          // Update user data in store
+          set((state) => ({
+            user: {
+              ...state.user,
+              ...result, // Merge the fetched user data
+            },
+            isLoading: false,
+          }));
+
+          return result;
+        } catch (error) {
+          set({ isLoading: false, error: error.message });
+          throw error;
+        }
+      },
+
+      fetchUserProfilePicture: async (user_id) => {
+        set({ isLoading: true, error: null });
+        try {
+          const result = await getUserProfilePicture(user_id);
+          set({ isLoading: false });
+          return result;
+        } catch (error) {
+          set({ isLoading: false, error: error.message });
+          throw error;
         }
       },
     }),

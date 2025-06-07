@@ -5,20 +5,37 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Avatar from '../../components/ui/Avatar';
 import useAuthStore from '../../store/auth-store';
-import useDoctorStore from '../../store/doctor-store';
+import useAppointmentsStore from '../../store/appointments-store';
 import { formatDate } from '../../utils';
 
 const DoctorPatients = () => {
   const { user } = useAuthStore();
-  const { patients, loadDoctorData, isLoading } = useDoctorStore();
+  const { appointments, getDoctorAppointments, isLoading } = useAppointmentsStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPatient, setSelectedPatient] = useState(null);
   
   useEffect(() => {
-    if (user) {
-      loadDoctorData(user.id);
+    if (user?.id) {
+      getDoctorAppointments();
     }
-  }, [user, loadDoctorData]);
+  }, [user?.id, getDoctorAppointments]);
+  
+  // Extract unique patients from appointments
+  const patients = appointments ? appointments.reduce((acc, appointment) => {
+    const patient = {
+      id: appointment.patientId,
+      firstName: appointment.patientName?.split(' ')[0] || 'Unknown',
+      lastName: appointment.patientName?.split(' ').slice(1).join(' ') || '',
+      email: appointment.patientEmail || '',
+      lastAppointment: appointment.dateTime,
+      totalAppointments: appointments.filter(apt => apt.patientId === appointment.patientId).length
+    };
+    
+    if (!acc.find(p => p.id === patient.id)) {
+      acc.push(patient);
+    }
+    return acc;
+  }, []) : [];
   
   // Filter patients based on search term
   const filteredPatients = patients.filter(patient => {

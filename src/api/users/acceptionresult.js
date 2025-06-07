@@ -1,14 +1,18 @@
-import { baseURL } from "../config.js";  // تأكد من المسار
+import { baseURL } from "../config.js"; // تأكد من المسار
 
 const checkAcception = async ({ doctor_id, token }) => {
   try {
-    const response = await fetch(`${baseURL}users/Acceptionresult?doctor_id=${doctor_id}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
+    const response = await fetch(
+      `${baseURL}users/Acceptionresult?doctor_id=${doctor_id}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          "ngrok-skip-browser-warning": "true",
+        },
       }
-    });
+    );
 
     const data = await response.json();
 

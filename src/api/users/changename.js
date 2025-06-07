@@ -2,11 +2,13 @@ import { baseURL } from "../config.js"; // Ensure the correct path for config
 
 const changeName = async ({ firstName, lastName, token }) => {
   try {
-    const response = await fetch(`${baseURL}users/ChangeName`, {  // Correct URL from Swagger
+    const response = await fetch(`${baseURL}users/ChangeName`, {
+      // Correct URL from Swagger
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,  // Ensure token is passed correctly
+        Authorization: `Bearer ${token}`, // Ensure token is passed correctly
+        "ngrok-skip-browser-warning": "true",
       },
       body: JSON.stringify({ firstName, lastName }), // Pass firstName and lastName in body
     });

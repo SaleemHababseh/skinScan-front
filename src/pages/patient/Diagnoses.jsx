@@ -5,31 +5,37 @@ import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import useAuthStore from '../../store/auth-store';
-import usePatientStore from '../../store/patient-store';
 import { formatDate } from '../../utils';
 
 const PatientDiagnoses = () => {
   const { user } = useAuthStore();
-  const { skinImages, loadPatientData, isLoading } = usePatientStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [isLoading, setIsLoading] = useState(false);
+  // Placeholder for skin images - will be integrated with API later
+  const [skinImages] = useState([]);
   
   useEffect(() => {
-    if (user) {
-      loadPatientData(user.id);
+    // Future: Load patient diagnoses/skin images from API
+    if (user?.id) {
+      setIsLoading(true);
+      // Simulate API call
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
     }
-  }, [user, loadPatientData]);
+  }, [user?.id]);
   
   // Filter diagnoses based on search term and filter status
-  const filteredDiagnoses = skinImages.filter(image => {
-    const matchesSearch = image.bodyPart.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         image.concernDescription.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredDiagnoses = (skinImages && Array.isArray(skinImages)) ? skinImages.filter(image => {
+    const matchesSearch = image.bodyPart?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         image.concernDescription?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesFilter = filterStatus === 'all' || 
                          image.diagnosisStatus === filterStatus;
                          
     return matchesSearch && matchesFilter;
-  });
+  }) : [];
 
   return (
     <div className="space-y-6">

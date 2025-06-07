@@ -1,8 +1,8 @@
 import { baseURL } from "../config.js";
 
-export const updateBio = async (bio, token) => {
+export const updateUserPassword = async (old_password, new_password, token) => {
     try {
-        const response = await fetch(`${baseURL}users/update-bio/${encodeURIComponent(bio)}`, {
+        const response = await fetch(`${baseURL}users/update/password/${encodeURIComponent(old_password)}/${encodeURIComponent(new_password)}`, {
             method: "PUT",
             headers: {
                 "Authorization": `Bearer ${token}`,
@@ -15,12 +15,12 @@ export const updateBio = async (bio, token) => {
 
         if (!response.ok) {
             console.error("Server error response:", data);
-            throw new Error(data.detail || "Bio update failed");
+            throw new Error(data.detail || "Password update failed");
         }
 
         return data;
     } catch (error) {
-        console.error("Bio update error:", error);
+        console.error("Password update error:", error);
         throw error;
     }
 };

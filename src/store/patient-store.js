@@ -1,12 +1,21 @@
 import { create } from 'zustand';
-import { 
-  uploadSkinImage, 
-  getSkinAnalysis, 
-  bookAppointment,
-  getPatientImages,
-  getPatientAppointments
-} from '../api/patient';
 
+function uploadSkinImage(imageFile, patientId) {
+
+  return null; // Placeholder for actual API call
+}
+function getSkinAnalysis(imageId) {
+  return null; // Placeholder for actual API call
+} 
+function bookAppointment(appointmentData) {
+  return null; // Placeholder for actual API call
+}
+function getPatientImages(patientId) {
+  return null; // Placeholder for actual API call
+}
+function getPatientAppointments(patientId) {
+  return null; // Placeholder for actual API call
+}
 const usePatientStore = create((set, get) => ({
   skinImages: [],
   appointments: [],

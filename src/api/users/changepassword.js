@@ -7,6 +7,8 @@ const changePassword = async ({ oldPass, newPass, token }) => {
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${token}`,  // Ensure token is passed correctly
+        
+                 "ngrok-skip-browser-warning": "true",
       },
       body: JSON.stringify({ old_pass: oldPass, new_pass: newPass }), // Pass old and new password in body
     });

@@ -1,9 +1,9 @@
 import { baseURL } from "../config.js";
 
-export const updateBio = async (bio, token) => {
+export const getUserBasicInfo = async (token) => {
     try {
-        const response = await fetch(`${baseURL}users/update-bio/${encodeURIComponent(bio)}`, {
-            method: "PUT",
+        const response = await fetch(`${baseURL}users/get/user-info/get-user-basic-info`, {
+            method: "GET",
             headers: {
                 "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json",
@@ -15,12 +15,12 @@ export const updateBio = async (bio, token) => {
 
         if (!response.ok) {
             console.error("Server error response:", data);
-            throw new Error(data.detail || "Bio update failed");
+            throw new Error(data.detail || "Failed to get user basic info");
         }
 
         return data;
     } catch (error) {
-        console.error("Bio update error:", error);
+        console.error("User basic info error:", error);
         throw error;
     }
 };

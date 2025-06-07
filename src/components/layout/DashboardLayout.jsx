@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, Navigate } from 'react-router-dom';
 import {
   Home,
@@ -20,9 +20,19 @@ import Footer from './Footer';
 const DashboardLayout = ({ children }) => {
   const { user, isAuthenticated, isLoading } = useAuthStore();
   const location = useLocation();
+  const [initialAuthCheck, setInitialAuthCheck] = useState(true);
   
-  // Handle loading state
-  if (isLoading) {
+  useEffect(() => {
+    // Only show loading for initial auth check, not subsequent API calls
+    const timer = setTimeout(() => {
+      setInitialAuthCheck(false);
+    }, 200);
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  // Handle loading state only for initial authentication check
+  if (initialAuthCheck && isLoading && !isAuthenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary-500 border-t-transparent"></div>
@@ -44,8 +54,6 @@ const DashboardLayout = ({ children }) => {
         { name: 'Upload Image', href: '/patient/upload', icon: Clipboard },
         { name: 'Medical News', href: '/news', icon: Activity },
         { name: 'Profile', href: '/profile', icon: User },
-        { name: 'Settings', href: '/settings', icon: Settings },
-        { name: 'Help', href: '/help', icon: HelpCircle },
       ];
     }
     
@@ -73,9 +81,7 @@ const DashboardLayout = ({ children }) => {
     
     return [];
   };
-  
-  const sidebarLinks = getSidebarLinks();
-  const basePath = `/${user?.role}`;
+    const sidebarLinks = getSidebarLinks();
   
   return (
     <div className="flex min-h-screen flex-col">

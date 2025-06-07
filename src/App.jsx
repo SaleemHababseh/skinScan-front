@@ -1,14 +1,11 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
-// Authentication Components
-import AuthProvider from './components/auth/AuthProvider';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
 // Layouts
 import AppLayout from './components/layout/AppLayout';
 import DashboardLayout from './components/layout/DashboardLayout';
-import AuthLayout from './components/layout/AuthLayout';
 
 // Authentication Pages
 import Login from './pages/auth/Login';
@@ -31,7 +28,6 @@ import PatientUpload from './pages/patient/Upload';
 import DoctorDashboard from './pages/doctor/Dashboard';
 import DoctorPatients from './pages/doctor/Patients';
 import DoctorAppointments from './pages/doctor/Appointments';
-
 // Admin Pages
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminUsers from './pages/admin/Users';
@@ -39,13 +35,12 @@ import AdminReports from './pages/admin/Reports';
 
 // Shared Pages
 import Profile from './pages/Profile';
-import Settings from './pages/Settings';
-import News from './pages/News';
+  import News from './pages/News';
 import TopDoctors from './pages/TopDoctors';
 
 function App() {
   return (
-    <AuthProvider>
+ 
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={
@@ -80,7 +75,7 @@ function App() {
         {/* Redirect old auth routes */}
         <Route path="/login" element={<Navigate to="/auth/login" replace />} />
         <Route path="/register" element={<Navigate to="/auth/register" replace />} />
-        
+        <Route path="/forgot-password" element={<Navigate to="/auth/forgot-password" replace />} />
         {/* Patient Routes - Protected */}
         <Route path="/patient/dashboard" element={
           <ProtectedRoute requiredRole="patient">
@@ -165,18 +160,12 @@ function App() {
             </DashboardLayout>
           </ProtectedRoute>
         } />
-        <Route path="/settings" element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <Settings />
-            </DashboardLayout>
-          </ProtectedRoute>
-        } />
+    
         
         {/* 404 Route */}
         <Route path="*" element={<NotFound />} />
       </Routes>
-    </AuthProvider>
+
   );
 }
 

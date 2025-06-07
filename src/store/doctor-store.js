@@ -1,10 +1,19 @@
 import { create } from "zustand";
-import {
-  getDoctorAppointments,
-  getDoctorPatients,
-  sendMedicalReport,
-  updateAppointmentStatus,
-} from "../api/doctor";
+
+
+  function getDoctorAppointments() {
+  return null; // Placeholder for actual API call
+}
+function getDoctorPatients() {
+  return null; // Placeholder for actual API call
+}
+function sendMedicalReport() {
+  return null; // Placeholder for actual API call
+}
+function updateAppointmentStatus() {
+  return null; // Placeholder for actual API call
+}
+
 
 const useDoctorStore = create((set) => ({
   appointments: [],

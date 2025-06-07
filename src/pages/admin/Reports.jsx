@@ -3,27 +3,44 @@ import { Calendar, BarChart2, PieChart, LineChart, Download, Filter, RefreshCw }
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import useAuthStore from '../../store/auth-store';
-import useAdminStore from '../../store/admin-store';
+import useAppointmentsStore from '../../store/appointments-store';
 
 const AdminReports = () => {
   const { user } = useAuthStore();
-  const { reports, loadReports, isLoading } = useAdminStore();
+  const { appointments } = useAppointmentsStore();
   const [dateRange, setDateRange] = useState('last30days');
   const [reportType, setReportType] = useState('all');
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Mock reports data - will be replaced with actual API calls
+  const [reports] = useState({
+    userStats: { total: 1250, active: 1180, new: 45 },
+    appointmentStats: { total: appointments?.length || 0, completed: 240, cancelled: 15 },
+    diagnosisStats: { total: 2850, completed: 2750, pending: 100 }
+  });
   
   useEffect(() => {
-    loadReports(dateRange, reportType);
-  }, [loadReports, dateRange, reportType]);
+    // Future: Load reports from API
+    if (user?.id) {
+      setIsLoading(true);
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
+    }
+  }, [user?.id, dateRange, reportType]);
   
   // Handle report download
   const handleDownloadReport = (format) => {
     alert(`Downloading ${reportType} report in ${format} format...`);
     // Actual download implementation would be here
   };
-  
-  // Handle report refresh
+    // Handle report refresh
   const handleRefreshReport = () => {
-    loadReports(dateRange, reportType);
+    setIsLoading(true);
+    // Future: Reload reports from API
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
   };
 
   return (

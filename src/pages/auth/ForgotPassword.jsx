@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import AuthLayout from '../../components/layout/AuthLayout';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
+import ThemeToggle from '../../components/ui/ThemeToggle';
 import useAuthStore from '../../store/auth-store';
 
 const ForgotPassword = () => {
@@ -19,6 +19,7 @@ const ForgotPassword = () => {
   const { 
     sendForgetPasswordCode, 
     validateVerificationCode,
+    validatePassCode,
     error, 
     clearError 
   } = useAuthStore();
@@ -116,17 +117,16 @@ const ForgotPassword = () => {
 
     setIsLoading(true);
     try {
-      // Note: You'll need to implement the actual password reset API call
-      // This is just a placeholder for the UI flow
-      console.log('Resetting password with:', {
-        email: formData.email,
-        code: formData.verificationCode,
-        newPassword: formData.newPassword
-      });
+      // Use the validatePassCode function to reset password
+      await validatePassCode(
+        formData.email, 
+        formData.verificationCode, 
+        formData.newPassword
+      );
       
       alert('Password reset successful! Please login with your new password.');
       // Redirect to login page
-      window.location.href = '/auth/login';
+      window.location.href = '/login';
     } catch (err) {
       console.error('Failed to reset password:', err);
     } finally {
@@ -171,11 +171,42 @@ const ForgotPassword = () => {
   };
 
   return (
-    <AuthLayout 
-      title={getTitle()} 
-      subtitle={getSubtitle()}
-      type="forgot-password"
-    >
+    <div className="flex min-h-screen flex-col justify-center bg-neutral-50 dark:bg-neutral-900">
+      <div className="absolute right-4 top-4">
+        <ThemeToggle />
+      </div>
+      
+      <div className="mx-auto w-full max-w-md px-4 py-8 sm:px-6 lg:px-8">
+        <div className="flex justify-center">
+          <Link to="/" className="flex items-center space-x-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-primary">
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                className="h-6 w-6 text-white" 
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <path d="M6 11a4 4 0 0 1 4-4c2 0 4 3 8 3a4 4 0 0 0 4-4" />
+                <path d="M6 21a4 4 0 0 1 4-4c2 0 4 3 8 3a4 4 0 0 0 4-4" />
+              </svg>
+            </div>
+            <span className="text-2xl font-bold">Skin<span className="text-primary-500">Scan</span></span>
+          </Link>
+        </div>
+        
+        <div className="mt-6">
+          <div className="bg-white px-6 py-8 shadow-md dark:bg-neutral-800 sm:rounded-lg sm:px-10">
+            <div className="mb-6 text-center">
+              <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">{getTitle()}</h2>
+              <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+                {getSubtitle()}
+              </p>
+            </div>
+
       <form onSubmit={getSubmitHandler()} className="space-y-6">
         {error && (
           <div className="rounded-md bg-error-50 p-4 dark:bg-error-900/30">
@@ -293,7 +324,7 @@ const ForgotPassword = () => {
           <p className="text-sm text-neutral-600 dark:text-neutral-400">
             Remember your password?{' '}
             <Link 
-              to="/auth/login" 
+              to="/login" 
               className="font-medium text-primary-500 hover:text-primary-600"
             >
               Sign in
@@ -301,7 +332,11 @@ const ForgotPassword = () => {
           </p>
         </div>
       </form>
-    </AuthLayout>
+      
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

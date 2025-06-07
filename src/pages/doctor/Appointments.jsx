@@ -5,22 +5,21 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Avatar from '../../components/ui/Avatar';
 import useAuthStore from '../../store/auth-store';
-import useDoctorStore from '../../store/doctor-store';
+import useAppointmentsStore from '../../store/appointments-store';
 import { formatDate } from '../../utils';
 
 const DoctorAppointments = () => {
-  const { user } = useAuthStore();
-  const { appointments, loadDoctorData, updateAppointment, isLoading } = useDoctorStore();
+  const { user, token } = useAuthStore();
+  const { appointments, fetchDoctorAppointments, acceptPatientAppointment, isLoading } = useAppointmentsStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [calendarView, setCalendarView] = useState('day'); // day, week, month
-  
-  useEffect(() => {
-    if (user) {
-      loadDoctorData(user.id);
+    useEffect(() => {
+    if (user && token) {
+      fetchDoctorAppointments(token);
     }
-  }, [user, loadDoctorData]);
+  }, [user, token, fetchDoctorAppointments]);
   
   // Get all dates in the current month
   const getDaysInMonth = (year, month) => {
@@ -83,10 +82,18 @@ const DoctorAppointments = () => {
     
     return matchesSearch && matchesFilter && matchesDate;
   }).sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime));
-  
-  // Handle appointment status update
-  const handleUpdateStatus = (appointmentId, status) => {
-    updateAppointment(appointmentId, { status });
+    // Handle appointment status update
+  const handleUpdateStatus = async (appointmentId, status) => {
+    try {
+      if (status === 'confirmed') {
+        await acceptPatientAppointment(appointmentId, token);
+      }
+      // Refresh appointments after update
+      fetchDoctorAppointments(token);
+    } catch (error) {
+      console.error('Error updating appointment:', error);
+      alert('Error updating appointment: ' + error.message);
+    }
   };
 
   return (

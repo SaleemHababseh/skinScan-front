@@ -3,30 +3,38 @@ import { Star, User, Calendar, MessageCircle } from 'lucide-react';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Avatar from '../components/ui/Avatar';
-import useUserStore from '../store/user-store';
+import useUserStore from '../store/appointments-store';
+import useAuthStore from '../store/auth-store';
 
 const TopDoctors = () => {
   const { 
-    topRatedDoctors, 
+    doctors, 
     isLoading, 
     error, 
     fetchTopRatedDoctors, 
-    createUserAppointment,
+    createNewAppointment,
     rateDoctorById,
     clearError 
   } = useUserStore();
+
+  const { token } = useAuthStore();
 
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [rating, setRating] = useState(0);
   const [showRatingModal, setShowRatingModal] = useState(false);
 
   useEffect(() => {
-    fetchTopRatedDoctors();
+    fetchTopRatedDoctors(token);
   }, [fetchTopRatedDoctors]);
 
   const handleBookAppointment = async (doctorId) => {
+    if (!token) {
+      alert('Please login to book an appointment');
+      return;
+    }
+    
     try {
-      await createUserAppointment(doctorId);
+      await createNewAppointment(doctorId, token);
       alert('Appointment booked successfully!');
     } catch (err) {
       console.error('Error booking appointment:', err);
@@ -35,14 +43,19 @@ const TopDoctors = () => {
   };
 
   const handleRateDoctor = async () => {
+    if (!token) {
+      alert('Please login to rate a doctor');
+      return;
+    }
+    
     if (selectedDoctor && rating > 0) {
       try {
-        await rateDoctorById(selectedDoctor.id, rating);
+        await rateDoctorById(selectedDoctor.doctor_id, rating, token);
         setShowRatingModal(false);
         setSelectedDoctor(null);
         setRating(0);
         // Refresh the list
-        fetchTopRatedDoctors();
+        fetchTopRatedDoctors(token);
         alert('Rating submitted successfully!');
       } catch (err) {
         console.error('Error rating doctor:', err);
@@ -92,46 +105,46 @@ const TopDoctors = () => {
 
       {/* Doctors Grid */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {topRatedDoctors && topRatedDoctors.length > 0 ? (
-          topRatedDoctors.map((doctor) => (
-            <Card key={doctor.id} className="overflow-hidden">
+        {doctors && doctors.length > 0 ? (
+          doctors.map((doctor) => (
+            <Card key={doctor.doctor_id} className="overflow-hidden">
               <div className="p-6">
                 <div className="flex items-center space-x-4">
                   <Avatar
                     src={doctor.profilePicture}
-                    alt={`Dr. ${doctor.f_name} ${doctor.l_name}`}
-                    fallback={`${doctor.f_name?.[0] || 'D'}${doctor.l_name?.[0] || 'R'}`}
+                    alt={`Dr. ${doctor.name}`}
+                    fallback={doctor.name.split(' ').map(n => n[0]).join('').toUpperCase()}
                     className="h-16 w-16"
                   />
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-                      Dr. {doctor.f_name} {doctor.l_name}
+                      Dr. {doctor.name}
                     </h3>
                     <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                      {doctor.specialization || 'General Practitioner'}
+                      General Practitioner
                     </p>
                     <div className="mt-1 flex items-center">
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
                           className={`h-4 w-4 ${
-                            i < Math.floor(doctor.rating || 0)
+                            i < Math.floor(doctor.rating_avg || 0)
                               ? 'fill-yellow-400 text-yellow-400'
                               : 'text-neutral-300 dark:text-neutral-600'
                           }`}
                         />
                       ))}
                       <span className="ml-2 text-sm text-neutral-600 dark:text-neutral-400">
-                        {doctor.rating?.toFixed(1) || 'No rating'} ({doctor.totalRatings || 0} reviews)
+                        {doctor.rating_avg?.toFixed(1) || 'No rating'}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {doctor.bio && (
+                {doctor.doctor_bio && (
                   <div className="mt-4">
                     <p className="text-sm text-neutral-600 dark:text-neutral-400 line-clamp-3">
-                      {doctor.bio}
+                      {doctor.doctor_bio}
                     </p>
                   </div>
                 )}
@@ -148,7 +161,7 @@ const TopDoctors = () => {
                   </Button>
                   <Button
                     size="sm"
-                    onClick={() => handleBookAppointment(doctor.id)}
+                    onClick={() => handleBookAppointment(doctor.doctor_id)}
                     className="flex-1"
                     disabled={isLoading}
                   >
@@ -175,7 +188,7 @@ const TopDoctors = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg dark:bg-neutral-800">
             <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-              Rate Dr. {selectedDoctor.f_name} {selectedDoctor.l_name}
+              Rate Dr. {selectedDoctor.name}
             </h3>
             <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
               How would you rate your experience with this doctor?

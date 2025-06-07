@@ -1,8 +1,8 @@
 import { baseURL } from "../config.js";
 
-export const updateBio = async (bio, token) => {
+export const updateBasicInformation = async (f_name, l_name, token) => {
     try {
-        const response = await fetch(`${baseURL}users/update-bio/${encodeURIComponent(bio)}`, {
+        const response = await fetch(`${baseURL}users/update-basic-information/${encodeURIComponent(f_name)}/${encodeURIComponent(l_name)}`, {
             method: "PUT",
             headers: {
                 "Authorization": `Bearer ${token}`,
@@ -15,12 +15,12 @@ export const updateBio = async (bio, token) => {
 
         if (!response.ok) {
             console.error("Server error response:", data);
-            throw new Error(data.detail || "Bio update failed");
+            throw new Error(data.detail || "Basic information update failed");
         }
 
         return data;
     } catch (error) {
-        console.error("Bio update error:", error);
+        console.error("Basic information update error:", error);
         throw error;
     }
 };
