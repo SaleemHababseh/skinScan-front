@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import ToastContainer from './components/ui/ToastContainer';
 
 // Layouts
 import AppLayout from './components/layout/AppLayout';
@@ -40,7 +41,8 @@ import TopDoctors from './pages/TopDoctors';
 
 function App() {
   return (
- 
+    <>
+      <ToastContainer />
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={
@@ -161,11 +163,10 @@ function App() {
           </ProtectedRoute>
         } />
     
-        
-        {/* 404 Route */}
+          {/* 404 Route */}
         <Route path="*" element={<NotFound />} />
       </Routes>
-
+    </>
   );
 }
 
