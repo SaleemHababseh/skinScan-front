@@ -96,38 +96,52 @@ const Register = () => {
     setFormErrors(errors);
     return isValid;
   };
-
   const handleNext = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
-    try {
-      if (step === 1 && validateEmail()) {
+    try {      if (step === 1 && validateEmail()) {
+        console.log("📧 Sending verification code to:", formData.email);
         // Send verification code
-        await sendVerificationCode(formData.email);
+        await sendVerificationCode({ email: formData.email });
+        console.log("✅ Verification code sent successfully");
         setStep(2);
       } else if (step === 2 && validateCode()) {
+        console.log("🔍 Validating verification code:", formData.verificationCode);
         // Validate verification code
-        await validateVerificationCode(
-          formData.email,
-          formData.verificationCode
-        );
+        await validateVerificationCode({
+          email: formData.email,
+          verification_code: formData.verificationCode
+        });
+        console.log("✅ Verification code validated successfully");
         setStep(3);
       }
     } catch (err) {
-      console.error("Step validation failed:", err);
+      console.error("❌ Step validation failed:", {
+        step,
+        error: err.message,
+        email: formData.email
+      });
     } finally {
       setIsLoading(false);
     }
-  };
-  const handleSubmit = async (e) => {
+  };  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateFinalForm()) return;
 
     setIsLoading(true);
+    console.log("👤 Creating user account:", {
+      email: formData.email,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      role: formData.role,
+      age: formData.age,
+      sex: formData.sex
+    });
+    
     try {
       // Register user
-      await createUser({
+      const result = await createUser({
         f_name: formData.firstName,
         l_name: formData.lastName,
         email: formData.email,
@@ -135,12 +149,24 @@ const Register = () => {
         age: parseInt(formData.age),
         hashed_password: formData.password,
         sex: formData.sex,
-      }); // Navigate to login page after successful registration
+      });
+      
+      console.log("✅ User registration successful:", result);
+      
+      // Navigate to login page after successful registration
       navigate("/login", {
         state: { message: "Registration successful! Please log in." },
       });
     } catch (err) {
-      console.error("Registration failed:", err);
+      console.error("❌ Registration failed:", {
+        error: err.message,
+        formData: {
+          email: formData.email,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          role: formData.role
+        }
+      });
     } finally {
       setIsLoading(false);
     }
@@ -197,7 +223,7 @@ const Register = () => {
                   </p>
                 </div>
               )}
-              {step === 3 && (
+              {step === 1 && (
                 <div>
                   <label
                     htmlFor="email"
@@ -242,7 +268,7 @@ const Register = () => {
                   </div>
                 </div>
               )}
-              {step === 1 && (
+              {step === 3 && (
                 <>
                   {" "}
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

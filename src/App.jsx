@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import ToastContainer from "./components/ui/ToastContainer";
+import ErrorBoundary from "./components/ui/ErrorBoundary";
 
 // Layouts
 import AppLayout from "./components/layout/AppLayout";
@@ -43,7 +44,7 @@ import Chat from "./pages/Chat";
 
 function App() {
   return (
-    <>
+    <ErrorBoundary>
       <ToastContainer />
       <Routes>
         {/* Public Routes */}
@@ -231,12 +232,11 @@ function App() {
             <ProtectedRoute>
               <Chat />
             </ProtectedRoute>
-          }
-        />
+          }        />
         {/* 404 Route */}
         <Route path="*" element={<NotFound />} />
       </Routes>
-    </>
+    </ErrorBoundary>
   );
 }
 

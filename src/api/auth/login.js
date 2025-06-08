@@ -29,13 +29,40 @@ const login = async ({
     const data = await response.json();
 
     if (!response.ok) {
-      console.error("Login failed:", data);
-      throw new Error(data.detail || "Login failed");
+      // Handle specific HTTP status codes
+      if (response.status === 401) {
+        throw new Error("Invalid email or password. Please check your credentials and try again.");
+      }
+      
+      if (response.status === 404) {
+        throw new Error("Authentication service not available. Please try again later.");
+      }
+      
+      if (response.status === 422) {
+        throw new Error("Invalid login format. Please check your email and password.");
+      }
+      
+      if (response.status >= 500) {
+        throw new Error("Server error. Please try again later.");
+      }
+      
+      // Fallback error message
+      throw new Error(data.detail || data.message || "Login failed. Please try again.");
     }
 
-    return data; // Returns the token data
+    // Validate response structure
+    if (!data.access_token) {
+      throw new Error("Invalid response from server. Please try again.");
+    }
+
+    return data;
   } catch (error) {
-    console.error("Login failed:", error.message);
+    // Handle network errors
+    if (error.name === 'NetworkError' || error.message.includes('fetch')) {
+      throw new Error("Network error. Please check your internet connection and try again.");
+    }
+    
+    // Re-throw API errors as-is (they already have user-friendly messages)
     throw error;
   }
 };

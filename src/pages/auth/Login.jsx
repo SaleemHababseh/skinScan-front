@@ -46,14 +46,15 @@ const Login = () => {
     return isValid;
   };
   const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!validateForm()) return;
+    e.preventDefault();    if (!validateForm()) return;
 
     setIsLoading(true);
 
     try {
+      console.log("🔐 Attempting login for:", formData.email);
       const user = await login(formData.email, formData.password);
+      
+      console.log("✅ Login successful, user role:", user.role);
 
       // Navigate based on user role
       const roleDashboards = {
@@ -63,13 +64,18 @@ const Login = () => {
       };
 
       const destination = roleDashboards[user.role] || "/patient/dashboard";
+      console.log("🔀 Redirecting to:", destination);
       navigate(destination);
     } catch (err) {
-      console.error("Login failed:", err);
+      console.error("❌ Login failed:", {
+        error: err.message,
+        email: formData.email
+      });
+      // Error is already set in the auth store, no need to set it here
     } finally {
       setIsLoading(false);
     }
-  };  return (
+  };return (
     <div className="flex min-h-screen flex-col justify-center bg-neutral-50 dark:bg-neutral-900">
       <div className="absolute right-4 top-4">
         <ThemeToggle />

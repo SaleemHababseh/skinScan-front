@@ -10,8 +10,7 @@ const Avatar = ({
   className,
   ...props 
 }) => {
-  const [hasError, setHasError] = React.useState(false);
-  
+
   const sizeClasses = {
     sm: 'h-8 w-8',
     md: 'h-10 w-10',
@@ -19,10 +18,7 @@ const Avatar = ({
     xl: 'h-20 w-20',
   };
   
-  const handleError = () => {
-    setHasError(true);
-  };
-  
+
   return (
     <div 
       className={cn(
@@ -32,12 +28,11 @@ const Avatar = ({
       )}
       {...props}
     >
-      {!hasError && src ? (
+      { src ? (
         <img
           src={src}
           alt={alt || 'Avatar'}
           className="h-full w-full object-cover"
-          onError={handleError}
         />
       ) : fallback ? (
         <div className="flex h-full w-full items-center justify-center rounded-full bg-neutral-200 text-neutral-500 dark:bg-neutral-700 dark:text-neutral-300">

@@ -16,13 +16,34 @@ export const validateVerificationCode = async ({ email, verification_code }) => 
         const data = await response.json();
 
         if (!response.ok) {
-            console.error("Server error response:", data);
-            throw new Error(data.detail || "Verification failed");
+            // Handle specific status codes
+            if (response.status === 400 || response.status === 422) {
+                throw new Error("Invalid or expired verification code. Please check the code and try again.");
+            }
+            
+            if (response.status === 404) {
+                throw new Error("Verification service not available. Please try again later.");
+            }
+            
+            if (response.status === 429) {
+                throw new Error("Too many verification attempts. Please wait before trying again.");
+            }
+            
+            if (response.status >= 500) {
+                throw new Error("Server error. Please try again later.");
+            }
+            
+            throw new Error(data.detail || data.message || "Verification code validation failed");
         }
         
         return data;
     } catch (error) {
-        console.log("Verification error:", error);
+        // Handle network errors
+        if (error.name === 'NetworkError' || error.message.includes('fetch')) {
+            throw new Error("Network error. Please check your internet connection and try again.");
+        }
+        
+        console.error("Verification error:", error.message);
         throw error;
     }
 };

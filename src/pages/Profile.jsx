@@ -150,6 +150,7 @@ const Profile = () => {
       
       setIsEditing(false);
       showSuccess('Profile updated successfully');
+      window.location.reload();
     } catch (err) {
       console.error('Error saving profile:', err);
       showError('Failed to update profile');

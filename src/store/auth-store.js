@@ -62,7 +62,7 @@ const useAuthStore = create(
           const tokenPayload = decodeJWT(data.access_token);
 
           if (!tokenPayload) {
-            throw new Error("Invalid access token received");
+            throw new Error("Invalid access token received from server");
           }
 
           // Update store with user data and tokens (persist will handle storage automatically)
@@ -79,12 +79,35 @@ const useAuthStore = create(
             role: tokenPayload.role || null,
             isAuthenticated: true,
             isLoading: false,
+            error: null,
           });
 
           return data;
         } catch (error) {
-          set({ isLoading: false, error: error.message });
-          throw error;
+          // Provide user-friendly error messages
+          let errorMessage = error.message;
+
+          if (
+            error.message.includes("401") ||
+            error.message.includes("Unauthorized")
+          ) {
+            errorMessage = "Invalid email or password. Please try again.";
+          } else if (error.message.includes("404")) {
+            errorMessage =
+              "Authentication service is currently unavailable. Please try again later.";
+          } else if (
+            error.message.includes("network") ||
+            error.message.includes("fetch")
+          ) {
+            errorMessage =
+              "Network error. Please check your connection and try again.";
+          } else if (!error.message || error.message === "Failed to fetch") {
+            errorMessage =
+              "Unable to connect to the server. Please try again later.";
+          }
+
+          set({ isLoading: false, error: errorMessage });
+          throw new Error(errorMessage);
         }
       },
       sendVerificationCode: async (email) => {
@@ -168,8 +191,27 @@ const useAuthStore = create(
       },
       refreshToken: async () => {
         const { refreshTokenValue, token } = get();
-        if (!refreshTokenValue || !token) {
-          throw new Error("No refresh token available");
+
+        if (!refreshTokenValue) {
+          const error = new Error(
+            "No refresh token available - please log in again"
+          );
+          set({
+            user: {
+              id: null,
+              email: null,
+              role: null,
+              name: null,
+              profilePicture: null,
+            },
+            token: null,
+            refreshTokenValue: null,
+            role: null,
+            isAuthenticated: false,
+            isLoading: false,
+            error: error.message,
+          });
+          throw error;
         }
 
         set({ isLoading: true, error: null });
@@ -194,14 +236,22 @@ const useAuthStore = create(
               role: tokenPayload.role || null,
               isAuthenticated: true,
               isLoading: false,
+              error: null,
             });
+            return result;
           } else {
-            throw new Error("Invalid access token received");
+            throw new Error("Invalid access token received from server");
           }
-
-          return result;
         } catch (error) {
           // Clear auth state on refresh failure
+          const errorMessage = error.message.includes(
+            "jose.exceptions.JWTError"
+          )
+            ? "Your session has expired. Please log in again."
+            : error.message.includes("404")
+            ? "Authentication service temporarily unavailable. Please try again later."
+            : error.message || "Session refresh failed. Please log in again.";
+
           set({
             user: {
               id: null,
@@ -215,9 +265,13 @@ const useAuthStore = create(
             role: null,
             isAuthenticated: false,
             isLoading: false,
-            error: error.message,
+            error: errorMessage,
           });
-          throw error;
+
+          // Create a more user-friendly error
+          const userError = new Error(errorMessage);
+          userError.shouldRedirectToLogin = true;
+          throw userError;
         }
       },
       logout: async () => {
