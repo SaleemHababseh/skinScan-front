@@ -6,6 +6,7 @@ import ThemeToggle from '../ui/ThemeToggle';
 import useAuthStore from '../../store/auth-store';
 import Button from '../ui/Button';
 import Avatar from '../ui/Avatar';
+import { baseURL } from '../../api/config';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
@@ -131,23 +132,24 @@ const Navbar = () => {
           <ThemeToggle />
           
           {isAuthenticated ? (
-            <div className="relative" ref={userMenuRef}>
-              <button
+            <div className="relative" ref={userMenuRef}>              <button
                 className="flex items-center space-x-1 rounded-full focus:outline-none"
                 onClick={toggleUserMenu}
               >
                 <Avatar 
-                  src={user.profileImage} 
-                  alt={`${user.firstName} ${user.lastName}`}
+                  src={user?.id ? `${baseURL}users/get/user-profile-picture?user_id=${user.id}` : null}
+                  alt={`${user?.firstName || user?.f_name || ''} ${user?.lastName || user?.l_name || ''}`}
+                  fallback={`${(user?.firstName || user?.f_name || '')[0] || ''}${(user?.lastName || user?.l_name || '')[0] || ''}`}
                   size="sm"
                 />
               </button>
               
               {isUserMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-neutral-800 dark:ring-neutral-700">
-                  <div className="border-b border-neutral-200 px-4 py-2 dark:border-neutral-700">
-                    <p className="text-sm font-medium">{user.firstName} {user.lastName}</p>
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400">{user.email}</p>
+                <div className="absolute right-0 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-neutral-800 dark:ring-neutral-700">                <div className="border-b border-neutral-200 px-4 py-2 dark:border-neutral-700">
+                    <p className="text-sm font-medium">
+                      {user?.firstName || user?.f_name || ''} {user?.lastName || user?.l_name || ''}
+                    </p>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400">{user?.email}</p>
                   </div>
                   <Link
                     to="/profile"
