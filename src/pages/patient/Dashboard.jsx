@@ -1,242 +1,260 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Plus, Calendar, FileText, BarChart2, Clock, AlertTriangle } from 'lucide-react';
+import React, { useEffect, useCallback, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { 
+  Calendar, 
+  FileText, 
+  Upload, 
+  Heart,
+  Star
+} from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import Avatar from '../../components/ui/Avatar';
 import useAuthStore from '../../store/auth-store';
-import useAppointmentsStore from '../../store/appointments-store';
+import { getPatientAppointments } from '../../api/users/getPatientAppointments';
+import { getUserRecords } from '../../api/users/getUserRecords';
 import { formatDate } from '../../utils';
 
 const PatientDashboard = () => {
-  const { user, token } = useAuthStore();
-  const { 
-    appointments = [], 
-    fetchPatientAppointments,
-    isLoading 
-  } = useAppointmentsStore();
-    // Local state for skin images (will be integrated with API later)
-  const [skinImages] = useState([]);
-  useEffect(() => {
-    // Load patient appointments on component mount
-    if (user?.id && token) {
-      fetchPatientAppointments(token);
+  const navigate = useNavigate();
+  const { user, token, fetchUserBasicInfo } = useAuthStore();
+  
+  const [appointments, setAppointments] = useState([]);
+  const [records, setRecords] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasLoadedUserInfo, setHasLoadedUserInfo] = useState(false);
+
+  const loadUserInfo = useCallback(async () => {
+    if (user?.id && !hasLoadedUserInfo) {
+      try {
+        await fetchUserBasicInfo();
+      } catch (error) {
+        console.error('Dashboard: Error loading user info:', error);
+      } finally {
+        setHasLoadedUserInfo(true);
+      }
     }
-  }, [user?.id, token, fetchPatientAppointments]);
-  
-  const recentDiagnoses = (skinImages && Array.isArray(skinImages)) ? skinImages.slice(0, 3) : [];
-  const upcomingAppointments = appointments
-    ?.filter(apt => new Date(apt.dateTime) > new Date())
-    ?.sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime))
-    ?.slice(0, 3) || [];
-  
+  }, [user?.id, hasLoadedUserInfo, fetchUserBasicInfo]);
+  const loadPatientData = useCallback(async () => {
+    if (!token) return;
+    
+    setIsLoading(true);
+    try {
+      const [appointmentsData, recordsData] = await Promise.all([
+        getPatientAppointments(token).catch(() => []),
+        getUserRecords(token).catch(() => [])
+      ]);
+      
+      setAppointments(Array.isArray(appointmentsData) ? appointmentsData : []);
+      
+      // Transform records data to handle the records_info structure
+      const transformedRecords = Array.isArray(recordsData) 
+        ? recordsData.map(record => record.records_info || record) 
+        : [];
+      setRecords(transformedRecords);
+    } catch (error) {
+      console.error('Error loading patient data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    loadUserInfo();
+  }, [loadUserInfo]);
+
+  useEffect(() => {
+    if (user && token) {
+      loadPatientData();
+    }
+  }, [user, token, loadPatientData]);  // Get recent appointments from API
+  const recentAppointments = appointments
+    .sort((a, b) => new Date(b.appointment_date) - new Date(a.appointment_date))
+    .slice(0, 3);
+
+  // Get recent records
+  const recentRecords = records
+    .sort((a, b) => new Date(b.test_date) - new Date(a.test_date))
+    .slice(0, 3);
+
+  // eslint-disable-next-line no-unused-vars
+  const QuickActionCard = ({ icon: Icon, title, description, onClick, color = "blue" }) => (
+    <Card className="hover:shadow-lg transition-all cursor-pointer" onClick={onClick}>
+      <div className="text-center">
+        <div className={`mx-auto w-12 h-12 bg-${color}-100 dark:bg-${color}-900/20 rounded-lg flex items-center justify-center mb-4`}>
+          <Icon className={`h-6 w-6 text-${color}-600 dark:text-${color}-400`} />
+        </div>
+        <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{title}</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400">{description}</p>
+      </div>
+    </Card>
+  );
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {/* Welcome Section */}
-      <div className="rounded-xl bg-gradient-primary p-6 text-white shadow-md">
-        <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-          <div>
-            <h1 className="text-2xl font-bold">Welcome, {user?.name || user?.firstName || 'User'} 👋</h1>
-            <p className="mt-1">Track your skin health and manage your appointments</p>
-          </div>
-          <div className="flex space-x-3">
-            <Link to="/patient/upload">
-              <Button className="bg-white text-primary-500 hover:bg-neutral-100">
-                <Plus className="mr-2 h-4 w-4" /> Upload Image
-              </Button>
-            </Link>
-            <Link to="/patient/appointments">
-              <Button className="bg-white/20 backdrop-blur-sm hover:bg-white/30">
-                <Calendar className="mr-2 h-4 w-4" /> Book Appointment
-              </Button>
-            </Link>
-          </div>
-        </div>
+      {/* Welcome Header */}
+      <div className="bg-gradient-primary rounded-xl p-6 text-white">
+        <h1 className="text-2xl font-bold">Welcome back, {user?.f_name || user?.firstName || 'Patient'}!</h1>
+        <p className="mt-2 opacity-90">Take control of your skin health journey.</p>
       </div>
-      
-      {/* Stats Summary */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Card className="bg-secondary-50 dark:bg-transparent dark:border dark:border-secondary-900">
-          <div className="flex items-center space-x-4">
-            <div className="rounded-full bg-secondary-100 p-3 dark:bg-secondary-900">
-              <FileText className="h-6 w-6 text-secondary-600 dark:text-secondary-400" />
-            </div>
-            <div>              <p className="text-sm text-secondary-700 dark:text-secondary-400">Total Diagnoses</p>
-              <p className="text-2xl font-bold text-secondary-900 dark:text-secondary-50">{skinImages?.length || 0}</p>
-            </div>
-          </div>
-        </Card>
-        <Card className="bg-primary-50 dark:bg-transparent dark:border dark:border-primary-900">
-          <div className="flex items-center space-x-4">
-            <div className="rounded-full bg-primary-100 p-3 dark:bg-primary-900">
-              <Calendar className="h-6 w-6 text-primary-600 dark:text-primary-400" />
-            </div>
-            <div>              <p className="text-sm text-primary-700 dark:text-primary-400">Appointments</p>
-              <p className="text-2xl font-bold text-primary-900 dark:text-primary-50">{appointments?.length || 0}</p>
-            </div>
-          </div>
-        </Card>
-        <Card className="bg-neutral-50 dark:bg-transparent dark:border dark:border-neutral-700">
-          <div className="flex items-center space-x-4">
-            <div className="rounded-full bg-neutral-200 p-3 dark:bg-neutral-800">
-              <BarChart2 className="h-6 w-6 text-neutral-700 dark:text-neutral-300" />
-            </div>
-            <div>
-              <p className="text-sm text-neutral-700 dark:text-neutral-400">Progress</p>
-              <p className="text-2xl font-bold text-neutral-900 dark:text-neutral-50">85%</p>
-            </div>
-          </div>
-        </Card>
-      </div>
-      
-      {/* Recent Diagnoses & Upcoming Appointments */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Recent Diagnoses */}
-        <div>
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">Recent Diagnoses</h2>
-            <Link to="/patient/diagnoses" className="text-sm font-medium text-primary-500 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-300">
-              View All
-            </Link>
-          </div>
-          
-          {isLoading ? (
-            <div className="flex h-40 items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-500 border-t-transparent"></div>
-            </div>
-          ) : recentDiagnoses.length > 0 ? (
-            <div className="space-y-4">
-              {recentDiagnoses.map((image) => (
-                <Card key={image.id} className="flex overflow-hidden">
-                  <div className="h-24 w-24 flex-shrink-0">
-                    <img
-                      src={image.imageUrl}
-                      alt={`Skin condition on ${image.bodyPart}`}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <div className="flex flex-1 flex-col p-4">
-                    <div className="flex justify-between">
-                      <h3 className="font-medium text-neutral-900 dark:text-neutral-100">{image.bodyPart}</h3>
-                      <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                        {formatDate(image.uploadDate)}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-                      {image.concernDescription}
-                    </p>
-                    <div className="mt-2 flex items-center">
-                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        image.diagnosisStatus === 'completed'
-                          ? 'bg-success-50 text-success-500 dark:bg-success-900/30 dark:text-success-500'
-                          : 'bg-warning-50 text-warning-500 dark:bg-warning-900/30 dark:text-warning-500'
-                      }`}>
-                        {image.diagnosisStatus === 'completed' ? 'Completed' : 'Processing'}
-                      </span>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card className="flex h-40 flex-col items-center justify-center text-center">
-              <FileText className="h-10 w-10 text-neutral-400" />
-              <p className="mt-2 text-neutral-600 dark:text-neutral-400">No diagnoses yet</p>
-              <Link to="/patient/upload" className="mt-2">
-                <Button size="sm">Upload Your First Image</Button>
-              </Link>
-            </Card>
-          )}
-        </div>
-        
-        {/* Upcoming Appointments */}
-        <div>
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">Upcoming Appointments</h2>
-            <Link to="/patient/appointments" className="text-sm font-medium text-primary-500 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-300">
-              View All
-            </Link>
-          </div>
-          
-          {isLoading ? (
-            <div className="flex h-40 items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-500 border-t-transparent"></div>
-            </div>
-          ) : upcomingAppointments.length > 0 ? (
-            <div className="space-y-4">
-              {upcomingAppointments.map((appointment) => (
-                <Card key={appointment.id}>
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary-100 dark:bg-secondary-900">
-                        <Clock className="h-6 w-6 text-secondary-600 dark:text-secondary-400" />
-                      </div>
-                    </div>
-                    <div className="ml-4 flex-1">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-medium text-neutral-900 dark:text-neutral-100">
-                          {appointment.doctorName}
-                        </h3>
-                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          appointment.status === 'confirmed'
-                            ? 'bg-success-50 text-success-500 dark:bg-success-900/30 dark:text-success-500'
-                            : 'bg-warning-50 text-warning-500 dark:bg-warning-900/30 dark:text-warning-500'
-                        }`}>
-                          {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
-                        </span>
-                      </div>
-                      <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                        {formatDate(appointment.dateTime)}
-                      </p>
-                      <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-                        {appointment.notes}
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card className="flex h-40 flex-col items-center justify-center text-center">
-              <Calendar className="h-10 w-10 text-neutral-400" />
-              <p className="mt-2 text-neutral-600 dark:text-neutral-400">No upcoming appointments</p>
-              <Link to="/patient/appointments" className="mt-2">
-                <Button size="sm">Book an Appointment</Button>
-              </Link>
-            </Card>
-          )}
-        </div>
-      </div>
-      
-      {/* Helpful Tips */}
+
+      {/* Quick Actions */}
       <div>
-        <div className="mb-4">
-          <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">Skin Care Tips</h2>
-        </div>
-        
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Card className="border-l-4 border-l-primary-500">
-            <h3 className="font-medium text-neutral-900 dark:text-neutral-100">Daily Sunscreen</h3>
-            <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
-              Apply a broad-spectrum sunscreen with at least SPF 30 daily, even on cloudy days.
-            </p>
-          </Card>
-          
-          <Card className="border-l-4 border-l-secondary-500">
-            <h3 className="font-medium text-neutral-900 dark:text-neutral-100">Stay Hydrated</h3>
-            <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
-              Drink plenty of water throughout the day to keep your skin hydrated from the inside out.
-            </p>
-          </Card>
-          
-          <Card className="border-l-4 border-l-warning-500">
-            <h3 className="font-medium text-neutral-900 dark:text-neutral-100">Monitor Changes</h3>
-            <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
-              Regularly check your skin for any new or changing spots, moles, or lesions.
-            </p>
-          </Card>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <QuickActionCard
+            icon={Calendar}
+            title="Book Appointment"
+            description="Schedule with a doctor"
+            onClick={() => navigate('/patient/appointments')}
+            color="blue"
+          />
+          <QuickActionCard
+            icon={Upload}
+            title="Upload Skin Image"
+            description="Get AI analysis"
+            onClick={() => navigate('/patient/upload')}
+            color="green"
+          />
+          <QuickActionCard
+            icon={FileText}
+            title="My Records"
+            description="View scan history"
+            onClick={() => navigate('/patient/records')}
+            color="purple"
+          />
+          <QuickActionCard
+            icon={Star}
+            title="Top Doctors"
+            description="Find specialists"
+            onClick={() => navigate('/top-doctors')}
+            color="orange"
+          />
         </div>
       </div>
+
+      {/* Dashboard Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">        {/* Recent Appointments */}
+        <Card>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Appointments</h3>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate('/patient/appointments')}
+            >
+              View All
+            </Button>
+          </div>
+          <div className="space-y-3">
+            {recentAppointments.length > 0 ? (
+              recentAppointments.map((appointment, index) => (
+                <div key={index} className="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div className="flex-shrink-0 w-10 h-10 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center mr-3">
+                    <Heart className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>                  <div className="flex-1">
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {appointment.doctorname || 'Unknown Doctor'}
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {formatDate(appointment.appointment_date)}
+                    </p>
+                  </div>
+                  <span className={`px-2 py-1 text-xs rounded-full ${
+                    appointment.status === 'accepted' 
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                      : appointment.status === 'pending'
+                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
+                      : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+                  }`}>
+                    {appointment.status || 'pending'}
+                  </span>
+                </div>
+              ))            ) : (
+              <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+                No appointments available
+              </p>
+            )}
+          </div>
+        </Card>
+
+        {/* Recent Records */}
+        <Card>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Scan Records</h3>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate('/patient/records')}
+            >
+              View All
+            </Button>
+          </div>
+          <div className="space-y-3">
+            {recentRecords.length > 0 ? (
+              recentRecords.map((record, index) => (
+                <div key={index} className="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div className="flex-shrink-0 w-10 h-10 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center mr-3">
+                    <FileText className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  </div>                  <div className="flex-1">
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {record.test_result || 'Skin Analysis'}
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {formatDate(record.test_date)}
+                    </p>
+                  </div>
+                  <span className={`px-2 py-1 text-xs rounded-full ${
+                    record.test_result === 'normal' || record.test_result === 'nev'
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                      : record.test_result === 'bkl' || record.test_result === 'bcc'
+                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
+                      : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                  }`}>
+                    {record.test_result || 'analyzed'}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+                No scan records available
+              </p>
+            )}
+          </div>
+        </Card>
+      </div>
+
+      {/* Health Tips */}
+      <Card>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Skin Health Tips</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            <h4 className="font-medium text-blue-900 dark:text-blue-300 mb-2">Daily Protection</h4>
+            <p className="text-sm text-blue-700 dark:text-blue-400">
+              Apply sunscreen with SPF 30+ daily, even on cloudy days.
+            </p>
+          </div>
+          <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+            <h4 className="font-medium text-green-900 dark:text-green-300 mb-2">Regular Checks</h4>
+            <p className="text-sm text-green-700 dark:text-green-400">
+              Examine your skin monthly for any changes in moles or spots.
+            </p>
+          </div>
+          <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+            <h4 className="font-medium text-purple-900 dark:text-purple-300 mb-2">Stay Hydrated</h4>
+            <p className="text-sm text-purple-700 dark:text-purple-400">
+              Drink plenty of water and moisturize regularly.
+            </p>
+          </div>
+        </div>
+      </Card>
     </div>
   );
 };
