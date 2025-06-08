@@ -1,36 +1,154 @@
-import React, { useEffect, useState } from 'react';
-import { Users, Search, Filter, PlusCircle, Edit, Trash2, MoreVertical } from 'lucide-react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Users, Search, Filter, PlusCircle, Edit, Trash2, MoreVertical, UserCheck, UserX, AlertTriangle } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Avatar from '../../components/ui/Avatar';
 import useAuthStore from '../../store/auth-store';
+import { getAllUsersInfo, getUserInfoByRole, getUserInfoById, getRecordsByUserId, suspendUser, acceptDoctor, getNotAcceptedDoctors, removeRecordByImageId } from '../../api/admin';
 
 const AdminUsers = () => {
-  const { user: currentAuthUser } = useAuthStore();
+  const { user: currentAuthUser, token } = useAuthStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [showUserModal, setShowUserModal] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('all');  const [showUserModal, setShowUserModal] = useState(false);
+  const [showUserDetailsModal, setShowUserDetailsModal] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [userDetails, setUserDetails] = useState(null);
+  const [userRecords, setUserRecords] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   
-  // Mock users data - will be replaced with actual API calls
-  const [users] = useState([
-    { id: 1, firstName: 'John', lastName: 'Doe', email: 'john@example.com', role: 'patient', status: 'active' },
-    { id: 2, firstName: 'Jane', lastName: 'Smith', email: 'jane@example.com', role: 'doctor', status: 'active' },
-    { id: 3, firstName: 'Admin', lastName: 'User', email: 'admin@example.com', role: 'admin', status: 'active' }
-  ]);
-  
-  useEffect(() => {
-    // Future: Load users from API
-    if (currentAuthUser?.id) {
-      setIsLoading(true);
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 1000);
+  // Real users data from API
+  const [users, setUsers] = useState([]);
+  const [pendingDoctors, setPendingDoctors] = useState([]);
+  // Load users data from API
+  const loadUsersData = useCallback(async () => {
+    if (!token) return;
+    
+    setIsLoading(true);
+    try {
+      let userData = [];
+      
+      if (roleFilter === 'all') {
+        userData = await getAllUsersInfo(token);
+      } else {
+        userData = await getUserInfoByRole(roleFilter, token);
+      }      // Get pending doctors (doctors with acception: false)
+      const pendingDoctorsData = await getNotAcceptedDoctors(false, token);
+      
+      // Format pending doctors data
+      const formattedPendingDoctors = Array.isArray(pendingDoctorsData) ? pendingDoctorsData.map(doctor => ({
+        id: doctor.doctor_id,
+        name: doctor.name,
+        email: doctor.email || '',
+        rating: doctor.rating_avg || 0,
+        isAccepted: doctor.acception
+      })) : [];
+        setPendingDoctors(formattedPendingDoctors);
+
+      // Create a set of pending doctor IDs for quick lookup
+      const pendingDoctorIds = new Set(formattedPendingDoctors.map(doc => doc.id));
+
+      // Format user data to match expected structure
+      const formattedUsers = Array.isArray(userData) ? userData.map(user => {
+        const userId = user.user_id || user.id;
+        const isDoctor = user.role === 'doctor';
+        const isPendingDoctor = isDoctor && pendingDoctorIds.has(userId);
+        
+        return {
+          id: userId,
+          firstName: user.name ? user.name.split(' ')[0] : '',
+          lastName: user.name ? user.name.split(' ').slice(1).join(' ') : '',
+          email: user.email || '',
+          role: user.role || 'patient',
+          status: user.suspension ? 'suspended' : (isPendingDoctor ? 'pending' : 'active'),
+          createdAt: user.signup_date,
+          isAccepted: isDoctor ? !isPendingDoctor : true // Doctors are accepted if not in pending list
+        };
+      }) : [];
+
+      setUsers(formattedUsers);
+    } catch (error) {
+      console.error('Error loading users:', error);
+      setUsers([]);
+    } finally {
+      setIsLoading(false);
     }
-  }, [currentAuthUser?.id]);
+  }, [token, roleFilter]);
+    useEffect(() => {
+    // Load users from API
+    if (currentAuthUser?.id && token) {
+      loadUsersData();
+    }
+  }, [currentAuthUser?.id, token, roleFilter, loadUsersData]);
+  // Handle user suspension
+  const handleSuspendUser = async (userId) => {
+    if (window.confirm('Are you sure you want to suspend this user?')) {
+      try {
+        await suspendUser(userId, token);
+        // Reload users data
+        loadUsersData();
+      } catch (error) {
+        console.error('Error suspending user:', error);
+        alert('Failed to suspend user');
+      }
+    }
+  };
+  // Handle doctor acceptance
+  const handleAcceptDoctor = async (doctorId) => {
+    try {
+      await acceptDoctor(doctorId, token);
+      // Reload users data
+      loadUsersData();
+    } catch (error) {
+      console.error('Error accepting doctor:', error);
+      alert('Failed to accept doctor');
+    }
+  };
+
+  // Handle deleting user record
+  const handleDeleteUserRecord = async (recordId) => {
+    if (window.confirm('Are you sure you want to delete this user record?')) {
+      try {
+        await removeRecordByImageId(recordId, token);
+        // Reload users data
+        loadUsersData();
+        alert('User record deleted successfully');
+      } catch (error) {
+        console.error('Error deleting user record:', error);
+        alert('Failed to delete user record');
+      }
+    }
+  };
+  // Handle viewing user details
+  const handleViewUserDetails = async (user) => {
+    try {
+      setIsLoading(true);
+      const details = await getUserInfoById(user.id, token);
+      const records = await getRecordsByUserId(user.id, token);
+      
+      // Format the details to match our expected structure
+      const formattedDetails = {
+        id: details.user_id || details.id,
+        name: details.name,
+        email: details.email,
+        role: details.role,
+        signupDate: details.signup_date,
+        suspension: details.suspension,
+        ...details // Include any additional fields
+      };
+      
+      setUserDetails(formattedDetails);
+      setUserRecords(Array.isArray(records) ? records : []);
+      setCurrentUser(user);
+      setShowUserDetailsModal(true);
+    } catch (error) {
+      console.error('Error loading user details:', error);
+      alert('Failed to load user details');
+    } finally {
+      setIsLoading(false);
+    }
+  };
     // Handle user creation/update - placeholder functions will be integrated with API later
   
   // Filter users based on search term, role filter, and status filter
@@ -44,20 +162,11 @@ const AdminUsers = () => {
     
     return matchesSearch && matchesRole && matchesStatus;
   });
-  
-  // Handle opening modal for creating or editing users
+    // Handle opening modal for creating or editing users
   const handleOpenUserModal = (user = null) => {
     setCurrentUser(user);
     setShowUserModal(true);
   };
-    // Handle user deletion
-  const handleDeleteUser = (userId) => {
-    if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-      console.log('Deleting user:', userId);
-      // Future: API call to delete user
-    }
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -69,7 +178,64 @@ const AdminUsers = () => {
         <Button onClick={() => handleOpenUserModal()}>
           <PlusCircle className="mr-2 h-4 w-4" /> Add New User
         </Button>
-      </div>
+      </div>      {/* Pending Doctors Alert */}
+      {pendingDoctors.length > 0 && (
+        <Card className="border-l-4 border-l-warning-500 bg-warning-50 dark:bg-warning-900/10">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <AlertTriangle className="h-5 w-5 text-warning-600" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-warning-900 dark:text-warning-100">
+                  {pendingDoctors.length} doctor{pendingDoctors.length > 1 ? 's' : ''} awaiting approval
+                </p>
+                <p className="text-xs text-warning-700 dark:text-warning-300">
+                  Review and approve pending doctor registrations
+                </p>
+              </div>
+            </div>
+            
+            {/* Pending Doctors List */}
+            <div className="space-y-2">
+              {pendingDoctors.map((doctor) => (
+                <div key={doctor.id} className="flex items-center justify-between bg-white dark:bg-neutral-800 rounded-md p-3 border border-warning-200 dark:border-warning-800">
+                  <div className="flex items-center space-x-3">
+                    <Avatar 
+                      fallback={doctor.name ? doctor.name.split(' ').map(n => n[0]).join('') : 'D'}
+                      className="h-8 w-8"
+                    />
+                    <div>
+                      <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                        {doctor.name}
+                      </p>
+                      <p className="text-xs text-neutral-600 dark:text-neutral-400">
+                        {doctor.email}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button 
+                      size="sm" 
+                      className="bg-success-600 hover:bg-success-700 text-white"
+                      onClick={() => handleAcceptDoctor(doctor.id)}
+                    >
+                      <UserCheck className="h-3 w-3 mr-1" />
+                      Approve
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="text-error-600 border-error-300 hover:bg-error-50"
+                    >
+                      <UserX className="h-3 w-3 mr-1" />
+                      Reject
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Card>
+      )}
       
       {/* Filters and Search */}
       <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:space-x-4 sm:space-y-0">
@@ -82,10 +248,9 @@ const AdminUsers = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-        </div>
-        <div className="flex flex-wrap gap-3">
+        </div>        <div className="flex flex-wrap gap-3">
           <select
-            className="rounded-md border border-neutral-300 bg-white py-2 pl-3 pr-8 text-sm dark:border-neutral-700 dark:bg-neutral-800"
+            className="rounded-md border border-neutral-300 bg-white py-2 pl-3 pr-8 text-sm text-neutral-900 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100"
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
           >
@@ -96,7 +261,7 @@ const AdminUsers = () => {
           </select>
           
           <select
-            className="rounded-md border border-neutral-300 bg-white py-2 pl-3 pr-8 text-sm dark:border-neutral-700 dark:bg-neutral-800"
+            className="rounded-md border border-neutral-300 bg-white py-2 pl-3 pr-8 text-sm text-neutral-900 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
           >
@@ -154,43 +319,75 @@ const AdminUsers = () => {
                       }`}>
                         {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                       </span>
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-3">
+                    </td>                    <td className="whitespace-nowrap px-4 py-3">
                       <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                         user.status === 'active' ? 'bg-success-50 text-success-700 dark:bg-success-900/30 dark:text-success-400' : 
-                        user.status === 'pending' ? 'bg-warning-50 text-warning-700 dark:bg-warning-900/30 dark:text-warning-400' : 
-                        'bg-error-50 text-error-700 dark:bg-error-900/30 dark:text-error-400'
+                        user.status === 'suspended' ? 'bg-error-50 text-error-700 dark:bg-error-900/30 dark:text-error-400' :
+                        (user.role === 'doctor' && !user.isAccepted) ? 'bg-warning-50 text-warning-700 dark:bg-warning-900/30 dark:text-warning-400' : 
+                        'bg-neutral-50 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-400'
                       }`}>
-                        {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+                        {user.role === 'doctor' && !user.isAccepted ? 'Pending' : user.status.charAt(0).toUpperCase() + user.status.slice(1)}
                       </span>
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-neutral-600 dark:text-neutral-400">
-                      {new Date(user.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-3">
+                    </td><td className="whitespace-nowrap px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                      {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                    </td>                    <td className="whitespace-nowrap px-4 py-3">
                       <div className="flex items-center space-x-2">
+                        {/* View Details button */}
                         <Button 
-                          variant="ghost" 
-                          size="icon"
-                          className="h-8 w-8 text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+                          variant="outline" 
+                          size="sm"
+                          className="text-blue-600 hover:text-blue-700 border-blue-300 hover:bg-blue-50"
+                          onClick={() => handleViewUserDetails(user)}
+                        >
+                          <Users className="h-3 w-3 mr-1" />
+                          Details
+                        </Button>
+                        
+                        {/* Doctor acceptance button for pending doctors */}
+                        {user.role === 'doctor' && !user.isAccepted && (
+                          <Button 
+                            variant="outline"
+                            size="sm"
+                            className="border-success-500 bg-success-50 text-success-700 hover:bg-success-100 hover:text-success-800 dark:border-success-400 dark:bg-success-900/20 dark:text-success-400 dark:hover:bg-success-900/30"
+                            onClick={() => handleAcceptDoctor(user.id)}
+                          >
+                            <UserCheck className="h-3 w-3 mr-1" />
+                            Accept
+                          </Button>
+                        )}
+                        
+                        {/* Suspend user button */}
+                        {user.status !== 'suspended' && user.id !== currentAuthUser?.id && (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="border-warning-500 bg-warning-50 text-warning-700 hover:bg-warning-100 hover:text-warning-800 dark:border-warning-400 dark:bg-warning-900/20 dark:text-warning-400 dark:hover:bg-warning-900/30"
+                            onClick={() => handleSuspendUser(user.id)}
+                          >
+                            <UserX className="h-3 w-3 mr-1" />
+                            Suspend
+                          </Button>
+                        )}
+                          {/* Edit button */}
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="border-neutral-300 bg-neutral-50 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-800 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
                           onClick={() => handleOpenUserModal(user)}
                         >
-                          <Edit className="h-4 w-4" />
+                          <Edit className="h-3 w-3 mr-1" />
+                          Edit
                         </Button>
+
+                        {/* Delete button */}
                         <Button 
-                          variant="ghost" 
-                          size="icon"
-                          className="h-8 w-8 text-neutral-600 hover:text-error-600 dark:text-neutral-400 dark:hover:text-error-400"
-                          onClick={() => handleDeleteUser(user.id)}
+                          variant="outline" 
+                          size="sm"
+                          className="border-error-500 bg-error-50 text-error-700 hover:bg-error-100 hover:text-error-800 dark:border-error-400 dark:bg-error-900/20 dark:text-error-400 dark:hover:bg-error-900/30"
+                          onClick={() => handleDeleteUserRecord(user.id)}
                         >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
-                        >
-                          <MoreVertical className="h-4 w-4" />
+                          <Trash2 className="h-3 w-3 mr-1" />
+                          Delete
                         </Button>
                       </div>
                     </td>
@@ -252,6 +449,76 @@ const AdminUsers = () => {
               </Button>
               <Button>
                 {currentUser ? 'Update User' : 'Create User'}
+              </Button>
+            </div>
+          </Card>
+        </div>      )}
+      
+      {/* User Details Modal */}
+      {showUserDetailsModal && currentUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">
+                User Details: {currentUser.firstName} {currentUser.lastName}
+              </h2>
+              <Button variant="ghost" onClick={() => setShowUserDetailsModal(false)}>
+                ×
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">              {/* User Information */}
+              <div>
+                <h3 className="text-lg font-medium text-neutral-900 dark:text-neutral-100 mb-3">
+                  User Information
+                </h3>
+                {userDetails ? (
+                  <div className="space-y-2 text-sm">
+                    <p><span className="font-medium">ID:</span> {userDetails.id}</p>
+                    <p><span className="font-medium">Name:</span> {userDetails.name}</p>
+                    <p><span className="font-medium">Email:</span> {userDetails.email}</p>
+                    <p><span className="font-medium">Role:</span> {userDetails.role}</p>
+                    <p><span className="font-medium">Status:</span> {userDetails.suspension ? 'Suspended' : 'Active'}</p>
+                    <p><span className="font-medium">Signup Date:</span> {userDetails.signupDate ? new Date(userDetails.signupDate).toLocaleDateString() : 'N/A'}</p>
+                    {userDetails.role === 'doctor' && (
+                      <p><span className="font-medium">Accepted:</span> {currentUser.isAccepted ? 'Yes' : 'No'}</p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">Loading user details...</p>
+                )}
+              </div>
+                {/* User Records */}
+              <div>
+                <h3 className="text-lg font-medium text-neutral-900 dark:text-neutral-100 mb-3">
+                  User Records ({userRecords.length})
+                </h3>
+                {userRecords.length > 0 ? (
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {userRecords.map((record, index) => {
+                      const recordInfo = record.records_info || record;
+                      return (
+                        <div key={recordInfo.img_id || index} className="p-3 border border-neutral-200 dark:border-neutral-700 rounded-md">
+                          <p className="text-sm"><span className="font-medium">Record #{recordInfo.img_id || index + 1}</span></p>
+                          <p className="text-xs text-neutral-600 dark:text-neutral-400">
+                            {recordInfo.test_date ? new Date(recordInfo.test_date).toLocaleDateString() : 'Date N/A'}
+                          </p>
+                          {recordInfo.test_result && (
+                            <p className="text-xs"><span className="font-medium">Diagnosis:</span> {recordInfo.test_result.toUpperCase()}</p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">No records found for this user.</p>
+                )}
+              </div>
+            </div>
+            
+            <div className="mt-6 flex justify-end">
+              <Button variant="outline" onClick={() => setShowUserDetailsModal(false)}>
+                Close
               </Button>
             </div>
           </Card>

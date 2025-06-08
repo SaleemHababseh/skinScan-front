@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, LogOut, User, Settings } from 'lucide-react';
+import { Menu, X, LogOut, User } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import ThemeToggle from '../ui/ThemeToggle';
 import useAuthStore from '../../store/auth-store';
@@ -69,7 +69,6 @@ const Navbar = () => {
       return [
         ...commonLinks,
         { name: 'Dashboard', href: '/doctor/dashboard' },
-        { name: 'Patients', href: '/doctor/patients' },
         { name: 'Appointments', href: '/doctor/appointments' },
       ];
     }
@@ -157,13 +156,7 @@ const Navbar = () => {
                     <User className="mr-2 h-4 w-4" />
                     Profile
                   </Link>
-                  <Link
-                    to="/settings"
-                    className="flex w-full items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-700"
-                  >
-                    <Settings className="mr-2 h-4 w-4" />
-                    Settings
-                  </Link>
+                 
                   <button
                     onClick={handleLogout}
                     className="flex w-full items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-700"

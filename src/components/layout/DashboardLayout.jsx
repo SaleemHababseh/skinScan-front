@@ -5,13 +5,14 @@ import {
   Calendar,
   Users,
   FileText,
-  Settings,
+ 
   HelpCircle,
   Clipboard,
   Grid,
   Activity,
   User,
-  BarChart
+  BarChart,
+  Upload
 } from 'lucide-react';
 import useAuthStore from '../../store/auth-store';
 import Navbar from './Navbar';
@@ -55,16 +56,13 @@ const DashboardLayout = ({ children }) => {
         { name: 'Medical News', href: '/news', icon: Activity },
         { name: 'Profile', href: '/profile', icon: User },
       ];
-    }
-    
-    if (user?.role === 'doctor') {
+    }    if (user?.role === 'doctor') {
       return [
         { name: 'Dashboard', href: '/doctor/dashboard', icon: Home },
-        { name: 'Patients', href: '/doctor/patients', icon: Users },
         { name: 'Appointments', href: '/doctor/appointments', icon: Calendar },
-        { name: 'Medical Reports', href: '/doctor/reports', icon: FileText },
+        { name: 'Diagnoses', href: '/doctor/diagnoses', icon: FileText },
+        { name: 'Upload Image', href: '/doctor/upload', icon: Upload },
         { name: 'Profile', href: '/profile', icon: User },
-        { name: 'Settings', href: '/settings', icon: Settings },
       ];
     }
     
@@ -75,7 +73,6 @@ const DashboardLayout = ({ children }) => {
         { name: 'Reports', href: '/admin/reports', icon: FileText },
         { name: 'Logs', href: '/admin/logs', icon: Activity },
         { name: 'Statistics', href: '/admin/statistics', icon: BarChart },
-        { name: 'Settings', href: '/admin/settings', icon: Settings },
       ];
     }
     

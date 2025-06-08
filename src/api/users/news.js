@@ -26,7 +26,7 @@ const getNews = async ({ token }) => {
 
 // // Example usage:
 // getNews({
-//   token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJKb2huIiwiaWQiOjEwLCJyb2xlIjoicGF0aWVudCIsImV4cCI6MTc0NTUyNjkzMX0.IhVCSzTtfCk0H2xx5B1plhpu8lfRdKW9BBOLKv1u13A"
+//   token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtYWhtb3VkIHp1cmlxaSIsImlkIjo1LCJyb2xlIjoicGF0aWVudCIsImV4cCI6MTc0OTMxNzM1OX0.Qik4aqE03DrnWJO7QOFk90mvNohho3VRhYvriLmvFCU"
 // }).then(data => {
 //   console.log("✅ News fetched successfully:");
 //   console.log(data.keys());

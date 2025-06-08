@@ -3,7 +3,15 @@ export const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Format date
 export const formatDate = (dateString) => {
+  if (!dateString) return 'No date';
+  
   const date = new Date(dateString);
+  
+  // Check if the date is valid
+  if (isNaN(date.getTime())) {
+    return 'Invalid date';
+  }
+  
   return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'short',
@@ -15,7 +23,15 @@ export const formatDate = (dateString) => {
 
 // Format relative time (e.g., "2 hours ago")
 export const formatRelativeTime = (dateString) => {
+  if (!dateString) return 'No date';
+  
   const date = new Date(dateString);
+  
+  // Check if the date is valid
+  if (isNaN(date.getTime())) {
+    return 'Invalid date';
+  }
+  
   const now = new Date();
   const diffInSeconds = Math.floor((now - date) / 1000);
   

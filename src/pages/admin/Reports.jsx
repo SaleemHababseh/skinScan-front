@@ -1,46 +1,112 @@
-import React, { useEffect, useState } from 'react';
-import { Calendar, BarChart2, PieChart, LineChart, Download, Filter, RefreshCw } from 'lucide-react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Calendar, BarChart2, PieChart, LineChart, Download, Filter, RefreshCw, AlertTriangle, Users, FileText } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import useAuthStore from '../../store/auth-store';
 import useAppointmentsStore from '../../store/appointments-store';
+import { getAllUsersInfo, getUserInfoByRole, getAllRecords, getReportsByStatus } from '../../api/admin';
 
 const AdminReports = () => {
-  const { user } = useAuthStore();
+  const { user, token } = useAuthStore();
   const { appointments } = useAppointmentsStore();
   const [dateRange, setDateRange] = useState('last30days');
   const [reportType, setReportType] = useState('all');
+  const [reportStatus, setReportStatus] = useState('all');
   const [isLoading, setIsLoading] = useState(false);
   
-  // Mock reports data - will be replaced with actual API calls
-  const [reports] = useState({
-    userStats: { total: 1250, active: 1180, new: 45 },
-    appointmentStats: { total: appointments?.length || 0, completed: 240, cancelled: 15 },
-    diagnosisStats: { total: 2850, completed: 2750, pending: 100 }
+  // Real reports data from API
+  const [reports, setReports] = useState({
+    userStats: { total: 0, doctors: 0, patients: 0, admins: 0 },
+    appointmentStats: { total: appointments?.length || 0, completed: 0, cancelled: 0 },
+    diagnosisStats: { total: 0, completed: 0, pending: 0 },
+    systemReports: { pending: 0, inProgress: 0, resolved: 0 }
   });
-  
-  useEffect(() => {
-    // Future: Load reports from API
-    if (user?.id) {
-      setIsLoading(true);
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 1000);
+
+  const [detailedReports, setDetailedReports] = useState([]);
+  // Load reports data from APIs
+  const loadReportsData = useCallback(async () => {
+    if (!token) return;
+    
+    setIsLoading(true);
+    try {
+      // Get all users
+      const allUsers = await getAllUsersInfo(token);
+      
+      // Get users by role
+      const doctors = await getUserInfoByRole('doctor', token);
+      const patients = await getUserInfoByRole('patient', token);
+      const admins = await getUserInfoByRole('admin', token);
+      
+      // Get all records for diagnoses
+      const allRecords = await getAllRecords(token);
+      
+      // Get reports by status
+      const pendingReports = await getReportsByStatus('pending', token);
+      const inProgressReports = await getReportsByStatus('in progress', token);
+      const resolvedReports = await getReportsByStatus('resolved', token);      // Update stats
+      setReports({
+        userStats: {
+          total: Array.isArray(allUsers) ? allUsers.length : 0,
+          doctors: Array.isArray(doctors) ? doctors.length : 0,
+          patients: Array.isArray(patients) ? patients.length : 0,
+          admins: Array.isArray(admins) ? admins.length : 0
+        },
+        appointmentStats: {
+          total: appointments?.length || 0,
+          completed: 0, // This would need appointment status data
+          cancelled: 0  // This would need appointment status data
+        },
+        diagnosisStats: {
+          total: Array.isArray(allRecords) ? allRecords.length : 0,
+          completed: Array.isArray(allRecords) ? allRecords.length : 0, // Assuming all records are completed
+          pending: 0
+        },
+        systemReports: {
+          pending: Array.isArray(pendingReports) ? pendingReports.length : 0,
+          inProgress: Array.isArray(inProgressReports) ? inProgressReports.length : 0,
+          resolved: Array.isArray(resolvedReports) ? resolvedReports.length : 0
+        }
+      });
+
+      // Set detailed reports based on current filter
+      let currentReports = [];
+      if (reportStatus === 'pending') {
+        currentReports = pendingReports;
+      } else if (reportStatus === 'in progress') {
+        currentReports = inProgressReports;
+      } else if (reportStatus === 'resolved') {
+        currentReports = resolvedReports;
+      } else {
+        // Combine all reports
+        currentReports = [
+          ...(Array.isArray(pendingReports) ? pendingReports : []),
+          ...(Array.isArray(inProgressReports) ? inProgressReports : []),
+          ...(Array.isArray(resolvedReports) ? resolvedReports : [])
+        ];
+      }
+        setDetailedReports(Array.isArray(currentReports) ? currentReports : []);
+
+    } catch (error) {
+      console.error('Error loading reports data:', error);
+    } finally {
+      setIsLoading(false);
     }
-  }, [user?.id, dateRange, reportType]);
+  }, [token, appointments?.length, reportStatus]);
+
+  useEffect(() => {
+    // Load reports from API
+    if (user?.id && token) {
+      loadReportsData();
+    }
+  }, [user?.id, token, loadReportsData]);
   
   // Handle report download
   const handleDownloadReport = (format) => {
     alert(`Downloading ${reportType} report in ${format} format...`);
     // Actual download implementation would be here
-  };
-    // Handle report refresh
+  };  // Handle report refresh
   const handleRefreshReport = () => {
-    setIsLoading(true);
-    // Future: Reload reports from API
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
+    loadReportsData();
   };
 
   return (
@@ -96,8 +162,7 @@ const AdminReports = () => {
           <option value="thisYear">This Year</option>
           <option value="custom">Custom Range</option>
         </select>
-        
-        <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2">
           <BarChart2 className="h-4 w-4 text-neutral-500" />
           <span className="text-sm text-neutral-700 dark:text-neutral-300">Report Type:</span>
         </div>
@@ -112,9 +177,23 @@ const AdminReports = () => {
           <option value="appointments">Appointment Reports</option>
           <option value="system">System Reports</option>
         </select>
+        
+        <div className="flex items-center space-x-2">
+          <FileText className="h-4 w-4 text-neutral-500" />
+          <span className="text-sm text-neutral-700 dark:text-neutral-300">Report Status:</span>
+        </div>
+        <select
+          className="rounded-md border border-neutral-300 bg-white py-2 pl-3 pr-8 text-sm dark:border-neutral-700 dark:bg-neutral-800"
+          value={reportStatus}
+          onChange={(e) => setReportStatus(e.target.value)}
+        >
+          <option value="all">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="in progress">In Progress</option>
+          <option value="resolved">Resolved</option>
+        </select>
       </div>
-      
-      {/* Reports Summary */}
+        {/* Reports Summary */}
       {isLoading ? (
         <div className="flex h-64 items-center justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-500 border-t-transparent"></div>
@@ -123,50 +202,52 @@ const AdminReports = () => {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
           <Card className="bg-primary-50 dark:bg-transparent dark:border dark:border-primary-900">
             <div>
-              <h3 className="text-sm font-medium text-primary-700 dark:text-primary-400">New Users</h3>
+              <h3 className="text-sm font-medium text-primary-700 dark:text-primary-400">Total Users</h3>
               <p className="mt-1 text-2xl font-bold text-primary-900 dark:text-primary-50">
-                {reports?.userStats?.newUsers || 0}
+                {reports?.userStats?.total || 0}
               </p>
               <p className="mt-1 text-xs text-primary-700 dark:text-primary-400">
-                <span className={reports?.userStats?.growth >= 0 ? 'text-success-600 dark:text-success-400' : 'text-error-600 dark:text-error-400'}>
-                  {reports?.userStats?.growth >= 0 ? '↑' : '↓'} {Math.abs(reports?.userStats?.growth || 0)}%
-                </span>
-                {' '}vs previous period
+                Doctors: {reports?.userStats?.doctors || 0} | Patients: {reports?.userStats?.patients || 0}
               </p>
             </div>
           </Card>
           
           <Card className="bg-secondary-50 dark:bg-transparent dark:border dark:border-secondary-900">
             <div>
-              <h3 className="text-sm font-medium text-secondary-700 dark:text-secondary-400">Diagnoses</h3>
+              <h3 className="text-sm font-medium text-secondary-700 dark:text-secondary-400">Total Diagnoses</h3>
               <p className="mt-1 text-2xl font-bold text-secondary-900 dark:text-secondary-50">
-                {reports?.diagnosisStats?.totalDiagnoses || 0}
+                {reports?.diagnosisStats?.total || 0}
               </p>
               <p className="mt-1 text-xs text-secondary-700 dark:text-secondary-400">
-                <span className={reports?.diagnosisStats?.growth >= 0 ? 'text-success-600 dark:text-success-400' : 'text-error-600 dark:text-error-400'}>
-                  {reports?.diagnosisStats?.growth >= 0 ? '↑' : '↓'} {Math.abs(reports?.diagnosisStats?.growth || 0)}%
-                </span>
-                {' '}vs previous period
+                Completed: {reports?.diagnosisStats?.completed || 0} | Pending: {reports?.diagnosisStats?.pending || 0}
               </p>
             </div>
           </Card>
           
           <Card className="bg-success-50 dark:bg-transparent dark:border dark:border-success-900">
             <div>
-              <h3 className="text-sm font-medium text-success-700 dark:text-success-400">Appointments</h3>
+              <h3 className="text-sm font-medium text-success-700 dark:text-success-400">Total Appointments</h3>
               <p className="mt-1 text-2xl font-bold text-success-900 dark:text-success-50">
-                {reports?.appointmentStats?.totalAppointments || 0}
+                {reports?.appointmentStats?.total || 0}
               </p>
               <p className="mt-1 text-xs text-success-700 dark:text-success-400">
-                <span className={reports?.appointmentStats?.growth >= 0 ? 'text-success-600 dark:text-success-400' : 'text-error-600 dark:text-error-400'}>
-                  {reports?.appointmentStats?.growth >= 0 ? '↑' : '↓'} {Math.abs(reports?.appointmentStats?.growth || 0)}%
-                </span>
-                {' '}vs previous period
+                Completed: {reports?.appointmentStats?.completed || 0} | Cancelled: {reports?.appointmentStats?.cancelled || 0}
               </p>
             </div>
           </Card>
           
-          <Card className="bg-neutral-50 dark:bg-transparent dark:border dark:border-neutral-700">
+          <Card className="bg-warning-50 dark:bg-transparent dark:border dark:border-warning-900">
+            <div>
+              <h3 className="text-sm font-medium text-warning-700 dark:text-warning-400">System Reports</h3>
+              <p className="mt-1 text-2xl font-bold text-warning-900 dark:text-warning-50">
+                {(reports?.systemReports?.pending || 0) + (reports?.systemReports?.inProgress || 0) + (reports?.systemReports?.resolved || 0)}
+              </p>
+              <p className="mt-1 text-xs text-warning-700 dark:text-warning-400">
+                Pending: {reports?.systemReports?.pending || 0} | Resolved: {reports?.systemReports?.resolved || 0}
+              </p>            </div>
+          </Card>
+          
+          <Card className="bg-neutral-50 dark:bg-transparent dark:border dark:border-neutral-800">
             <div>
               <h3 className="text-sm font-medium text-neutral-700 dark:text-neutral-400">Average Response Time</h3>
               <p className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-50">

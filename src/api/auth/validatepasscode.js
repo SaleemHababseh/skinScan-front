@@ -1,17 +1,14 @@
-import { baseURL } from "../config.js"; // Adjust the path if needed
+import { baseURL } from "../config.js";
 
 export const validatePassCode = async ({ email, validate_code, new_password }) => {
     try {
-        const response = await fetch(`${baseURL}auth/validatePassCode`, {
-            method: "POST",
+        const response = await fetch(`${baseURL}users/info/update-forget-password?new_password=${new_password}&email=${email}`, {
+            method: "PUT",
             headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                email,
-                validate_code,
-                new_password
-            })
+                "Content-Type": "application/json",
+                "ngrok-skip-browser-warning": "true",
+
+            }
         });
 
         const data = await response.json();
