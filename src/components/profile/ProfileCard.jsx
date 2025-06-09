@@ -67,6 +67,7 @@ const ProfileCard = ({
             <p className="text-sm text-neutral-600 dark:text-neutral-400">
               {profileData.bio || 'No bio added yet.'}
             </p>
+        
           </div>
         )}
       </div>

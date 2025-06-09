@@ -10,7 +10,7 @@ const AuthErrorDisplay = ({
   if (!error) return null;
 
   const getErrorIcon = () => {
-    if (error.includes('Network') || error.includes('connection')) {
+    if (error.includes('🌐') || error.includes('Network') || error.includes('connection')) {
       return (
         <svg className="w-12 h-12 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
@@ -18,9 +18,9 @@ const AuthErrorDisplay = ({
       );
     }
     
-    if (error.includes('expired') || error.includes('session')) {
+    if (error.includes('🔐') || error.includes('expired') || error.includes('session')) {
       return (
-        <svg className="w-12 h-12 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-12 h-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 0h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
         </svg>
       );
@@ -34,11 +34,11 @@ const AuthErrorDisplay = ({
   };
 
   const getErrorTitle = () => {
-    if (error.includes('Network') || error.includes('connection')) {
+    if (error.includes('🌐') || error.includes('Network') || error.includes('connection')) {
       return "Connection Problem";
     }
     
-    if (error.includes('expired') || error.includes('session')) {
+    if (error.includes('🔐') || error.includes('expired') || error.includes('session')) {
       return "Session Expired";
     }
     
@@ -50,13 +50,15 @@ const AuthErrorDisplay = ({
   };
 
   const shouldShowRetry = () => {
-    return error.includes('Network') || 
+    return (error.includes('🌐') || error.includes('Network') || 
            error.includes('Server error') || 
-           error.includes('try again');
+           error.includes('try again')) && 
+           !error.includes('🔐'); // Don't show retry for session expiration
   };
 
   const shouldShowLoginButton = () => {
-    return error.includes('expired') || 
+    return error.includes('🔐') || 
+           error.includes('expired') || 
            error.includes('session') || 
            error.includes('log in again');
   };

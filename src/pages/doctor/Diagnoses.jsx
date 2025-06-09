@@ -80,8 +80,8 @@ const DoctorDiagnoses = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Patient Diagnoses</h1>
-        <p className="mt-1 text-neutral-600 dark:text-neutral-400">Review and manage patient medical records and diagnoses</p>
+        <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Your Diagnoses</h1>
+        <p className="mt-1 text-neutral-600 dark:text-neutral-400">Review and manage medical records and diagnoses</p>
       </div>
 
       {/* Stats Cards */}

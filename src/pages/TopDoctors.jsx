@@ -3,8 +3,10 @@ import { Star, User, Calendar, MessageCircle } from 'lucide-react';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Avatar from '../components/ui/Avatar';
+import RatingModal from '../components/chat/RatingModal';
 import useUserStore from '../store/appointments-store';
 import useAuthStore from '../store/auth-store';
+import {useToast} from '../hooks/useToast';
 
 const TopDoctors = () => {
   const { 
@@ -18,6 +20,7 @@ const TopDoctors = () => {
   } = useUserStore();
 
   const { token } = useAuthStore();
+  const { showSuccess, showError } = useToast();
 
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [rating, setRating] = useState(0);
@@ -25,26 +28,26 @@ const TopDoctors = () => {
 
   useEffect(() => {
     fetchTopRatedDoctors(token);
-  }, [fetchTopRatedDoctors]);
+  }, [fetchTopRatedDoctors, token]);
 
   const handleBookAppointment = async (doctorId) => {
     if (!token) {
-      alert('Please login to book an appointment');
+      showError('Please login to book an appointment');
       return;
     }
     
     try {
       await createNewAppointment(doctorId, token);
-      alert('Appointment booked successfully!');
+      showSuccess('Appointment booked successfully!');
     } catch (err) {
       console.error('Error booking appointment:', err);
-      alert('Error booking appointment: ' + err.message);
+      showError('Error booking appointment: ' + err.message);
     }
   };
 
-  const handleRateDoctor = async () => {
+  const handleRateDoctor = async (rating) => {
     if (!token) {
-      alert('Please login to rate a doctor');
+      showError('Please login to rate a doctor');
       return;
     }
     
@@ -53,13 +56,12 @@ const TopDoctors = () => {
         await rateDoctorById(selectedDoctor.doctor_id, rating, token);
         setShowRatingModal(false);
         setSelectedDoctor(null);
-        setRating(0);
         // Refresh the list
         fetchTopRatedDoctors(token);
-        alert('Rating submitted successfully!');
+        showSuccess('Rating submitted successfully!');
       } catch (err) {
         console.error('Error rating doctor:', err);
-        alert('Error rating doctor: ' + err.message);
+        showError('Error rating doctor: ' + err.message);
       }
     }
   };
@@ -72,7 +74,6 @@ const TopDoctors = () => {
   const closeRatingModal = () => {
     setShowRatingModal(false);
     setSelectedDoctor(null);
-    setRating(0);
     clearError();
   };
 

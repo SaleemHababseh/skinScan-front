@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import useAuthStore from "../../store/auth-store";
 import AuthErrorDisplay from "../ui/AuthErrorDisplay";
+import { useToast } from "../../hooks/useToast";
 
 // Global refresh state to prevent multiple simultaneous refresh attempts
 let globalRefreshPromise = null;
@@ -27,6 +28,7 @@ const ProtectedRoute = ({
   redirectTo = "/auth/login",
 }) => {
   const { isAuthenticated, user, token, refreshToken } = useAuthStore();
+  const { showError, showWarning } = useToast();
   const location = useLocation();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [refreshAttempted, setRefreshAttempted] = useState(false);
@@ -56,7 +58,24 @@ const ProtectedRoute = ({
           await globalRefreshPromise;
         } catch (error) {
           console.error("Token refresh failed:", error.message);
-          setAuthError(error.shouldRedirectToLogin ? error.message : "Session expired. Please log in again.");
+          
+          // Show user-friendly toast message based on error type
+          if (error.isSessionExpired) {
+            showError("🔐 Your session has ended. Redirecting to login...", 4000);
+          } else if (error.message.includes("Network") || error.message.includes("connection")) {
+            showWarning("🌐 Connection issues detected. Please check your internet connection.", 5000);
+          } else {
+            showError("⚠️ Authentication issue. Please log in again.", 4000);
+          }
+          
+          // Set a more user-friendly error message for display
+          const displayMessage = error.isSessionExpired 
+            ? "🔐 Your session has ended. Please log in again to continue."
+            : error.shouldRedirectToLogin 
+            ? error.message 
+            : "Session expired. Please log in again.";
+            
+          setAuthError(displayMessage);
         } finally {
           setIsRefreshing(false);
           globalRefreshInProgress = false;
@@ -73,7 +92,7 @@ const ProtectedRoute = ({
     }, 100);
 
     return () => clearTimeout(timeoutId);
-  }, [token, refreshToken, refreshAttempted]);
+  }, [token, refreshToken, refreshAttempted, showError, showWarning]);
 
   // Show loading while refreshing token
   if (isRefreshing) {

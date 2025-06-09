@@ -7,6 +7,8 @@ import SecuritySettings from '../components/profile/SecuritySettings';
 import useAuthStore from '../store/auth-store';
 import { useToast } from '../hooks/useToast';
 import { baseURL } from '../api/config';
+import { getDoctorBio } from '../api/users/getDoctorBio';
+
 const Profile = () => {
   const { 
     user,
@@ -41,45 +43,56 @@ const Profile = () => {
 
   const loadUserInfo = useCallback(async () => {
     if (user?.id && !hasLoadedUserInfo) {
-      console.log(`loadUserInfo: Attempting to fetch for user ${user.id}. hasLoadedUserInfo: ${hasLoadedUserInfo}`);
       try {
         await fetchUserBasicInfo();
-        console.log('loadUserInfo: Fetch successful.');
         
-        // Set profile picture URL directly
+        let bioData = user.bio || '';
+        
+        // If user is a doctor, fetch doctor bio
+        if (user.role === 'doctor') {
+          try {
+            const doctorBioData = await getDoctorBio(user.id);
+            
+            // Use doctor bio if available
+            if (doctorBioData && (doctorBioData.Bio || doctorBioData.bio)) {
+              bioData = doctorBioData.Bio || doctorBioData.bio;
+            } else {
+              // Check if bio might be in a different property
+              if (doctorBioData && typeof doctorBioData === 'string') {
+                bioData = doctorBioData;
+              } else if (doctorBioData && doctorBioData.description) {
+                bioData = doctorBioData.description;
+              }
+            }
+          } catch {
+            // Don't fail the whole process if bio fetch fails
+          }
+        }
+        
+        // Set all profile data at once to avoid multiple state updates
         const avatarUrl = `${baseURL}users/get/user-profile-picture?user_id=${user.id}`;
-        console.log(`loadUserInfo: Setting avatarUrl to ${avatarUrl}`);
-        setProfileData(prev => ({
-          ...prev,
+        
+        setProfileData({
+          firstName: user.f_name || user.firstName || '',
+          lastName: user.l_name || user.lastName || '',
+          email: user.email || '',
+          bio: bioData,
           avatarUrl: avatarUrl
-        }));
-      } catch (error) {
-        console.error('loadUserInfo: Error loading user info:', error);
+        });
+        
+      } catch {
+        // Error loading user info
       } finally {
         // Set to true regardless of success or failure to prevent re-fetching due to this flag.
-        console.log('loadUserInfo: Setting hasLoadedUserInfo to true in finally block.');
         setHasLoadedUserInfo(true);
       }
     }
-  }, [user?.id, hasLoadedUserInfo, fetchUserBasicInfo]); // Corrected dependencies
+  }, [user?.id, user?.role, user?.bio, user?.email, user?.f_name, user?.firstName, user?.l_name, user?.lastName, hasLoadedUserInfo, fetchUserBasicInfo]);
 
   useEffect(() => {
     loadUserInfo();
   }, [loadUserInfo]);
   
-  useEffect(() => {
-    // Update form data when user changes
-    if (user) {
-      setProfileData({
-        firstName: user.f_name || user.firstName || '',
-        lastName: user.l_name || user.lastName || '',
-        email: user.email || '',
-        bio: user.bio || '',
-        avatarUrl: user.profilePicture || user.avatarUrl || ''
-      });
-    }
-  }, [user]);
-
   // Cleanup object URLs on unmount
   useEffect(() => {
     return () => {
@@ -126,8 +139,7 @@ const Profile = () => {
         setSelectedFile(null);
         
         showSuccess('Profile picture updated successfully');
-      } catch (err) {
-        console.error('Error uploading profile picture:', err);
+      } catch {
         showError('Failed to upload profile picture');
       }
     }
@@ -150,9 +162,8 @@ const Profile = () => {
       
       setIsEditing(false);
       showSuccess('Profile updated successfully');
-      window.location.reload();
-    } catch (err) {
-      console.error('Error saving profile:', err);
+      // window.location.reload();
+    } catch {
       showError('Failed to update profile');
     } finally {
       // Always clear the selected file after save attempt (success or failure)
@@ -175,7 +186,6 @@ const Profile = () => {
       setShowPasswordChange(false);
       showSuccess('Password updated successfully');
     } catch (err) {
-      console.error('Error updating password:', err);
       showError(`Error updating password: ${err.message}`);
     }
   };
@@ -186,16 +196,8 @@ const Profile = () => {
       URL.revokeObjectURL(URL.createObjectURL(selectedFile));
     }
     
-    // Reset form to current user data
-    if (user) {
-      setProfileData({
-        firstName: user.f_name || user.firstName || '',
-        lastName: user.l_name || user.lastName || '',
-        email: user.email || '',
-        bio: user.bio || '',
-        avatarUrl: user.profilePicture || user.avatarUrl || ''
-      });
-    }
+    // Reset form to current profile data (which already includes doctor bio if applicable)
+    // No need to fetch again since loadUserInfo already handled this
     setSelectedFile(null);
     setIsEditing(false);
   };

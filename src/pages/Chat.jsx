@@ -4,14 +4,21 @@ import useAuthStore from '../store/auth-store';
 import ChatHeader from '../components/chat/ChatHeader';
 import ChatMessages from '../components/chat/ChatMessages';
 import ChatInput from '../components/chat/ChatInput';
+import PatientRecords from '../components/chat/PatientRecords';
+import PatientRecordsModal from '../components/chat/PatientRecordsModal';
+import RatingModal from '../components/chat/RatingModal';
+import ReportModal from '../components/chat/ReportModal';
 import { addMessage, formatTime } from '../utils/chatUtils';
-import { baseURL } from '../api/config';
+import { createChatWebSocket, fetchChatHistory, sendChatMessage, rateDoctor } from '../api/chat';
+import { submitReport, requiresUserId } from '../api/reportService';
+import {useToast} from '../hooks/useToast';
 
 const Chat = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, token } = useAuthStore();
   const wsRef = useRef(null);
+  const historyLoadedRef = useRef(false);
 
   const { appointment, chatPartner, appointmentId } = location.state || {};
 
@@ -19,6 +26,11 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('Disconnected');
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [showRecordsModal, setShowRecordsModal] = useState(false);
+  
+  const { showSuccess, showError } = useToast();
 
   useEffect(() => {
     if (!appointment || !chatPartner) {
@@ -33,13 +45,9 @@ const Chat = () => {
         return;
       }
 
-      const wsBaseUrl = baseURL.replace('https://', 'wss://').replace('http://', 'ws://').replace(/\/$/, '');
-      const recipientId = chatPartner.id;
-      const wsUrl = `${wsBaseUrl}/chat/ws/${recipientId}?token=${encodeURIComponent(token)}`;
-
       try {
         setConnectionStatus('Connecting...');
-        wsRef.current = new WebSocket(wsUrl);
+        wsRef.current = createChatWebSocket(chatPartner.id, token);
 
         const connectionTimeout = setTimeout(() => {
           if (wsRef.current && wsRef.current.readyState === WebSocket.CONNECTING) {
@@ -111,9 +119,8 @@ const Chat = () => {
     }
 
     try {
-      const sendStr = `${chatPartner.id}: ${message.trim()}`;
-      wsRef.current.send(sendStr);
-      addMessage(setMessages, 'outgoing', `You to ${chatPartner.id}: ${message.trim()}`);
+      sendChatMessage(wsRef.current, chatPartner.id, message);
+      addMessage(setMessages, 'outgoing', `You: ${message.trim()}`);
       setMessage('');
     } catch {
       addMessage(setMessages, 'system', 'Failed to send message. Please check your connection and try again.');
@@ -126,13 +133,9 @@ const Chat = () => {
     }
 
     if (user && chatPartner && appointmentId && token) {
-      const wsBaseUrl = baseURL.replace('https://', 'wss://').replace('http://', 'ws://').replace(/\/$/, '');
-      const recipientId = chatPartner.id;
-      const wsUrl = `${wsBaseUrl}/chat/ws/${recipientId}?token=${encodeURIComponent(token)}&appointment_id=${appointmentId}`;
-
       try {
         setConnectionStatus('Connecting...');
-        wsRef.current = new WebSocket(wsUrl);
+        wsRef.current = createChatWebSocket(chatPartner.id, token, appointmentId);
 
         const timeout = setTimeout(() => {
           if (wsRef.current && wsRef.current.readyState === WebSocket.CONNECTING) {
@@ -183,56 +186,134 @@ const Chat = () => {
     }
   };
 
-  // Added API call to fetch chat history and updated message display logic
-  const fetchChatHistory = async (receiverId) => {
+  const handleRateDoctor = async (rating) => {
     try {
-      const response = await fetch(`${baseURL}chat/history?receiver_id=${receiverId}`);
-      if (response.ok) {
-        const history = await response.json();
-        return history;
-      } else {
-        console.error('Failed to fetch chat history:', response.statusText);
-        return [];
-      }
+      await rateDoctor(chatPartner.id, rating, token);
+      showSuccess('Rating submitted successfully!');
     } catch (error) {
-      console.error('Error fetching chat history:', error);
-      return [];
+      showError('Failed to submit rating. Please try again.');
+      console.error('Rating error:', error);
+    }
+  };
+
+  const handleReportUser = async (reportType, description) => {
+    try {
+      // Check if this report type requires a user ID
+      const needsUserId = requiresUserId(reportType);
+      
+      if (needsUserId) {
+        // For user-specific reports (abuse, spam), include the chat partner's ID
+        await submitReport(reportType, description, chatPartner.id, token);
+      } else {
+        // For application errors, terms violations, and other reports, don't include user ID
+        await submitReport(reportType, description, null, token);
+      }
+      
+      showSuccess('Report submitted successfully!');
+      return true; // Return success indicator
+    } catch (error) {
+      showError('Failed to submit report. Please try again.');
+      console.error('Report error:', error);
+      throw error; // Re-throw so the modal can handle it
     }
   };
 
   useEffect(() => {
     const loadChatHistory = async () => {
-      if (chatPartner?.id) {
-        const history = await fetchChatHistory(chatPartner.id);
-        history.forEach((msg) => {
-          const trimmedMessage = msg.split(': ')[1] || msg; // Trim message to exclude ID and ':'
-          addMessage(setMessages, 'incoming', trimmedMessage);
+      // Prevent duplicate requests using ref
+      if (historyLoadedRef.current || !chatPartner?.id || !user?.id || !token) {
+        return;
+      }
+
+      historyLoadedRef.current = true;
+
+      try {
+        const history = await fetchChatHistory(chatPartner.id, token);
+        
+        // Sort messages by sent_at timestamp to maintain chronological order
+        const sortedHistory = history.sort((a, b) => new Date(a.sent_at) - new Date(b.sent_at));
+        
+        const partnerName = chatPartner?.name || 'Unknown';
+        
+        // Create new messages array with proper structure
+        const historyMessages = sortedHistory.map((msg) => {
+          const messageType = msg.sender_id === user.id ? 'outgoing' : 'incoming';
+          const senderName = msg.sender_id === user.id ? 'You' : partnerName;
+          const displayMessage = `${senderName}: ${msg.content}`;
+          
+          return {
+            id: Date.now() + Math.random(),
+            type: messageType,
+            content: displayMessage,
+            timestamp: new Date(msg.sent_at)
+          };
         });
+
+        // Set messages directly instead of appending to avoid duplicates
+        setMessages(historyMessages);
+      } catch (error) {
+        console.error('Error fetching chat history:', error);
       }
     };
 
-    loadChatHistory();
-  }, [chatPartner]);
+    // Only load history once when component mounts and required data is available
+    if (chatPartner?.id && user?.id && token && !historyLoadedRef.current) {
+      loadChatHistory();
+    }
+  }, [chatPartner?.id, user?.id, token, chatPartner?.name]);
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
-      <div className="mx-auto max-w-4xl">
-        <ChatHeader
-          navigate={navigate}
-          chatPartner={chatPartner}
-          isConnected={isConnected}
-          connectionStatus={connectionStatus}
-        />
-        <ChatMessages messages={messages} formatTime={formatTime} />
-        <ChatInput
-          message={message}
-          setMessage={setMessage}
-          sendMessage={sendMessage}
-          isConnected={isConnected}
-          connectionStatus={connectionStatus}
-          reconnect={reconnect}
-        />
+      {/* Both doctor and patient views now use consistent full-width styling */}
+      <div className="h-screen flex flex-col">
+        <div className="w-full flex flex-col h-full">
+          <ChatHeader
+            navigate={navigate}
+            chatPartner={chatPartner}
+            isConnected={isConnected}
+            connectionStatus={connectionStatus}
+            onRate={() => setShowRatingModal(true)}
+            onReport={() => setShowReportModal(true)}
+            onViewRecords={user?.role === 'doctor' ? () => setShowRecordsModal(true) : undefined}
+            userRole={user?.role}
+          />
+          <div className="flex-1 flex flex-col min-h-0">
+            <ChatMessages messages={messages} formatTime={formatTime} />
+            <ChatInput
+              message={message}
+              setMessage={setMessage}
+              sendMessage={sendMessage}
+              isConnected={isConnected}
+              connectionStatus={connectionStatus}
+              reconnect={reconnect}
+            />
+          </div>
+        </div>
       </div>
+      
+      <RatingModal
+        isOpen={showRatingModal}
+        onClose={() => setShowRatingModal(false)}
+        onSubmit={handleRateDoctor}
+        doctorName={chatPartner?.name}
+      />
+      
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        onSubmit={handleReportUser}
+      />
+      
+      {/* Mobile Patient Records Modal for Doctors */}
+      {user?.role === 'doctor' && (
+        <PatientRecordsModal
+          isOpen={showRecordsModal}
+          onClose={() => setShowRecordsModal(false)}
+          patientId={chatPartner?.id}
+          token={token}
+          patientName={chatPartner?.name}
+        />
+      )}
     </div>
   );
 };

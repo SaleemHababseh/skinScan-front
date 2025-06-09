@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Calendar, 
@@ -17,56 +17,61 @@ import { formatDate } from '../../utils';
 const PatientDashboard = () => {
   const navigate = useNavigate();
   const { user, token, fetchUserBasicInfo } = useAuthStore();
-  
-  const [appointments, setAppointments] = useState([]);
+    const [appointments, setAppointments] = useState([]);
   const [records, setRecords] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [hasLoadedUserInfo, setHasLoadedUserInfo] = useState(false);
+  const loadingRef = useRef(false);
+  const hasLoadedRef = useRef(false);
 
-  const loadUserInfo = useCallback(async () => {
-    if (user?.id && !hasLoadedUserInfo) {
+  // Single effect to handle all data loading
+  useEffect(() => {
+    const loadAllData = async () => {
+      if (!user?.id || !token || loadingRef.current || hasLoadedRef.current) return;
+
+      loadingRef.current = true;
+      setIsLoading(true);
+
       try {
-        await fetchUserBasicInfo();
+        // Load user info if needed
+        const needsUserInfo = !user.f_name && !user.firstName;
+        if (needsUserInfo) {
+          await fetchUserBasicInfo().catch((error) => {
+            console.error('Dashboard: Error loading user info:', error);
+          });
+        }
+
+        // Load patient data
+        const [appointmentsData, recordsData] = await Promise.all([
+          getPatientAppointments(token).catch(() => []),
+          getUserRecords(token).catch(() => [])
+        ]);
+        
+        setAppointments(Array.isArray(appointmentsData) ? appointmentsData : []);
+        
+        // Transform records data to handle the records_info structure
+        const transformedRecords = Array.isArray(recordsData) 
+          ? recordsData.map(record => record.records_info || record) 
+          : [];
+        setRecords(transformedRecords);
+        hasLoadedRef.current = true;
       } catch (error) {
-        console.error('Dashboard: Error loading user info:', error);
+        console.error('Error loading patient data:', error);
       } finally {
-        setHasLoadedUserInfo(true);
+        setIsLoading(false);
+        loadingRef.current = false;
       }
-    }
-  }, [user?.id, hasLoadedUserInfo, fetchUserBasicInfo]);
-  const loadPatientData = useCallback(async () => {
-    if (!token) return;
-    
-    setIsLoading(true);
-    try {
-      const [appointmentsData, recordsData] = await Promise.all([
-        getPatientAppointments(token).catch(() => []),
-        getUserRecords(token).catch(() => [])
-      ]);
-      
-      setAppointments(Array.isArray(appointmentsData) ? appointmentsData : []);
-      
-      // Transform records data to handle the records_info structure
-      const transformedRecords = Array.isArray(recordsData) 
-        ? recordsData.map(record => record.records_info || record) 
-        : [];
-      setRecords(transformedRecords);
-    } catch (error) {
-      console.error('Error loading patient data:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [token]);
+    };
 
-  useEffect(() => {
-    loadUserInfo();
-  }, [loadUserInfo]);
+    loadAllData();
+  }, [user?.id, token, user?.f_name, user?.firstName, fetchUserBasicInfo]);
 
+  // Reset data when user changes
   useEffect(() => {
-    if (user && token) {
-      loadPatientData();
-    }
-  }, [user, token, loadPatientData]);  // Get recent appointments from API
+    hasLoadedRef.current = false;
+    setAppointments([]);
+    setRecords([]);  }, [user?.id]);
+
+  // Get recent appointments from API
   const recentAppointments = appointments
     .sort((a, b) => new Date(b.appointment_date) - new Date(a.appointment_date))
     .slice(0, 3);
@@ -108,7 +113,7 @@ const PatientDashboard = () => {
       {/* Quick Actions */}
       <div>
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <QuickActionCard
             icon={Calendar}
             title="Book Appointment"
@@ -130,13 +135,7 @@ const PatientDashboard = () => {
             onClick={() => navigate('/patient/records')}
             color="purple"
           />
-          <QuickActionCard
-            icon={Star}
-            title="Top Doctors"
-            description="Find specialists"
-            onClick={() => navigate('/top-doctors')}
-            color="orange"
-          />
+
         </div>
       </div>
 

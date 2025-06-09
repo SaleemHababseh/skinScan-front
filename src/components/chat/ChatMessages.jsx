@@ -2,7 +2,7 @@ import React from 'react';
 
 const ChatMessages = ({ messages, formatTime }) => {
   return (
-    <div className="h-[calc(100vh-200px)] overflow-y-auto p-4 space-y-4">
+    <div className="flex-1 overflow-y-auto p-4 space-y-4">
       {messages.map((msg) => (
         <div
           key={msg.id}

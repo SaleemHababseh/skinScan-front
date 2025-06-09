@@ -188,14 +188,15 @@ const useAuthStore = create(
           set({ isLoading: false, error: error.message });
           throw error;
         }
-      },
-      refreshToken: async () => {
+      },      refreshToken: async () => {
         const { refreshTokenValue, token } = get();
 
         if (!refreshTokenValue) {
           const error = new Error(
-            "No refresh token available - please log in again"
+            "🔐 Your session has ended. Please log in again to continue."
           );
+          error.isSessionExpired = true;
+          error.shouldRedirectToLogin = true;
           set({
             user: {
               id: null,
@@ -241,16 +242,24 @@ const useAuthStore = create(
             return result;
           } else {
             throw new Error("Invalid access token received from server");
-          }
-        } catch (error) {
+          }        } catch (error) {
           // Clear auth state on refresh failure
-          const errorMessage = error.message.includes(
-            "jose.exceptions.JWTError"
-          )
-            ? "Your session has expired. Please log in again."
-            : error.message.includes("404")
-            ? "Authentication service temporarily unavailable. Please try again later."
-            : error.message || "Session refresh failed. Please log in again.";
+          let errorMessage;
+          let userFriendlyMessage;
+          
+          if (error.message.includes("jose.exceptions.JWTError") || error.message.includes("JWT")) {
+            errorMessage = "Your session has expired. Please log in again.";
+            userFriendlyMessage = "🔐 Your session has ended. Please log in again to continue.";
+          } else if (error.message.includes("404")) {
+            errorMessage = "Authentication service temporarily unavailable. Please try again later.";
+            userFriendlyMessage = "🔧 Authentication service is temporarily unavailable. Please try again in a moment.";
+          } else if (error.message.includes("Network") || error.message.includes("fetch")) {
+            errorMessage = "Network connection error. Please check your internet connection.";
+            userFriendlyMessage = "🌐 Connection lost. Please check your internet and try again.";
+          } else {
+            errorMessage = error.message || "Session refresh failed. Please log in again.";
+            userFriendlyMessage = "🔐 Your session has ended. Please log in again to continue.";
+          }
 
           set({
             user: {
@@ -268,9 +277,11 @@ const useAuthStore = create(
             error: errorMessage,
           });
 
-          // Create a more user-friendly error
-          const userError = new Error(errorMessage);
+          // Create a more user-friendly error with enhanced messaging
+          const userError = new Error(userFriendlyMessage);
+          userError.originalMessage = errorMessage;
           userError.shouldRedirectToLogin = true;
+          userError.isSessionExpired = error.message.includes("jose.exceptions.JWTError") || error.message.includes("JWT") || error.message.includes("expired");
           throw userError;
         }
       },

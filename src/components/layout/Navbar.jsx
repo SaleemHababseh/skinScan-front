@@ -1,19 +1,23 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, LogOut, User } from 'lucide-react';
+import { Menu, X, LogOut, User, Flag } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import ThemeToggle from '../ui/ThemeToggle';
 import useAuthStore from '../../store/auth-store';
 import Button from '../ui/Button';
 import Avatar from '../ui/Avatar';
 import { baseURL } from '../../api/config';
+import ReportModal from '../chat/ReportModal';
+import { reportSystem } from '../../api/reportService';
+import { useToast } from '../../hooks/useToast';
 
 const Navbar = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);  const { user, isAuthenticated, logout, token } = useAuthStore();
   const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = React.useState(false);
   const userMenuRef = React.useRef(null);
   const navigate = useNavigate();
+  const { showSuccess, showError } = useToast();
   
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -22,13 +26,40 @@ const Navbar = () => {
   const toggleUserMenu = () => {
     setIsUserMenuOpen(!isUserMenuOpen);
   };
-  
-  const handleLogout = async () => {
+    const handleLogout = async () => {
     try {
       await logout();
       navigate('/login');
     } catch (error) {
       console.error('Logout failed:', error);
+    }
+  };  const handleReportSubmit = async (reportType, description) => {
+    try {
+      console.log('Submitting report:', { reportType, description });
+      
+      if (!token) {
+        console.error('No token found in auth store');
+        const error = new Error('You must be logged in to submit a report');
+        showError(error.message);
+        throw error;
+      }
+
+      console.log('Token found, calling reportSystem...');
+      
+      // For navbar reports, we only submit system-level reports (no user ID)
+      const result = await reportSystem(reportType, description, token);
+      console.log('Report submitted successfully:', result);
+      
+      showSuccess('Report submitted successfully! Thank you for your feedback.');
+      
+      // Close user menu after successful report
+      setIsUserMenuOpen(false);
+      
+      return result;
+    } catch (error) {
+      console.error('Failed to submit report:', error);
+      showError(`Failed to submit report: ${error.message}`);
+      throw error; // Re-throw so the modal can handle it
     }
   };
   
@@ -150,14 +181,24 @@ const Navbar = () => {
                       {user?.firstName || user?.f_name || ''} {user?.lastName || user?.l_name || ''}
                     </p>
                     <p className="text-xs text-neutral-500 dark:text-neutral-400">{user?.email}</p>
-                  </div>
-                  <Link
+                  </div>                  <Link
                     to="/profile"
                     className="flex w-full items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-700"
                   >
                     <User className="mr-2 h-4 w-4" />
                     Profile
                   </Link>
+                  
+                  <button
+                    onClick={() => {
+                      setIsReportModalOpen(true);
+                      setIsUserMenuOpen(false);
+                    }}
+                    className="flex w-full items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                  >
+                    <Flag className="mr-2 h-4 w-4" />
+                    Report Issue
+                  </button>
                  
                   <button
                     onClick={handleLogout}
@@ -233,8 +274,15 @@ const Navbar = () => {
               </Link>
             </div>
           )}
-        </div>
-      </div>
+        </div>      </div>
+      
+      {/* Report Modal for system-level reports only */}
+      <ReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        onSubmit={handleReportSubmit}
+        systemReportsOnly={true}
+      />
     </header>
   );
 };

@@ -12,7 +12,7 @@ const ChatInput = ({ message, setMessage, sendMessage, isConnected, connectionSt
   };
 
   return (
-    <div className="sticky bottom-0 bg-white dark:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-700 p-4">
+    <div className="bg-white dark:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-700 p-4">
       <div className="flex items-center space-x-3">
         <div className="flex-1">
           <Input
@@ -28,16 +28,16 @@ const ChatInput = ({ message, setMessage, sendMessage, isConnected, connectionSt
         <Button
           onClick={sendMessage}
           disabled={!message.trim() || !isConnected}
-          className="h-10 w-10 p-0 rounded-full"
+          className="h-12 w-12 p-0 rounded-full"
         >
-          <Send className="h-4 w-4" />
+          <Send className="h-5 w-5" />
         </Button>
       </div>
       
       {!isConnected && (
         <div className="mt-2 flex items-center justify-between">
           <p className="text-sm text-amber-600 dark:text-amber-400 flex items-center">
-            <WifiOff className="h-4 w-4 mr-1" />
+            <WifiOff className="h-5 w-5 mr-2" />
             {connectionStatus}
           </p>
           {(connectionStatus === 'Connection Error' || connectionStatus === 'Connection Timeout' || connectionStatus === 'Disconnected') && (

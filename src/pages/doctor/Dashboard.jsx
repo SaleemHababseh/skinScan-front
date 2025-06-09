@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Calendar, 
@@ -19,34 +19,53 @@ const DoctorDashboard = () => {
     loadDoctorAppointments,
     isLoading
   } = useDoctorStore();
+  const loadingRef = useRef(false);
+  const hasLoadedRef = useRef(false);
 
-  const [hasLoadedUserInfo, setHasLoadedUserInfo] = useState(false);
+  // Single effect to handle all data loading
+  useEffect(() => {
+    const loadAllData = async () => {
+      if (!user?.id || loadingRef.current || hasLoadedRef.current) return;
 
-  const loadUserInfo = useCallback(async () => {
-    if (user?.id && !hasLoadedUserInfo) {
+      loadingRef.current = true;
+
       try {
-        await fetchUserBasicInfo();
-      } catch (error) {
-        console.error('Dashboard: Error loading user info:', error);
-      } finally {
-        setHasLoadedUserInfo(true);
-      }
-    }
-  }, [user?.id, hasLoadedUserInfo, fetchUserBasicInfo]);
+        // Load user info if needed
+        const needsUserInfo = !user.f_name && !user.firstName;
+        const promises = [];
 
+        if (needsUserInfo) {
+          promises.push(
+            fetchUserBasicInfo().catch((error) => {
+              console.error('Dashboard: Error loading user info:', error);
+            })
+          );
+        }
+
+        // Load doctor appointments
+        promises.push(loadDoctorAppointments());
+
+        await Promise.all(promises);
+        hasLoadedRef.current = true;
+      } catch (error) {
+        console.error('Error loading doctor data:', error);
+      } finally {
+        loadingRef.current = false;
+      }
+    };
+
+    loadAllData();
+  }, [user?.id, user?.f_name, user?.firstName, fetchUserBasicInfo, loadDoctorAppointments]);
+  // Reset data when user changes
   useEffect(() => {
-    loadUserInfo();
-  }, [loadUserInfo]);
-  useEffect(() => {
-    if (user) {
-      loadDoctorAppointments();
-    }
-  }, [user, loadDoctorAppointments]);// Get today's appointments
-  const today = new Date();
-  const todayAppointments = appointments.filter(apt => {
-    const aptDate = new Date(apt.appointment_date);
-    return aptDate.toDateString() === today.toDateString();
-  }).slice(0, 3); // Show only first 3
+    hasLoadedRef.current = false;
+  }, [user?.id]);
+
+  // Get recent appointments (last 3)
+  const recentAppointments = appointments
+    .sort((a, b) => new Date(b.appointment_date) - new Date(a.appointment_date))
+    .slice(0, 3);
+
   // eslint-disable-next-line no-unused-vars
   const QuickActionCard = ({ icon: Icon, title, description, onClick, color = "blue" }) => (
     <Card className="hover:shadow-lg transition-all cursor-pointer" onClick={onClick}>
@@ -78,7 +97,7 @@ const DoctorDashboard = () => {
       {/* Quick Actions */}
       <div>
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <QuickActionCard
             icon={Calendar}
             title="View Appointments"
@@ -100,22 +119,15 @@ const DoctorDashboard = () => {
             onClick={() => navigate('/doctor/diagnoses')}
             color="purple"
           />
-          <QuickActionCard
-            icon={Activity}
-            title="Patient Records"
-            description="View patient history"
-            onClick={() => navigate('/doctor/diagnoses')}
-            color="orange"
-          />
+     
         </div>
       </div>
 
       {/* Recent Activity */}
-      <div>
-        {/* Today's Appointments */}
+      <div>        {/* Recent Appointments */}
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Today's Appointments</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Appointments</h3>
             <Button 
               variant="outline" 
               size="sm"
@@ -124,8 +136,8 @@ const DoctorDashboard = () => {
               View All
             </Button>
           </div>
-          <div className="space-y-3">            {todayAppointments.length > 0 ? (
-              todayAppointments.map((appointment, index) => (
+          <div className="space-y-3">            {recentAppointments.length > 0 ? (
+              recentAppointments.map((appointment, index) => (
                 <div key={index} className="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                   <div className="flex-1">
                     <p className="font-medium text-gray-900 dark:text-white">
@@ -146,9 +158,8 @@ const DoctorDashboard = () => {
                   </span>
                 </div>
               ))
-            ) : (
-              <p className="text-gray-500 dark:text-gray-400 text-center py-4">
-                No appointments scheduled for today
+            ) : (              <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+                No appointments available
               </p>
             )}
           </div>        </Card>

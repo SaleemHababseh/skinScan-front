@@ -153,8 +153,7 @@ const DoctorAppointments = () => {
                         Decline
                       </Button>
                     </>
-                  )}
-                  {appointment.status === 'accepted' && (
+                  )}                  {appointment.status === 'accepted' && (
                     <>
                       <Button 
                         variant="outline"
@@ -181,11 +180,11 @@ const DoctorAppointments = () => {
                       <Button 
                         variant="outline"
                         size="sm"
-                        className="text-info-600 border-info-200 hover:bg-info-50 hover:border-info-300 dark:text-info-400 dark:border-info-800 dark:hover:bg-info-900/30"
-                        onClick={() => handleUpdateStatus(appointment.appointment_id || appointment.id, 'completed')}
+                        className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/20"
+                        onClick={() => handleUpdateStatus(appointment.appointment_id || appointment.id, 'cancelled')}
                       >
-                        <Check className="mr-2 h-4 w-4" />
-                        Complete
+                        <X className="mr-2 h-4 w-4" />
+                        Cancel
                       </Button>
                     </>
                   )}
