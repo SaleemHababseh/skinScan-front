@@ -4,6 +4,7 @@ import Button from '../components/ui/Button';
 import ProfileCard from '../components/profile/ProfileCard';
 import ProfileForm from '../components/profile/ProfileForm';
 import SecuritySettings from '../components/profile/SecuritySettings';
+import DoctorCVSection from '../components/profile/DoctorCVSection';
 import useAuthStore from '../store/auth-store';
 import { useToast } from '../hooks/useToast';
 import { baseURL } from '../api/config';
@@ -256,6 +257,11 @@ const Profile = () => {
           }}
         />
       </div>
+
+      {/* Doctor CV Section - Only visible for doctors */}
+      {user?.role === 'doctor' && (
+        <DoctorCVSection />
+      )}
     </div>
   );
 };
