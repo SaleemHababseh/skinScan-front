@@ -2,12 +2,15 @@ import { baseURL } from "../config.js";
 
 export const getReportsByStatus = async (status = "pending", token) => {
     try {
-        const validStatuses = ["pending", "in progress", "resolved"];
+        const validStatuses = ["pending", "in_progress", "resolved"];
         if (!validStatuses.includes(status)) {
-            throw new Error("Invalid status. Must be 'pending', 'in progress', or 'resolved'");
+            throw new Error("Invalid status. Must be 'pending', 'in_progress', or 'resolved'");
         }
 
-        const response = await fetch(`${baseURL}admin/get-reports-by-status?status=${encodeURIComponent(status)}`, {
+        // Convert status format for API compatibility
+        const apiStatus = status === 'in_progress' ? 'in progress' : status;
+
+        const response = await fetch(`${baseURL}admin/get-reports-by-status?status=${encodeURIComponent(apiStatus)}`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${token}`,

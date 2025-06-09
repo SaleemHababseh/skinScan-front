@@ -16,16 +16,16 @@ const DoctorCVSection = () => {
   const [acceptationStatus, setAcceptationStatus] = useState(null);
   const [isLoadingStatus, setIsLoadingStatus] = useState(false);
 
+  // Refactor to handle only true or false results
   const fetchAcceptationStatus = useCallback(async () => {
     setIsLoadingStatus(true);
     try {
-      const result = await getDoctorAcceptationResult(token);
-      setAcceptationStatus(result);
+        const result = await getDoctorAcceptationResult(token);
+        setAcceptationStatus(result?.Result === true);
     } catch (error) {
-      console.error('Error fetching acceptation status:', error);
-      // Don't show error toast here as this might be expected for new doctors
+        console.error('Error fetching acceptation status:', error);
     } finally {
-      setIsLoadingStatus(false);
+        setIsLoadingStatus(false);
     }
   }, [token]);
 
@@ -77,71 +77,14 @@ const DoctorCVSection = () => {
 
   const getStatusIcon = () => {
     if (isLoadingStatus) return <Clock className="h-5 w-5 text-yellow-500 animate-spin" />;
-    
-    if (!acceptationStatus) return <Upload className="h-5 w-5 text-blue-500" />;
-    
-    switch (acceptationStatus.status?.toLowerCase()) {
-      case 'accepted':
-      case 'approved':
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case 'rejected':
-      case 'denied':
-        return <XCircle className="h-5 w-5 text-red-500" />;
-      case 'pending':
-      case 'under_review':
-        return <Clock className="h-5 w-5 text-yellow-500" />;
-      case 'false':
-      case false:
-        return <Clock className="h-5 w-5 text-orange-500" />;
-      default:
-        return <Clock className="h-5 w-5 text-yellow-500" />;
-    }
+    if (acceptationStatus === null) return <Upload className="h-5 w-5 text-blue-500" />;
+    return acceptationStatus ? <CheckCircle className="h-5 w-5 text-green-500" /> : <XCircle className="h-5 w-5 text-red-500" />;
   };
 
   const getStatusText = () => {
     if (isLoadingStatus) return 'Loading status...';
-    
-    if (!acceptationStatus) return 'If you have submitted your CV, please wait for review. If not, please submit your CV below.';
-    
-    switch (acceptationStatus.status?.toLowerCase()) {
-      case 'accepted':
-      case 'approved':
-        return 'Your doctor application has been approved!';
-      case 'rejected':
-      case 'denied':
-        return 'Your application was not accepted. Please contact support or submit a new CV.';
-      case 'pending':
-      case 'under_review':
-        return 'Your CV has been submitted and is under review. Please wait for approval.';
-      case 'false':
-      case false:
-        return 'You are not accepted yet. If you have submitted your CV, please wait for the review process to complete.';
-      default:
-        return 'Your doctor application is under review. Please wait for approval.';
-    }
-  };
-
-  const getStatusColor = () => {
-    if (isLoadingStatus) return 'text-gray-600 dark:text-gray-400';
-    
-    if (!acceptationStatus) return 'text-blue-600 dark:text-blue-400';
-    
-    switch (acceptationStatus.status?.toLowerCase()) {
-      case 'accepted':
-      case 'approved':
-        return 'text-green-600 dark:text-green-400';
-      case 'rejected':
-      case 'denied':
-        return 'text-red-600 dark:text-red-400';
-      case 'pending':
-      case 'under_review':
-        return 'text-yellow-600 dark:text-yellow-400';
-      case 'false':
-      case false:
-        return 'text-orange-600 dark:text-orange-400';
-      default:
-        return 'text-yellow-600 dark:text-yellow-400';
-    }
+    if (acceptationStatus === null) return 'If you have submitted your CV, please wait for review. If not, please submit your CV below.';
+    return acceptationStatus ? <span className="text-green-600 dark:text-green-400">Accepted</span> : 'Rejected';
   };
 
   // Only show this section for doctors
@@ -167,24 +110,18 @@ const DoctorCVSection = () => {
               Verification Status
             </span>
           </div>
-          <p className={`text-sm ${getStatusColor()}`}>
+          <p className="text-sm">
             {getStatusText()}
           </p>
           
-          {acceptationStatus?.message && (
-            <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-2">
-              <strong>Note:</strong> {acceptationStatus.message}
-            </p>
-          )}
-          
           {/* Additional guidance based on status */}
-          {!acceptationStatus && (
+          {acceptationStatus === null && (
             <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
               💡 You can submit or resubmit your CV using the upload section below.
             </p>
           )}
           
-          {acceptationStatus && (acceptationStatus.status === false || acceptationStatus.status === 'false') && (
+          {acceptationStatus === false && (
             <p className="text-xs text-orange-600 dark:text-orange-400 mt-2">
               ⏳ If you have recently submitted your CV, please allow 2-3 business days for review.
             </p>

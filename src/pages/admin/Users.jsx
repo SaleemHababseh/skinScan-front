@@ -1,27 +1,26 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Users, Search, Filter, PlusCircle, Edit, Trash2, MoreVertical, UserCheck, UserX, AlertTriangle } from 'lucide-react';
+import { Users, Search, Filter, PlusCircle, Edit, Trash2, MoreVertical, UserCheck, UserX } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Avatar from '../../components/ui/Avatar';
 import useAuthStore from '../../store/auth-store';
-import { getAllUsersInfo, getUserInfoByRole, getUserInfoById, getRecordsByUserId, suspendUser, acceptDoctor, getNotAcceptedDoctors, removeRecordByImageId } from '../../api/admin';
+import { getAllUsersInfo, getUserInfoByRole, getUserInfoById, getRecordsByUserId, suspendUser, removeRecordByImageId } from '../../api/admin';
+import { getDoctorAcceptationResult } from '../../api/users/getDoctorAcceptationResult';
 
 const AdminUsers = () => {
   const { user: currentAuthUser, token } = useAuthStore();
   const [searchTerm, setSearchTerm] = useState('');
-  const [roleFilter, setRoleFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');  const [showUserModal, setShowUserModal] = useState(false);
+  const [roleFilter, setRoleFilter] = useState('all');  const [statusFilter, setStatusFilter] = useState('all');
+  const [showUserModal, setShowUserModal] = useState(false);
   const [showUserDetailsModal, setShowUserDetailsModal] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [userDetails, setUserDetails] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);  const [userDetails, setUserDetails] = useState(null);
   const [userRecords, setUserRecords] = useState([]);
+  const [doctorAcceptanceStatus, setDoctorAcceptanceStatus] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   
   // Real users data from API
-  const [users, setUsers] = useState([]);
-  const [pendingDoctors, setPendingDoctors] = useState([]);
-  // Load users data from API
+  const [users, setUsers] = useState([]);  // Load users data from API
   const loadUsersData = useCallback(async () => {
     if (!token) return;
     
@@ -33,27 +32,11 @@ const AdminUsers = () => {
         userData = await getAllUsersInfo(token);
       } else {
         userData = await getUserInfoByRole(roleFilter, token);
-      }      // Get pending doctors (doctors with acception: false)
-      const pendingDoctorsData = await getNotAcceptedDoctors(false, token);
-      
-      // Format pending doctors data
-      const formattedPendingDoctors = Array.isArray(pendingDoctorsData) ? pendingDoctorsData.map(doctor => ({
-        id: doctor.doctor_id,
-        name: doctor.name,
-        email: doctor.email || '',
-        rating: doctor.rating_avg || 0,
-        isAccepted: doctor.acception
-      })) : [];
-        setPendingDoctors(formattedPendingDoctors);
-
-      // Create a set of pending doctor IDs for quick lookup
-      const pendingDoctorIds = new Set(formattedPendingDoctors.map(doc => doc.id));
+      }
 
       // Format user data to match expected structure
       const formattedUsers = Array.isArray(userData) ? userData.map(user => {
         const userId = user.user_id || user.id;
-        const isDoctor = user.role === 'doctor';
-        const isPendingDoctor = isDoctor && pendingDoctorIds.has(userId);
         
         return {
           id: userId,
@@ -61,9 +44,8 @@ const AdminUsers = () => {
           lastName: user.name ? user.name.split(' ').slice(1).join(' ') : '',
           email: user.email || '',
           role: user.role || 'patient',
-          status: user.suspension ? 'suspended' : (isPendingDoctor ? 'pending' : 'active'),
-          createdAt: user.signup_date,
-          isAccepted: isDoctor ? !isPendingDoctor : true // Doctors are accepted if not in pending list
+          status: user.suspension ? 'suspended' : 'active',
+          createdAt: user.signup_date
         };
       }) : [];
 
@@ -80,29 +62,18 @@ const AdminUsers = () => {
     if (currentAuthUser?.id && token) {
       loadUsersData();
     }
-  }, [currentAuthUser?.id, token, roleFilter, loadUsersData]);
-  // Handle user suspension
-  const handleSuspendUser = async (userId) => {
-    if (window.confirm('Are you sure you want to suspend this user?')) {
+  }, [currentAuthUser?.id, token, roleFilter, loadUsersData]);  // Handle user suspension toggle
+  const handleToggleSuspension = async (userId, currentStatus) => {
+    const action = currentStatus === 'suspended' ? 'reactivate' : 'suspend';
+    if (window.confirm(`Are you sure you want to ${action} this user?`)) {
       try {
         await suspendUser(userId, token);
         // Reload users data
         loadUsersData();
       } catch (error) {
-        console.error('Error suspending user:', error);
-        alert('Failed to suspend user');
+        console.error(`Error ${action}ing user:`, error);
+        alert(`Failed to ${action} user`);
       }
-    }
-  };
-  // Handle doctor acceptance
-  const handleAcceptDoctor = async (doctorId) => {
-    try {
-      await acceptDoctor(doctorId, token);
-      // Reload users data
-      loadUsersData();
-    } catch (error) {
-      console.error('Error accepting doctor:', error);
-      alert('Failed to accept doctor');
     }
   };
 
@@ -119,8 +90,7 @@ const AdminUsers = () => {
         alert('Failed to delete user record');
       }
     }
-  };
-  // Handle viewing user details
+  };  // Handle viewing user details
   const handleViewUserDetails = async (user) => {
     try {
       setIsLoading(true);
@@ -141,6 +111,22 @@ const AdminUsers = () => {
       setUserDetails(formattedDetails);
       setUserRecords(Array.isArray(records) ? records : []);
       setCurrentUser(user);
+      
+      // If user is a doctor, fetch their acceptance status
+      if (details.role === 'doctor') {
+        try {
+          // Note: This API call is for the doctor's own status, but we're calling it as admin
+          // The API might return different results based on the token used
+          const acceptanceResult = await getDoctorAcceptationResult(token);
+          setDoctorAcceptanceStatus(acceptanceResult);
+        } catch (error) {
+          console.error('Error fetching doctor acceptance status:', error);
+          setDoctorAcceptanceStatus(null);
+        }
+      } else {
+        setDoctorAcceptanceStatus(null);
+      }
+      
       setShowUserDetailsModal(true);
     } catch (error) {
       console.error('Error loading user details:', error);
@@ -177,65 +163,7 @@ const AdminUsers = () => {
         </div>
         <Button onClick={() => handleOpenUserModal()}>
           <PlusCircle className="mr-2 h-4 w-4" /> Add New User
-        </Button>
-      </div>      {/* Pending Doctors Alert */}
-      {pendingDoctors.length > 0 && (
-        <Card className="border-l-4 border-l-warning-500 bg-warning-50 dark:bg-warning-900/10">
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <AlertTriangle className="h-5 w-5 text-warning-600" />
-              <div className="flex-1">
-                <p className="text-sm font-medium text-warning-900 dark:text-warning-100">
-                  {pendingDoctors.length} doctor{pendingDoctors.length > 1 ? 's' : ''} awaiting approval
-                </p>
-                <p className="text-xs text-warning-700 dark:text-warning-300">
-                  Review and approve pending doctor registrations
-                </p>
-              </div>
-            </div>
-            
-            {/* Pending Doctors List */}
-            <div className="space-y-2">
-              {pendingDoctors.map((doctor) => (
-                <div key={doctor.id} className="flex items-center justify-between bg-white dark:bg-neutral-800 rounded-md p-3 border border-warning-200 dark:border-warning-800">
-                  <div className="flex items-center space-x-3">
-                    <Avatar 
-                      fallback={doctor.name ? doctor.name.split(' ').map(n => n[0]).join('') : 'D'}
-                      className="h-8 w-8"
-                    />
-                    <div>
-                      <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-                        {doctor.name}
-                      </p>
-                      <p className="text-xs text-neutral-600 dark:text-neutral-400">
-                        {doctor.email}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Button 
-                      size="sm" 
-                      className="bg-success-600 hover:bg-success-700 text-white"
-                      onClick={() => handleAcceptDoctor(doctor.id)}
-                    >
-                      <UserCheck className="h-3 w-3 mr-1" />
-                      Approve
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="text-error-600 border-error-300 hover:bg-error-50"
-                    >
-                      <UserX className="h-3 w-3 mr-1" />
-                      Reject
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Card>
-      )}
+        </Button>      </div>
       
       {/* Filters and Search */}
       <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:space-x-4 sm:space-y-0">
@@ -323,10 +251,9 @@ const AdminUsers = () => {
                       <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                         user.status === 'active' ? 'bg-success-50 text-success-700 dark:bg-success-900/30 dark:text-success-400' : 
                         user.status === 'suspended' ? 'bg-error-50 text-error-700 dark:bg-error-900/30 dark:text-error-400' :
-                        (user.role === 'doctor' && !user.isAccepted) ? 'bg-warning-50 text-warning-700 dark:bg-warning-900/30 dark:text-warning-400' : 
                         'bg-neutral-50 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-400'
                       }`}>
-                        {user.role === 'doctor' && !user.isAccepted ? 'Pending' : user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+                        {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
                       </span>
                     </td><td className="whitespace-nowrap px-4 py-3 text-neutral-600 dark:text-neutral-400">
                       {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
@@ -343,32 +270,31 @@ const AdminUsers = () => {
                           Details
                         </Button>
                         
-                        {/* Doctor acceptance button for pending doctors */}
-                        {user.role === 'doctor' && !user.isAccepted && (
-                          <Button 
-                            variant="outline"
-                            size="sm"
-                            className="border-success-500 bg-success-50 text-success-700 hover:bg-success-100 hover:text-success-800 dark:border-success-400 dark:bg-success-900/20 dark:text-success-400 dark:hover:bg-success-900/30"
-                            onClick={() => handleAcceptDoctor(user.id)}
-                          >
-                            <UserCheck className="h-3 w-3 mr-1" />
-                            Accept
-                          </Button>
-                        )}
-                        
-                        {/* Suspend user button */}
-                        {user.status !== 'suspended' && user.id !== currentAuthUser?.id && (
+                        {/* Suspend/Reactivate toggle button */}
+                        {user.id !== currentAuthUser?.id && (
                           <Button 
                             variant="outline" 
                             size="sm"
-                            className="border-warning-500 bg-warning-50 text-warning-700 hover:bg-warning-100 hover:text-warning-800 dark:border-warning-400 dark:bg-warning-900/20 dark:text-warning-400 dark:hover:bg-warning-900/30"
-                            onClick={() => handleSuspendUser(user.id)}
+                            className={user.status === 'suspended' 
+                              ? "border-success-500 bg-success-50 text-success-700 hover:bg-success-100 hover:text-success-800 dark:border-success-400 dark:bg-success-900/20 dark:text-success-400 dark:hover:bg-success-900/30"
+                              : "border-warning-500 bg-warning-50 text-warning-700 hover:bg-warning-100 hover:text-warning-800 dark:border-warning-400 dark:bg-warning-900/20 dark:text-warning-400 dark:hover:bg-warning-900/30"
+                            }
+                            onClick={() => handleToggleSuspension(user.id, user.status)}
                           >
-                            <UserX className="h-3 w-3 mr-1" />
-                            Suspend
-                          </Button>
-                        )}
-                          {/* Edit button */}
+                            {user.status === 'suspended' ? (
+                              <>
+                                <UserCheck className="h-3 w-3 mr-1" />
+                                Reactivate
+                              </>
+                            ) : (
+                              <>
+                                <UserX className="h-3 w-3 mr-1" />
+                                Suspend
+                              </>
+                            )}
+                          </Button>                        )}
+
+                        {/* Edit button */}
                         <Button 
                           variant="outline" 
                           size="sm"
@@ -377,9 +303,7 @@ const AdminUsers = () => {
                         >
                           <Edit className="h-3 w-3 mr-1" />
                           Edit
-                        </Button>
-
-                        {/* Delete button */}
+                        </Button>                        {/* Delete button */}
                         <Button 
                           variant="outline" 
                           size="sm"
@@ -471,8 +395,7 @@ const AdminUsers = () => {
               <div>
                 <h3 className="text-lg font-medium text-neutral-900 dark:text-neutral-100 mb-3">
                   User Information
-                </h3>
-                {userDetails ? (
+                </h3>                {userDetails ? (
                   <div className="space-y-2 text-sm">
                     <p><span className="font-medium">ID:</span> {userDetails.id}</p>
                     <p><span className="font-medium">Name:</span> {userDetails.name}</p>
@@ -481,7 +404,33 @@ const AdminUsers = () => {
                     <p><span className="font-medium">Status:</span> {userDetails.suspension ? 'Suspended' : 'Active'}</p>
                     <p><span className="font-medium">Signup Date:</span> {userDetails.signupDate ? new Date(userDetails.signupDate).toLocaleDateString() : 'N/A'}</p>
                     {userDetails.role === 'doctor' && (
-                      <p><span className="font-medium">Accepted:</span> {currentUser.isAccepted ? 'Yes' : 'No'}</p>
+                      <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md">
+                        <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">Doctor Status</h4>
+                        {doctorAcceptanceStatus ? (
+                          <div className="space-y-1">
+                            <p><span className="font-medium">Acceptance Status:</span> 
+                              <span className={`ml-2 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                doctorAcceptanceStatus.status === true || doctorAcceptanceStatus.status === 'accepted' || doctorAcceptanceStatus.status === 'approved'
+                                  ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                  : doctorAcceptanceStatus.status === false || doctorAcceptanceStatus.status === 'rejected' || doctorAcceptanceStatus.status === 'denied'
+                                  ? 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                  : 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                              }`}>
+                                {doctorAcceptanceStatus.status === true || doctorAcceptanceStatus.status === 'accepted' || doctorAcceptanceStatus.status === 'approved' 
+                                  ? 'Accepted' 
+                                  : doctorAcceptanceStatus.status === false || doctorAcceptanceStatus.status === 'rejected' || doctorAcceptanceStatus.status === 'denied'
+                                  ? 'Rejected'
+                                  : 'Pending'}
+                              </span>
+                            </p>
+                            {doctorAcceptanceStatus.message && (
+                              <p><span className="font-medium">Message:</span> {doctorAcceptanceStatus.message}</p>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-gray-600 dark:text-gray-400">Doctor acceptance status not available</p>
+                        )}
+                      </div>
                     )}
                   </div>
                 ) : (

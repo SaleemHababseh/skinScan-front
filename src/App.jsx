@@ -35,6 +35,7 @@ import DoctorUpload from "./pages/doctor/Upload";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminUsers from "./pages/admin/Users";
 import AdminReports from "./pages/admin/Reports";
+import NewDoctors from "./pages/admin/NewDoctors";
 
 // Shared Pages
 import Profile from "./pages/Profile";
@@ -204,13 +205,22 @@ function App() {
               </DashboardLayout>
             </ProtectedRoute>
           }
-        />
-        <Route
+        />        <Route
           path="/admin/reports"
           element={
             <ProtectedRoute requiredRole="admin">
               <DashboardLayout>
                 <AdminReports />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/new-doctors"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <DashboardLayout>
+                <NewDoctors />
               </DashboardLayout>
             </ProtectedRoute>
           }

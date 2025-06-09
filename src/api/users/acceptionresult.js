@@ -21,7 +21,8 @@ const checkAcception = async ({ doctor_id, token }) => {
       throw new Error(data.detail || "Failed to check acception result");
     }
 
-    return data;
+    // Modify the return statement to handle the response correctly
+    return data.Result === true;
   } catch (error) {
     console.error("Acception check failed:", error.message);
     throw error;

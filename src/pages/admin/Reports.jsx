@@ -1,78 +1,46 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Calendar, BarChart2, PieChart, LineChart, Download, Filter, RefreshCw, AlertTriangle, Users, FileText } from 'lucide-react';
+import { Filter, RefreshCw, FileText } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import useAuthStore from '../../store/auth-store';
-import useAppointmentsStore from '../../store/appointments-store';
-import { getAllUsersInfo, getUserInfoByRole, getAllRecords, getReportsByStatus } from '../../api/admin';
+import { getReportsByStatus } from '../../api/admin';
 
 const AdminReports = () => {
   const { user, token } = useAuthStore();
-  const { appointments } = useAppointmentsStore();
-  const [dateRange, setDateRange] = useState('last30days');
-  const [reportType, setReportType] = useState('all');
   const [reportStatus, setReportStatus] = useState('all');
   const [isLoading, setIsLoading] = useState(false);
-  
-  // Real reports data from API
-  const [reports, setReports] = useState({
-    userStats: { total: 0, doctors: 0, patients: 0, admins: 0 },
-    appointmentStats: { total: appointments?.length || 0, completed: 0, cancelled: 0 },
-    diagnosisStats: { total: 0, completed: 0, pending: 0 },
-    systemReports: { pending: 0, inProgress: 0, resolved: 0 }
-  });
-
   const [detailedReports, setDetailedReports] = useState([]);
-  // Load reports data from APIs
+  const [reportCounts, setReportCounts] = useState({
+    pending: 0,
+    in_progress: 0,
+    resolved: 0,
+    total: 0
+  });  // Load reports data from API
   const loadReportsData = useCallback(async () => {
     if (!token) return;
     
     setIsLoading(true);
     try {
-      // Get all users
-      const allUsers = await getAllUsersInfo(token);
-      
-      // Get users by role
-      const doctors = await getUserInfoByRole('doctor', token);
-      const patients = await getUserInfoByRole('patient', token);
-      const admins = await getUserInfoByRole('admin', token);
-      
-      // Get all records for diagnoses
-      const allRecords = await getAllRecords(token);
-      
       // Get reports by status
       const pendingReports = await getReportsByStatus('pending', token);
-      const inProgressReports = await getReportsByStatus('in progress', token);
-      const resolvedReports = await getReportsByStatus('resolved', token);      // Update stats
-      setReports({
-        userStats: {
-          total: Array.isArray(allUsers) ? allUsers.length : 0,
-          doctors: Array.isArray(doctors) ? doctors.length : 0,
-          patients: Array.isArray(patients) ? patients.length : 0,
-          admins: Array.isArray(admins) ? admins.length : 0
-        },
-        appointmentStats: {
-          total: appointments?.length || 0,
-          completed: 0, // This would need appointment status data
-          cancelled: 0  // This would need appointment status data
-        },
-        diagnosisStats: {
-          total: Array.isArray(allRecords) ? allRecords.length : 0,
-          completed: Array.isArray(allRecords) ? allRecords.length : 0, // Assuming all records are completed
-          pending: 0
-        },
-        systemReports: {
-          pending: Array.isArray(pendingReports) ? pendingReports.length : 0,
-          inProgress: Array.isArray(inProgressReports) ? inProgressReports.length : 0,
-          resolved: Array.isArray(resolvedReports) ? resolvedReports.length : 0
-        }
+      const inProgressReports = await getReportsByStatus('in_progress', token);
+      const resolvedReports = await getReportsByStatus('resolved', token);
+
+      // Update report counts
+      setReportCounts({
+        pending: Array.isArray(pendingReports) ? pendingReports.length : 0,
+        in_progress: Array.isArray(inProgressReports) ? inProgressReports.length : 0,
+        resolved: Array.isArray(resolvedReports) ? resolvedReports.length : 0,
+        total: (Array.isArray(pendingReports) ? pendingReports.length : 0) + 
+               (Array.isArray(inProgressReports) ? inProgressReports.length : 0) + 
+               (Array.isArray(resolvedReports) ? resolvedReports.length : 0)
       });
 
       // Set detailed reports based on current filter
       let currentReports = [];
       if (reportStatus === 'pending') {
         currentReports = pendingReports;
-      } else if (reportStatus === 'in progress') {
+      } else if (reportStatus === 'in_progress') {
         currentReports = inProgressReports;
       } else if (reportStatus === 'resolved') {
         currentReports = resolvedReports;
@@ -84,15 +52,15 @@ const AdminReports = () => {
           ...(Array.isArray(resolvedReports) ? resolvedReports : [])
         ];
       }
-        setDetailedReports(Array.isArray(currentReports) ? currentReports : []);
+      
+      setDetailedReports(Array.isArray(currentReports) ? currentReports : []);
 
     } catch (error) {
       console.error('Error loading reports data:', error);
     } finally {
       setIsLoading(false);
     }
-  }, [token, appointments?.length, reportStatus]);
-
+  }, [token, reportStatus]);
   useEffect(() => {
     // Load reports from API
     if (user?.id && token) {
@@ -100,11 +68,7 @@ const AdminReports = () => {
     }
   }, [user?.id, token, loadReportsData]);
   
-  // Handle report download
-  const handleDownloadReport = (format) => {
-    alert(`Downloading ${reportType} report in ${format} format...`);
-    // Actual download implementation would be here
-  };  // Handle report refresh
+  // Handle report refresh
   const handleRefreshReport = () => {
     loadReportsData();
   };
@@ -114,72 +78,18 @@ const AdminReports = () => {
       {/* Header */}
       <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Analytics & Reports</h1>
-          <p className="mt-1 text-neutral-600 dark:text-neutral-400">View system performance and usage statistics</p>
+          <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">System Reports</h1>
+          <p className="mt-1 text-neutral-600 dark:text-neutral-400">View and manage system reports</p>
         </div>
-        <div className="flex space-x-2">
-          <Button variant="outline" className="flex items-center" onClick={handleRefreshReport}>
-            <RefreshCw className="mr-2 h-4 w-4" /> Refresh
-          </Button>
-          <div className="relative inline-block text-left">
-            <Button className="flex items-center">
-              <Download className="mr-2 h-4 w-4" /> Export
-            </Button>
-            <div className="absolute right-0 mt-2 hidden w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-neutral-800">
-              <div className="py-1">
-                <button className="block w-full px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-neutral-700" onClick={() => handleDownloadReport('csv')}>
-                  CSV
-                </button>
-                <button className="block w-full px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-neutral-700" onClick={() => handleDownloadReport('pdf')}>
-                  PDF
-                </button>
-                <button className="block w-full px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-neutral-700" onClick={() => handleDownloadReport('excel')}>
-                  Excel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <Button variant="outline" className="flex items-center" onClick={handleRefreshReport}>
+          <RefreshCw className="mr-2 h-4 w-4" /> Refresh
+        </Button>
       </div>
       
-      {/* Filters */}
-      <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:space-x-4 sm:space-y-0">
+      {/* Report Status Filter */}
+      <div className="flex items-center space-x-4">
         <div className="flex items-center space-x-2">
           <Filter className="h-4 w-4 text-neutral-500" />
-          <span className="text-sm text-neutral-700 dark:text-neutral-300">Date Range:</span>
-        </div>
-        <select
-          className="rounded-md border border-neutral-300 bg-white py-2 pl-3 pr-8 text-sm dark:border-neutral-700 dark:bg-neutral-800"
-          value={dateRange}
-          onChange={(e) => setDateRange(e.target.value)}
-        >
-          <option value="today">Today</option>
-          <option value="yesterday">Yesterday</option>
-          <option value="last7days">Last 7 Days</option>
-          <option value="last30days">Last 30 Days</option>
-          <option value="thisMonth">This Month</option>
-          <option value="lastMonth">Last Month</option>
-          <option value="thisYear">This Year</option>
-          <option value="custom">Custom Range</option>
-        </select>
-          <div className="flex items-center space-x-2">
-          <BarChart2 className="h-4 w-4 text-neutral-500" />
-          <span className="text-sm text-neutral-700 dark:text-neutral-300">Report Type:</span>
-        </div>
-        <select
-          className="rounded-md border border-neutral-300 bg-white py-2 pl-3 pr-8 text-sm dark:border-neutral-700 dark:bg-neutral-800"
-          value={reportType}
-          onChange={(e) => setReportType(e.target.value)}
-        >
-          <option value="all">All Reports</option>
-          <option value="users">User Reports</option>
-          <option value="diagnoses">Diagnosis Reports</option>
-          <option value="appointments">Appointment Reports</option>
-          <option value="system">System Reports</option>
-        </select>
-        
-        <div className="flex items-center space-x-2">
-          <FileText className="h-4 w-4 text-neutral-500" />
           <span className="text-sm text-neutral-700 dark:text-neutral-300">Report Status:</span>
         </div>
         <select
@@ -189,283 +99,138 @@ const AdminReports = () => {
         >
           <option value="all">All Statuses</option>
           <option value="pending">Pending</option>
-          <option value="in progress">In Progress</option>
+          <option value="in_progress">In Progress</option>
           <option value="resolved">Resolved</option>
         </select>
       </div>
-        {/* Reports Summary */}
+
+      {/* Report Counts Summary */}
       {isLoading ? (
-        <div className="flex h-64 items-center justify-center">
+        <div className="flex h-32 items-center justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-500 border-t-transparent"></div>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
-          <Card className="bg-primary-50 dark:bg-transparent dark:border dark:border-primary-900">
+          <Card className="bg-neutral-50 dark:bg-transparent dark:border dark:border-neutral-800">
             <div>
-              <h3 className="text-sm font-medium text-primary-700 dark:text-primary-400">Total Users</h3>
-              <p className="mt-1 text-2xl font-bold text-primary-900 dark:text-primary-50">
-                {reports?.userStats?.total || 0}
-              </p>
-              <p className="mt-1 text-xs text-primary-700 dark:text-primary-400">
-                Doctors: {reports?.userStats?.doctors || 0} | Patients: {reports?.userStats?.patients || 0}
-              </p>
-            </div>
-          </Card>
-          
-          <Card className="bg-secondary-50 dark:bg-transparent dark:border dark:border-secondary-900">
-            <div>
-              <h3 className="text-sm font-medium text-secondary-700 dark:text-secondary-400">Total Diagnoses</h3>
-              <p className="mt-1 text-2xl font-bold text-secondary-900 dark:text-secondary-50">
-                {reports?.diagnosisStats?.total || 0}
-              </p>
-              <p className="mt-1 text-xs text-secondary-700 dark:text-secondary-400">
-                Completed: {reports?.diagnosisStats?.completed || 0} | Pending: {reports?.diagnosisStats?.pending || 0}
-              </p>
-            </div>
-          </Card>
-          
-          <Card className="bg-success-50 dark:bg-transparent dark:border dark:border-success-900">
-            <div>
-              <h3 className="text-sm font-medium text-success-700 dark:text-success-400">Total Appointments</h3>
-              <p className="mt-1 text-2xl font-bold text-success-900 dark:text-success-50">
-                {reports?.appointmentStats?.total || 0}
-              </p>
-              <p className="mt-1 text-xs text-success-700 dark:text-success-400">
-                Completed: {reports?.appointmentStats?.completed || 0} | Cancelled: {reports?.appointmentStats?.cancelled || 0}
+              <h3 className="text-sm font-medium text-neutral-700 dark:text-neutral-400">Total Reports</h3>
+              <p className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-50">
+                {reportCounts.total}
               </p>
             </div>
           </Card>
           
           <Card className="bg-warning-50 dark:bg-transparent dark:border dark:border-warning-900">
             <div>
-              <h3 className="text-sm font-medium text-warning-700 dark:text-warning-400">System Reports</h3>
+              <h3 className="text-sm font-medium text-warning-700 dark:text-warning-400">Pending</h3>
               <p className="mt-1 text-2xl font-bold text-warning-900 dark:text-warning-50">
-                {(reports?.systemReports?.pending || 0) + (reports?.systemReports?.inProgress || 0) + (reports?.systemReports?.resolved || 0)}
+                {reportCounts.pending}
               </p>
-              <p className="mt-1 text-xs text-warning-700 dark:text-warning-400">
-                Pending: {reports?.systemReports?.pending || 0} | Resolved: {reports?.systemReports?.resolved || 0}
-              </p>            </div>
+            </div>
           </Card>
           
-          <Card className="bg-neutral-50 dark:bg-transparent dark:border dark:border-neutral-800">
+          <Card className="bg-blue-50 dark:bg-transparent dark:border dark:border-blue-900">
             <div>
-              <h3 className="text-sm font-medium text-neutral-700 dark:text-neutral-400">Average Response Time</h3>
-              <p className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-50">
-                {reports?.systemStats?.avgResponseTime || '0ms'}
+              <h3 className="text-sm font-medium text-blue-700 dark:text-blue-400">In Progress</h3>
+              <p className="mt-1 text-2xl font-bold text-blue-900 dark:text-blue-50">
+                {reportCounts.in_progress}
               </p>
-              <p className="mt-1 text-xs text-neutral-700 dark:text-neutral-400">
-                <span className={reports?.systemStats?.responseTimeChange <= 0 ? 'text-success-600 dark:text-success-400' : 'text-error-600 dark:text-error-400'}>
-                  {reports?.systemStats?.responseTimeChange <= 0 ? '↓' : '↑'} {Math.abs(reports?.systemStats?.responseTimeChange || 0)}%
-                </span>
-                {' '}vs previous period
+            </div>
+          </Card>
+          
+          <Card className="bg-success-50 dark:bg-transparent dark:border dark:border-success-900">
+            <div>
+              <h3 className="text-sm font-medium text-success-700 dark:text-success-400">Resolved</h3>
+              <p className="mt-1 text-2xl font-bold text-success-900 dark:text-success-50">
+                {reportCounts.resolved}
               </p>
             </div>
           </Card>
         </div>
-      )}
-      
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* User Growth Chart */}
-        <Card className="p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-medium text-neutral-900 dark:text-neutral-100">User Growth</h2>
-            <Button variant="ghost" size="sm">
-              <Calendar className="mr-2 h-4 w-4" /> View Details
-            </Button>
-          </div>
-          
-          {/* Chart Placeholder */}
-          <div className="h-64 rounded-md border-2 border-dashed border-neutral-300 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900">
-            <div className="flex h-full items-center justify-center">
-              <div className="text-center">
-                <LineChart className="mx-auto h-10 w-10 text-neutral-400" />
-                <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
-                  User Growth Chart - To be implemented
-                </p>
-              </div>
-            </div>
-          </div>
-        </Card>
-        
-        {/* Diagnoses Distribution Chart */}
-        <Card className="p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-medium text-neutral-900 dark:text-neutral-100">Diagnoses by Type</h2>
-            <Button variant="ghost" size="sm">
-              <Calendar className="mr-2 h-4 w-4" /> View Details
-            </Button>
-          </div>
-          
-          {/* Chart Placeholder */}
-          <div className="h-64 rounded-md border-2 border-dashed border-neutral-300 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900">
-            <div className="flex h-full items-center justify-center">
-              <div className="text-center">
-                <PieChart className="mx-auto h-10 w-10 text-neutral-400" />
-                <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
-                  Diagnoses Distribution Chart - To be implemented
-                </p>
-              </div>
-            </div>
-          </div>
-        </Card>
-        
-        {/* Appointment Statistics Chart */}
-        <Card className="p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-medium text-neutral-900 dark:text-neutral-100">Appointments Over Time</h2>
-            <Button variant="ghost" size="sm">
-              <Calendar className="mr-2 h-4 w-4" /> View Details
-            </Button>
-          </div>
-          
-          {/* Chart Placeholder */}
-          <div className="h-64 rounded-md border-2 border-dashed border-neutral-300 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900">
-            <div className="flex h-full items-center justify-center">
-              <div className="text-center">
-                <BarChart2 className="mx-auto h-10 w-10 text-neutral-400" />
-                <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
-                  Appointment Statistics Chart - To be implemented
-                </p>
-              </div>
-            </div>
-          </div>
-        </Card>
-        
-        {/* System Performance Chart */}
-        <Card className="p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-medium text-neutral-900 dark:text-neutral-100">System Performance</h2>
-            <Button variant="ghost" size="sm">
-              <Calendar className="mr-2 h-4 w-4" /> View Details
-            </Button>
-          </div>
-          
-          {/* Chart Placeholder */}
-          <div className="h-64 rounded-md border-2 border-dashed border-neutral-300 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900">
-            <div className="flex h-full items-center justify-center">
-              <div className="text-center">
-                <LineChart className="mx-auto h-10 w-10 text-neutral-400" />
-                <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
-                  System Performance Chart - To be implemented
-                </p>
-              </div>
-            </div>
-          </div>
-        </Card>
-      </div>
-      
+      )}      
       {/* Detailed Reports Table */}
-      <div>
-        <div className="mb-4">
-          <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">Detailed Reports</h2>
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">
+            Detailed Reports {reportStatus !== 'all' && `(${reportStatus.charAt(0).toUpperCase() + reportStatus.slice(1)})`}
+          </h2>
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">
+            {detailedReports.length} report{detailedReports.length !== 1 ? 's' : ''} found
+          </p>
         </div>
         
         <Card className="overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-neutral-50 dark:bg-neutral-900">
-                <tr className="border-b border-neutral-200 text-left text-sm font-medium text-neutral-500 dark:border-neutral-800 dark:text-neutral-400">
-                  <th className="whitespace-nowrap px-4 py-3">Report Name</th>
-                  <th className="whitespace-nowrap px-4 py-3">Type</th>
-                  <th className="whitespace-nowrap px-4 py-3">Period</th>
-                  <th className="whitespace-nowrap px-4 py-3">Generated</th>
-                  <th className="whitespace-nowrap px-4 py-3">Size</th>
-                  <th className="whitespace-nowrap px-4 py-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
-                <tr className="text-sm">
-                  <td className="whitespace-nowrap px-4 py-3 font-medium text-neutral-900 dark:text-neutral-100">
-                    User Activity Report
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-neutral-600 dark:text-neutral-400">
-                    <span className="inline-flex items-center rounded-full bg-primary-50 px-2.5 py-0.5 text-xs font-medium text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">
-                      Users
-                    </span>
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-neutral-600 dark:text-neutral-400">
-                    Last 30 days
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-neutral-600 dark:text-neutral-400">
-                    Apr 21, 2025
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-neutral-600 dark:text-neutral-400">
-                    245 KB
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3">
-                    <Button size="sm">View</Button>
-                  </td>
-                </tr>
-                <tr className="text-sm">
-                  <td className="whitespace-nowrap px-4 py-3 font-medium text-neutral-900 dark:text-neutral-100">
-                    Diagnosis Outcomes
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-neutral-600 dark:text-neutral-400">
-                    <span className="inline-flex items-center rounded-full bg-secondary-50 px-2.5 py-0.5 text-xs font-medium text-secondary-700 dark:bg-secondary-900/30 dark:text-secondary-400">
-                      Diagnoses
-                    </span>
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-neutral-600 dark:text-neutral-400">
-                    Last 30 days
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-neutral-600 dark:text-neutral-400">
-                    Apr 20, 2025
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-neutral-600 dark:text-neutral-400">
-                    180 KB
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3">
-                    <Button size="sm">View</Button>
-                  </td>
-                </tr>
-                <tr className="text-sm">
-                  <td className="whitespace-nowrap px-4 py-3 font-medium text-neutral-900 dark:text-neutral-100">
-                    Appointment Analytics
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-neutral-600 dark:text-neutral-400">
-                    <span className="inline-flex items-center rounded-full bg-success-50 px-2.5 py-0.5 text-xs font-medium text-success-700 dark:bg-success-900/30 dark:text-success-400">
-                      Appointments
-                    </span>
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-neutral-600 dark:text-neutral-400">
-                    Last 30 days
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-neutral-600 dark:text-neutral-400">
-                    Apr 19, 2025
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-neutral-600 dark:text-neutral-400">
-                    205 KB
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3">
-                    <Button size="sm">View</Button>
-                  </td>
-                </tr>
-                <tr className="text-sm">
-                  <td className="whitespace-nowrap px-4 py-3 font-medium text-neutral-900 dark:text-neutral-100">
-                    System Performance
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-neutral-600 dark:text-neutral-400">
-                    <span className="inline-flex items-center rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-medium text-neutral-700 dark:bg-neutral-800 dark:text-neutral-400">
-                      System
-                    </span>
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-neutral-600 dark:text-neutral-400">
-                    Last 30 days
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-neutral-600 dark:text-neutral-400">
-                    Apr 18, 2025
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-neutral-600 dark:text-neutral-400">
-                    310 KB
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3">
-                    <Button size="sm">View</Button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          {detailedReports.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full">                <thead className="bg-neutral-50 dark:bg-neutral-900">
+                  <tr className="border-b border-neutral-200 text-left text-sm font-medium text-neutral-500 dark:border-neutral-800 dark:text-neutral-400">
+                    <th className="whitespace-nowrap px-4 py-3">Report ID</th>
+                    <th className="whitespace-nowrap px-4 py-3">Reporter ID</th>
+                    <th className="whitespace-nowrap px-4 py-3">Report Type</th>
+                    <th className="whitespace-nowrap px-4 py-3">Description</th>
+                    <th className="whitespace-nowrap px-4 py-3">Status</th>
+                    <th className="whitespace-nowrap px-4 py-3">Created Date</th>
+                    <th className="whitespace-nowrap px-4 py-3">Actions</th>
+                  </tr>
+                </thead>                <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
+                  {detailedReports.map((report, index) => (
+                    <tr key={report.report_id || index} className="text-sm">
+                      <td className="whitespace-nowrap px-4 py-3 font-medium text-neutral-900 dark:text-neutral-100">
+                        #{report.report_id || `REPORT-${index + 1}`}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                        User #{report.reporter_id}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3">
+                        <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                          {report.report_type ? report.report_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Unknown'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400 max-w-xs truncate">
+                        {report.description || 'No description'}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3">
+                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                          report.status === 'pending' ? 'bg-warning-50 text-warning-700 dark:bg-warning-900/30 dark:text-warning-400' :
+                          report.status === 'in_progress' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                          report.status === 'resolved' ? 'bg-success-50 text-success-700 dark:bg-success-900/30 dark:text-success-400' :
+                          'bg-neutral-50 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-400'
+                        }`}>
+                          {report.status ? report.status.charAt(0).toUpperCase() + report.status.slice(1) : 'Unknown'}
+                        </span>
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                        {report.created_at ? new Date(report.created_at).toLocaleDateString() : 'N/A'}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3">
+                        <div className="flex items-center space-x-2">
+                          <Button size="sm" variant="outline">View</Button>
+                          {report.status !== 'resolved' && (
+                            <Button size="sm" variant="outline" className="text-blue-600 hover:text-blue-700">
+                              Update
+                            </Button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="flex h-32 flex-col items-center justify-center text-center">
+              <FileText className="h-8 w-8 text-neutral-400" />
+              <p className="mt-2 text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                No reports found
+              </p>
+              <p className="text-xs text-neutral-600 dark:text-neutral-400">
+                {reportStatus !== 'all' 
+                  ? `No reports with status "${reportStatus}" found`
+                  : 'No reports available for the selected criteria'
+                }
+              </p>
+            </div>
+          )}
         </Card>
       </div>
     </div>

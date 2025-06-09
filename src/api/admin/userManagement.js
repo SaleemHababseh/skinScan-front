@@ -1,5 +1,6 @@
 import { baseURL } from "../config.js";
 
+// Toggle user suspension (suspend/reactivate)
 export const suspendUser = async (userId, token) => {
     try {
         const response = await fetch(`${baseURL}admin/user/suspend/${userId}`, {
@@ -15,12 +16,12 @@ export const suspendUser = async (userId, token) => {
 
         if (!response.ok) {
             console.error("Server error response:", data);
-            throw new Error(data.detail || "Failed to suspend user");
+            throw new Error(data.detail || "Failed to toggle user suspension");
         }
 
         return data;
     } catch (error) {
-        console.error("Error suspending user:", error);
+        console.error("Error toggling user suspension:", error);
         throw error;
     }
 };
@@ -71,6 +72,32 @@ export const getNotAcceptedDoctors = async (acception = false, token) => {
         return data;
     } catch (error) {
         console.error("Error getting doctors by acception:", error);
+        throw error;
+    }
+};
+
+// Get doctor CV by ID
+export const getDoctorCV = async (doctorId, token) => {
+    try {
+        const response = await fetch(`${baseURL}admin/doctor-info/get-doctor-cv/${doctorId}`, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json",
+                "ngrok-skip-browser-warning": "true",
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            console.error("Server error response:", data);
+            throw new Error(data.detail || "Failed to get doctor CV");
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Error getting doctor CV:", error);
         throw error;
     }
 };

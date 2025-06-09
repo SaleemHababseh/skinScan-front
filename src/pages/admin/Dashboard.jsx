@@ -4,12 +4,10 @@ import { Users, FileText, BarChart2, Activity, AlertTriangle, UserCheck, UserX }
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import useAuthStore from '../../store/auth-store';
-import useAppointmentsStore from '../../store/appointments-store';
-import { getAllUsersInfo, getUserInfoByRole, getAllRecords, getRecordByImageId, removeRecordByImageId, getNotAcceptedDoctors, getReportsByStatus } from '../../api/admin';
+import { getAllUsersInfo, getUserInfoByRole, getAllRecords, getNotAcceptedDoctors, getReportsByStatus } from '../../api/admin';
 
 const AdminDashboard = () => {
   const { user, token } = useAuthStore();
-  const { appointments } = useAppointmentsStore();
   const [isLoading, setIsLoading] = useState(false);
   
   // Real admin stats from API
@@ -17,18 +15,15 @@ const AdminDashboard = () => {
     totalUsers: 0,
     totalDoctors: 0,
     totalPatients: 0,
-    activeAppointments: appointments?.length || 0,
     totalDiagnoses: 0,
     pendingDoctors: 0,
     pendingReports: 0,
     systemHealth: 98.5
   });
   
-  const [recentActivities, setRecentActivities] = useState([]);
   const [systemAlerts, setSystemAlerts] = useState([]);
-  const [recentRecords, setRecentRecords] = useState([]);
 
-  // Load admin data from APIs
+  // Load admin overview data from APIs
   const loadAdminData = useCallback(async () => {
     if (!token) return;
     
@@ -54,45 +49,31 @@ const AdminDashboard = () => {
         totalUsers: Array.isArray(allUsers) ? allUsers.length : 0,
         totalDoctors: Array.isArray(doctors) ? doctors.length : 0,
         totalPatients: Array.isArray(patients) ? patients.length : 0,
-        activeAppointments: appointments?.length || 0,
         totalDiagnoses: Array.isArray(allRecords) ? allRecords.length : 0,
         pendingDoctors: Array.isArray(pendingDoctors) ? pendingDoctors.length : 0,
         pendingReports: Array.isArray(pendingReports) ? pendingReports.length : 0,
         systemHealth: 98.5
       });
 
-      // Set recent activities based on data
-      setRecentActivities([
-        { id: 1, type: 'user_registration', message: `${Array.isArray(patients) ? patients.length : 0} total patients registered`, time: 'All time' },
-        { id: 2, type: 'doctor_pending', message: `${Array.isArray(pendingDoctors) ? pendingDoctors.length : 0} doctors awaiting approval`, time: 'Active' },
-        { id: 3, type: 'diagnosis_completed', message: `${Array.isArray(allRecords) ? allRecords.length : 0} total diagnoses completed`, time: 'All time' }
-      ]);
-
-      // Set recent records (latest 5)
-      if (Array.isArray(allRecords)) {
-        const formattedRecords = allRecords
-          .map((record, index) => {
-            const recordInfo = record.records_info || record;
-            return {
-              id: recordInfo.img_id || index,
-              userId: recordInfo.user_id,
-              diagnosis: recordInfo.test_result || 'Unknown',
-              date: recordInfo.test_date || new Date().toISOString(),
-              imageId: recordInfo.img_id
-            };
-          })
-          .sort((a, b) => new Date(b.date) - new Date(a.date))
-          .slice(0, 5);
-        setRecentRecords(formattedRecords);
-      }
-
       // Set system alerts
       const alerts = [];
       if (Array.isArray(pendingDoctors) && pendingDoctors.length > 0) {
-        alerts.push({ id: 1, type: 'warning', message: `${pendingDoctors.length} doctors pending approval`, priority: 'high' });
+        alerts.push({ 
+          id: 1, 
+          type: 'warning', 
+          message: `${pendingDoctors.length} doctors pending approval`, 
+          priority: 'high',
+          action: '/admin/new-doctors'
+        });
       }
       if (Array.isArray(pendingReports) && pendingReports.length > 0) {
-        alerts.push({ id: 2, type: 'info', message: `${pendingReports.length} pending reports`, priority: 'medium' });
+        alerts.push({ 
+          id: 2, 
+          type: 'info', 
+          message: `${pendingReports.length} pending reports`, 
+          priority: 'medium',
+          action: '/admin/reports'
+        });
       }
       setSystemAlerts(alerts);
 
@@ -104,21 +85,7 @@ const AdminDashboard = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [token, appointments?.length]);
-
-  // Handle record deletion
-  const handleDeleteRecord = async (imageId) => {
-    if (window.confirm('Are you sure you want to delete this record? This action cannot be undone.')) {
-      try {
-        await removeRecordByImageId(imageId, token);
-        // Reload admin data to refresh records
-        loadAdminData();
-      } catch (error) {
-        console.error('Error deleting record:', error);
-        alert('Failed to delete record');
-      }
-    }
-  };
+  }, [token]);
 
   useEffect(() => {
     // Load admin data from API
@@ -142,6 +109,11 @@ const AdminDashboard = () => {
                 <Users className="mr-2 h-4 w-4" /> Manage Users
               </Button>
             </Link>
+            <Link to="/admin/new-doctors">
+              <Button className="bg-white/20 backdrop-blur-sm hover:bg-white/30">
+                <UserCheck className="mr-2 h-4 w-4" /> New Doctors
+              </Button>
+            </Link>
             <Link to="/admin/reports">
               <Button className="bg-white/20 backdrop-blur-sm hover:bg-white/30">
                 <BarChart2 className="mr-2 h-4 w-4" /> View Reports
@@ -151,7 +123,7 @@ const AdminDashboard = () => {
         </div>
       </div>
       
-      {/* Stats Summary */}
+      {/* Stats Overview */}
       {isLoading ? (
         <div className="flex h-40 items-center justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-500 border-t-transparent"></div>
@@ -194,7 +166,7 @@ const AdminDashboard = () => {
                   <UserCheck className="h-6 w-6 text-success-600 dark:text-success-400" />
                 </div>
                 <div>
-                  <p className="text-sm text-success-700 dark:text-success-400">Total Doctors</p>
+                  <p className="text-sm text-success-700 dark:text-success-400">Active Doctors</p>
                   <p className="text-2xl font-bold text-success-900 dark:text-success-50">
                     {stats?.totalDoctors || 0}
                   </p>
@@ -264,32 +236,31 @@ const AdminDashboard = () => {
         </>
       )}
       
-      {/* System Alerts & Recent Activity */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* System Alerts */}
-        <div>
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">System Alerts</h2>
-            <Link to="/admin/users" className="text-sm font-medium text-primary-500 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-300">
-              Manage
-            </Link>
+      {/* System Alerts */}
+      <div>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">System Alerts</h2>
+          <Button variant="outline" size="sm" onClick={loadAdminData}>
+            <Activity className="mr-2 h-4 w-4" /> Refresh
+          </Button>
+        </div>
+        
+        {isLoading ? (
+          <div className="flex h-40 items-center justify-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-500 border-t-transparent"></div>
           </div>
-          
-          {isLoading ? (
-            <div className="flex h-40 items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-500 border-t-transparent"></div>
-            </div>
-          ) : systemAlerts && systemAlerts.length > 0 ? (
-            <div className="space-y-4">
-              {systemAlerts.map((alert, index) => (
-                <Card 
-                  key={index}
-                  className={`border-l-4 ${
-                    alert.priority === 'high' ? 'border-l-error-500' :
-                    alert.priority === 'medium' ? 'border-l-warning-500' :
-                    'border-l-info-500'
-                  }`}
-                >
+        ) : systemAlerts && systemAlerts.length > 0 ? (
+          <div className="space-y-4">
+            {systemAlerts.map((alert, index) => (
+              <Card 
+                key={index}
+                className={`border-l-4 ${
+                  alert.priority === 'high' ? 'border-l-error-500' :
+                  alert.priority === 'medium' ? 'border-l-warning-500' :
+                  'border-l-info-500'
+                }`}
+              >
+                <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <AlertTriangle className={`h-5 w-5 ${
                       alert.priority === 'high' ? 'text-error-500' :
@@ -305,56 +276,24 @@ const AdminDashboard = () => {
                       </p>
                     </div>
                   </div>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card className="flex h-40 flex-col items-center justify-center text-center">
-              <AlertTriangle className="h-8 w-8 text-neutral-400" />
-              <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">No alerts at this time</p>
-            </Card>
-          )}
-        </div>
-
-        {/* Recent Activity */}
-        <div>
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">System Overview</h2>
-            <Link to="/admin/reports" className="text-sm font-medium text-primary-500 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-300">
-              View All
-            </Link>
+                  {alert.action && (
+                    <Link to={alert.action}>
+                      <Button size="sm" variant="outline">
+                        View
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+              </Card>
+            ))}
           </div>
-          
-          {isLoading ? (
-            <div className="flex h-40 items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-500 border-t-transparent"></div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {recentActivities.map((activity) => (
-                <Card key={activity.id}>
-                  <div className="flex items-center space-x-3">
-                    <div className={`rounded-full p-2 ${
-                      activity.type === 'user_registration' ? 'bg-primary-100 dark:bg-primary-900' :
-                      activity.type === 'doctor_pending' ? 'bg-warning-100 dark:bg-warning-900' :
-                      'bg-success-100 dark:bg-success-900'
-                    }`}>
-                      {activity.type === 'user_registration' && <Users className="h-4 w-4 text-primary-600 dark:text-primary-400" />}
-                      {activity.type === 'doctor_pending' && <UserX className="h-4 w-4 text-warning-600 dark:text-warning-400" />}
-                      {activity.type === 'diagnosis_completed' && <FileText className="h-4 w-4 text-success-600 dark:text-success-400" />}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-                        {activity.message}
-                      </p>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400">{activity.time}</p>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
+        ) : (
+          <Card className="flex h-40 flex-col items-center justify-center text-center">
+            <AlertTriangle className="h-8 w-8 text-neutral-400" />
+            <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">No alerts at this time</p>
+            <p className="text-xs text-neutral-500 dark:text-neutral-500">System is running smoothly</p>
+          </Card>
+        )}
       </div>
 
       {/* Quick Actions */}
@@ -370,14 +309,16 @@ const AdminDashboard = () => {
                 <Users className="mr-2 h-4 w-4" /> Manage Users
               </Button>
             </Link>
+            <Link to="/admin/new-doctors">
+              <Button variant="outline" className="flex items-center">
+                <UserCheck className="mr-2 h-4 w-4" /> Review New Doctors
+              </Button>
+            </Link>
             <Link to="/admin/reports">
               <Button variant="outline" className="flex items-center">
                 <BarChart2 className="mr-2 h-4 w-4" /> View Reports
               </Button>
             </Link>
-            <Button variant="outline" className="flex items-center" onClick={loadAdminData}>
-              <Activity className="mr-2 h-4 w-4" /> Refresh Data
-            </Button>
           </div>
         </div>
       </Card>

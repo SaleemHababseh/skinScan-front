@@ -5,7 +5,7 @@ import {
   Calendar,
   Users,
   FileText,
- 
+  UserPlus,
   HelpCircle,
   Clipboard,
   Grid,
@@ -65,11 +65,11 @@ const DashboardLayout = ({ children }) => {
         { name: 'Profile', href: '/profile', icon: User },
       ];
     }
-    
-    if (user?.role === 'admin') {
+      if (user?.role === 'admin') {
       return [
         { name: 'Dashboard', href: '/admin/dashboard', icon: Home },
         { name: 'Users', href: '/admin/users', icon: Users },
+        { name: 'New Doctors', href: '/admin/new-doctors', icon: UserPlus },
         { name: 'Reports', href: '/admin/reports', icon: FileText },
         { name: 'Logs', href: '/admin/logs', icon: Activity },
         { name: 'Statistics', href: '/admin/statistics', icon: BarChart },

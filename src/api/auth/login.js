@@ -26,11 +26,14 @@ const login = async ({
       body: body.toString(),
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
+    const data = await response.json();    if (!response.ok) {
       // Handle specific HTTP status codes
       if (response.status === 401) {
+        // Check if it's a suspended account
+        if (data.detail && data.detail.toLowerCase().includes('suspended')) {
+          throw new Error("Your account has been suspended. Please review your email or contact our support team for assistance.");
+        }
+        // Regular invalid credentials
         throw new Error("Invalid email or password. Please check your credentials and try again.");
       }
       
