@@ -33,7 +33,8 @@ const NewDoctors = () => {
   }, [token]);
 
   // Handle doctor acceptance
-  const handleAcceptDoctor = async (doctorId) => {
+  const handleAcceptDoctor = async (doctor) => {
+    const doctorId = (typeof doctor === 'object') ? (doctor.doctor_id || doctor.id) : doctor;
     if (window.confirm('Are you sure you want to accept this doctor?')) {
       try {
         await acceptDoctor(doctorId, token);
@@ -53,7 +54,8 @@ const NewDoctors = () => {
     setShowCVModal(true);
     
     try {
-      const cv = await getDoctorCV(doctor.id, token);
+      const doctorId = doctor.doctor_id || doctor.id;
+      const cv = await getDoctorCV(doctorId, token);
       setCvData(cv);
     } catch (error) {
       console.error('Error loading CV:', error);
@@ -64,8 +66,9 @@ const NewDoctors = () => {
   };
 
   // Handle CV download
-  const handleDownloadCV = async (doctorId) => {
+  const handleDownloadCV = async (doctor) => {
     try {
+      const doctorId = (typeof doctor === 'object') ? (doctor.doctor_id || doctor.id) : doctor;
       const response = await fetch(`${baseURL}admin/doctor-info/get-doctor-cv/${doctorId}`, {
         method: 'GET',
         headers: {
@@ -120,11 +123,11 @@ const NewDoctors = () => {
       ) : pendingDoctors.length > 0 ? (
         <div className="space-y-4">
           {pendingDoctors.map((doctor) => (
-            <Card key={doctor.id} className="p-6">
+            <Card key={doctor.doctor_id || doctor.id} className="p-6">
               <div className="flex items-start justify-between">
                 <div className="flex items-start space-x-4">
                   <Avatar 
-                    src={doctor.id ? `${baseURL}users/get/user-profile-picture?user_id=${doctor.id}` : null}
+                    src={(doctor.doctor_id || doctor.id) ? `${baseURL}users/get/user-profile-picture?user_id=${doctor.doctor_id || doctor.id}` : null}
                     fallback={doctor.name ? doctor.name.split(' ').map(n => n[0]).join('') : 'D'}
                     size="lg"
                   />
@@ -170,7 +173,7 @@ const NewDoctors = () => {
                   <Button 
                     size="sm" 
                     variant="outline"
-                    onClick={() => handleDownloadCV(doctor.id)}
+                    onClick={() => handleDownloadCV(doctor)}
                   >
                     <Download className="h-3 w-3 mr-1" />
                     Download
@@ -178,7 +181,7 @@ const NewDoctors = () => {
                   <Button 
                     size="sm" 
                     className="bg-success-600 hover:bg-success-700 text-white"
-                    onClick={() => handleAcceptDoctor(doctor.id)}
+                    onClick={() => handleAcceptDoctor(doctor)}
                   >
                     <UserCheck className="h-3 w-3 mr-1" />
                     Approve
@@ -210,7 +213,7 @@ const NewDoctors = () => {
                   <Button 
                     size="sm" 
                     variant="outline"
-                    onClick={() => handleDownloadCV(selectedDoctor?.id)}
+                    onClick={() => handleDownloadCV(selectedDoctor)}
                   >
                     <Download className="h-3 w-3 mr-1" />
                     Download
@@ -242,7 +245,7 @@ const NewDoctors = () => {
                         </p>
                         <Button 
                           className="mt-4"
-                          onClick={() => handleDownloadCV(selectedDoctor?.id)}
+                          onClick={() => handleDownloadCV(selectedDoctor)}
                         >
                           <Download className="h-4 w-4 mr-2" />
                           Download CV
@@ -265,7 +268,7 @@ const NewDoctors = () => {
                 <Button 
                   className="bg-success-600 hover:bg-success-700 text-white"
                   onClick={() => {
-                    handleAcceptDoctor(selectedDoctor?.id);
+                    handleAcceptDoctor(selectedDoctor);
                     setShowCVModal(false);
                   }}
                 >
