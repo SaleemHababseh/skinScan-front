@@ -3,9 +3,8 @@ const API_KEY = "f9a7c81b434e44fe8ed32c1ae7628cf7";
 const BASE_URL = "https://newsapi.org/v2";
 
 export const fetchNews = async () => {
-  try {
-    const response = await fetch(
-      `${BASE_URL}/everything?q=medical%20OR%20health%20OR%20disease%20OR%20treatment&language=en&sortBy=popularity&apiKey=${API_KEY}`,
+  try {    const response = await fetch(
+      `${BASE_URL}/everything?q=skin%20cancer&language=en&sortBy=popularity&apiKey=${API_KEY}`,
       {
         headers: {
           'accept': 'application/json',

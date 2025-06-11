@@ -187,11 +187,10 @@ const PatientDashboard = () => {
         {/* Recent Records */}
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Scan Records</h3>
-            <Button 
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Scan Records</h3>            <Button 
               variant="outline" 
               size="sm"
-              onClick={() => navigate('/patient/records')}
+              onClick={() => navigate('/patient/diagnoses')}
             >
               View All
             </Button>
