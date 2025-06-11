@@ -113,7 +113,7 @@ const useAuthStore = create(
       sendVerificationCode: async (email) => {
         set({ isLoading: true, error: null });
         try {
-          const result = await sendVerificationCode({ email });
+          const result = await sendVerificationCode( email );
           set({ isLoading: false, verificationStep: "code_sent" });
           return result;
         } catch (error) {
@@ -135,10 +135,10 @@ const useAuthStore = create(
       validateVerificationCode: async (email, code) => {
         set({ isLoading: true, error: null });
         try {
-          const result = await validateVerificationCode({
+          const result = await validateVerificationCode(
             email,
-            verification_code: code,
-          });
+           code,
+          );
           set({ isLoading: false, verificationStep: "verified" });
           return result;
         } catch (error) {
