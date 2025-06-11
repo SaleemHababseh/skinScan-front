@@ -10,7 +10,7 @@ function Contact() {
           <div className="bg-white rounded-lg shadow-md p-8">
             <h2 className="text-2xl font-semibold mb-4">Get in Touch</h2>
             <p className="text-gray-700 mb-6">
-              Have questions about MedConnect? We're here to help! Fill out the form or use one of our contact methods below.
+              Have questions about SkinScan? We're here to help! Fill out the form or use one of our contact methods below.
             </p>
             
             <div className="space-y-4">
@@ -22,7 +22,7 @@ function Contact() {
                 </div>
                 <div>
                   <h3 className="font-semibold">Phone</h3>
-                  <p className="text-gray-700">(555) 123-4567</p>
+                  <p className="text-gray-700">00962781108200</p>
                 </div>
               </div>
               
@@ -34,20 +34,13 @@ function Contact() {
                 </div>
                 <div>
                   <h3 className="font-semibold">Email</h3>
-                  <p className="text-gray-700">support@medconnect.com</p>
+                  <p className="text-gray-700">skinscanteam@gmail.com</p>
                 </div>
               </div>
               
               <div className="flex items-start">
-                <div className="bg-primary-100 p-2 rounded-full mr-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </div>
+                
                 <div>
-                  <h3 className="font-semibold">Address</h3>
-                  <p className="text-gray-700">123 Healthcare Ave, Suite 500<br />Medical District, CA 90210</p>
                 </div>
               </div>
             </div>
@@ -62,7 +55,7 @@ function Contact() {
                   type="text"
                   id="name"
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  placeholder="John Doe"
+                  placeholder="Saleem A.Hababsah"
                 />
               </div>
               
@@ -72,7 +65,7 @@ function Contact() {
                   type="email"
                   id="email"
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  placeholder="john@example.com"
+                  placeholder="skinscanteam@gmail.com"
                 />
               </div>
               
@@ -122,9 +115,9 @@ function Contact() {
               </p>
             </div>
             <div>
-              <h3 className="font-semibold mb-2">How do I become a healthcare provider on MedConnect?</h3>
+              <h3 className="font-semibold mb-2">How do I become a healthcare provider on SkinScan?</h3>
               <p className="text-gray-700">
-                If you're a licensed healthcare professional, please contact our provider relations team at providers@medconnect.com.
+                If you're a licensed healthcare professional, please contact our provider relations team at skinscanteam@gmail.com.
               </p>
             </div>
           </div>

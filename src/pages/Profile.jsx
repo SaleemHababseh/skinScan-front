@@ -46,27 +46,26 @@ const Profile = () => {
     if (user?.id && !hasLoadedUserInfo) {
       try {
         await fetchUserBasicInfo();
+          // Only set bio data for doctors
+        let bioData = '';
         
-        let bioData = user.bio || '';
-        
-        // If user is a doctor, fetch doctor bio
         if (user.role === 'doctor') {
           try {
+            // Get bio from multiple potential sources with doctor-specific endpoint
             const doctorBioData = await getDoctorBio(user.id);
             
-            // Use doctor bio if available
-            if (doctorBioData && (doctorBioData.Bio || doctorBioData.bio)) {
-              bioData = doctorBioData.Bio || doctorBioData.bio;
-            } else {
-              // Check if bio might be in a different property
-              if (doctorBioData && typeof doctorBioData === 'string') {
+            if (doctorBioData) {
+              if (typeof doctorBioData === 'string') {
                 bioData = doctorBioData;
-              } else if (doctorBioData && doctorBioData.description) {
+              } else if (doctorBioData.Bio || doctorBioData.bio) {
+                bioData = doctorBioData.Bio || doctorBioData.bio;
+              } else if (doctorBioData.description) {
                 bioData = doctorBioData.description;
               }
             }
           } catch {
-            // Don't fail the whole process if bio fetch fails
+            // If doctor bio fetch fails, fall back to user.bio for doctors only
+            bioData = user.bio || '';
           }
         }
         
@@ -145,8 +144,7 @@ const Profile = () => {
       }
     }
   };
-  
-  const handleSaveProfile = async () => {
+    const handleSaveProfile = async () => {
     try {
       // Upload profile picture first if one is selected
       if (selectedFile) {
@@ -155,9 +153,9 @@ const Profile = () => {
       
       // Update basic information
       await updateProfile(profileData.firstName, profileData.lastName);
-      
-      // Update bio if it changed and user is not a patient
-      if (user && user.role !== 'patient' && profileData.bio !== user.bio) {
+
+      // Update bio only if the user is a doctor and bio has changed
+      if (user && user.role === 'doctor' && profileData.bio !== user.bio) {
         await updateUserBio(profileData.bio);
       }
       

@@ -231,7 +231,7 @@ const ForgotPassword = () => {
                 onChange={handleChange}
                 error={formErrors.email}
                 autoComplete="email"
-                placeholder="your@email.com"
+                placeholder="skinscanteam@gmail.com"
                 required
               />
             </div>

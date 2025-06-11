@@ -15,7 +15,7 @@ const ProfileCard = ({
       <div className="flex flex-col items-center p-6 text-center">
         <div className="relative">
           <Avatar 
-            src={selectedFile ? URL.createObjectURL(selectedFile) : `${profileData.avatarUrl}`} 
+            src={selectedFile ? URL.createObjectURL(selectedFile) : `${profileData.avatarUrl}&t=${Date.now()}`} 
             alt={`${profileData.firstName} ${profileData.lastName}`}
             fallback={`${profileData.firstName?.[0] || ''}${profileData.lastName?.[0] || ''}`}
             className="h-24 w-24"

@@ -7,11 +7,11 @@ export const uploadProfilePicture = async (file , token) => {
 
         const response = await fetch(`${baseURL}users/upload-profile-picture/`, {
             method: "POST",
-            body: formData,
-            headers: {
+            body: formData,            headers: {
                 'authorization': `Bearer ${token}`,
+                'Cache-Control': 'no-cache',
+                'ngrok-skip-browser-warning': 'true'
             },
-            "ngrok-skip-browser-warning": "true",
         });
 
         const data = await response.json();

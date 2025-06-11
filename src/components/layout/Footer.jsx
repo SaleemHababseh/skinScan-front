@@ -11,9 +11,8 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand Section */}
           <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <Heart className="w-5 h-5 text-white" />
+            <div className="flex items-center space-x-2 mb-4">              <div className="w-8 h-8">
+                <img src="/logo.jpg" alt="SkinScan Logo" className="h-full w-full" />
               </div>
               <span className="text-xl font-bold text-gray-900 dark:text-white">
                 SkinScan
@@ -46,14 +45,7 @@ const Footer = () => {
                   Contact
                 </Link>
               </li>
-              <li>
-                <Link 
-                  to="/top-doctors" 
-                  className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                >
-                  Top Doctors
-                </Link>
-              </li>
+              
               <li>
                 <Link 
                   to="/news" 

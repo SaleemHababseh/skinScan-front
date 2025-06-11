@@ -123,21 +123,8 @@ const Navbar = () => {
     <header className="sticky top-0 z-50 w-full bg-white shadow-sm dark:bg-neutral-900 dark:border-b dark:border-neutral-800">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-primary">
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              className="h-5 w-5 text-white" 
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            >
-              <path d="M6 11a4 4 0 0 1 4-4c2 0 4 3 8 3a4 4 0 0 0 4-4" />
-              <path d="M6 21a4 4 0 0 1 4-4c2 0 4 3 8 3a4 4 0 0 0 4-4" />
-            </svg>
+        <Link to="/" className="flex items-center space-x-2">          <div className="h-14 w-14">
+            <img src="/logo.jpg" alt="SkinScan Logo" className="h-full w-full" />
           </div>
           <span className="text-xl font-bold">Skin<span className="text-primary-500">Scan</span></span>
         </Link>
@@ -168,7 +155,7 @@ const Navbar = () => {
                 onClick={toggleUserMenu}
               >
                 <Avatar 
-                  src={user?.id ? `${baseURL}users/get/user-profile-picture?user_id=${user.id}` : null}
+                  src={user?.id ? `${baseURL}users/get/user-profile-picture?user_id=${user.id}&t=${Date.now()}` : null}
                   alt={`${user?.firstName || user?.f_name || ''} ${user?.lastName || user?.l_name || ''}`}
                   fallback={`${(user?.firstName || user?.f_name || '')[0] || ''}${(user?.lastName || user?.l_name || '')[0] || ''}`}
                   size="sm"
