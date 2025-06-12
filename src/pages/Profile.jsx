@@ -206,8 +206,8 @@ const Profile = () => {
       {/* Header */}
       <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Profile</h1>
-          <p className="mt-1 text-neutral-600 dark:text-neutral-400">Manage your personal information and settings</p>
+          <h1 className="text-2xl font-bold text-neutral-900">Profile</h1>
+          <p className="mt-1 text-neutral-600">Manage your personal information and settings</p>
         </div>
         {!isEditing ? (
           <Button onClick={() => setIsEditing(true)}>

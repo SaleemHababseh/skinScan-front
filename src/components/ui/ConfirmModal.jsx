@@ -25,24 +25,24 @@ const ConfirmModal = ({
   const getIconColor = () => {
     switch (type) {
       case "danger":
-        return "text-error-600 dark:text-error-400";
+        return "text-error-600";
       case "info":
-        return "text-info-600 dark:text-info-400";
+        return "text-info-600";
       case "warning":
       default:
-        return "text-warning-600 dark:text-warning-400";
+        return "text-warning-600";
     }
   };
 
   const getIconBackground = () => {
     switch (type) {
       case "danger":
-        return "bg-error-100 dark:bg-error-900/30";
+        return "bg-error-100";
       case "info":
-        return "bg-info-100 dark:bg-info-900/30";
+        return "bg-info-100";
       case "warning":
       default:
-        return "bg-warning-100 dark:bg-warning-900/30";
+        return "bg-warning-100";
     }
   };
 
@@ -58,18 +58,18 @@ const ConfirmModal = ({
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium text-neutral-900 dark:text-neutral-100">
+                <h3 className="text-lg font-medium text-neutral-900">
                   {title}
                 </h3>
                 <button
                   onClick={onClose}
-                  className="rounded-full p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
+                  className="rounded-full p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600"
                   disabled={isLoading}
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
-              <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+              <p className="mt-2 text-sm text-neutral-600">
                 {message}
               </p>
             </div>

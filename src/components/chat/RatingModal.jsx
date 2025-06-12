@@ -18,9 +18,9 @@ const RatingModal = ({ isOpen, onClose, onSubmit, doctorName }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 w-full max-w-md">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+          <h3 className="text-lg font-semibold text-neutral-900">
             Rate Dr. {doctorName}
           </h3>
           <Button variant="ghost" size="icon" onClick={onClose}>
@@ -29,7 +29,7 @@ const RatingModal = ({ isOpen, onClose, onSubmit, doctorName }) => {
         </div>
 
         <div className="mb-6">
-          <p className="text-neutral-600 dark:text-neutral-400 mb-4">
+          <p className="text-neutral-600 mb-4">
             How would you rate your experience with this doctor?
           </p>
           
@@ -54,7 +54,7 @@ const RatingModal = ({ isOpen, onClose, onSubmit, doctorName }) => {
           </div>
           
           {rating > 0 && (
-            <p className="text-center mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+            <p className="text-center mt-2 text-sm text-neutral-600">
               {rating} star{rating !== 1 ? 's' : ''}
             </p>
           )}

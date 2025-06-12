@@ -12,7 +12,7 @@ const ChatInput = ({ message, setMessage, sendMessage, isConnected, connectionSt
   };
 
   return (
-    <div className="bg-white dark:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-700 p-4">
+    <div className="bg-white border-t border-neutral-200 p-4">
       <div className="flex items-center space-x-3">
         <div className="flex-1">
           <Input
@@ -21,7 +21,7 @@ const ChatInput = ({ message, setMessage, sendMessage, isConnected, connectionSt
             onKeyPress={handleKeyPress}
             placeholder={isConnected ? "Type your message..." : "Connecting..."}
             disabled={!isConnected}
-            className="resize-none border-neutral-300 dark:border-neutral-600 focus:border-primary-500 focus:ring-primary-500"
+            className="resize-none border-neutral-300 focus:border-primary-500 focus:ring-primary-500"
             maxLength={1000}
           />
         </div>
@@ -36,7 +36,7 @@ const ChatInput = ({ message, setMessage, sendMessage, isConnected, connectionSt
       
       {!isConnected && (
         <div className="mt-2 flex items-center justify-between">
-          <p className="text-sm text-amber-600 dark:text-amber-400 flex items-center">
+          <p className="text-sm text-amber-600 flex items-center">
             <WifiOff className="h-5 w-5 mr-2" />
             {connectionStatus}
           </p>

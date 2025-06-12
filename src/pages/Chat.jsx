@@ -263,7 +263,7 @@ const Chat = () => {
   }, [chatPartner?.id, user?.id, token, chatPartner?.name]);
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
+    <div className="min-h-screen bg-neutral-50">
       {/* Both doctor and patient views now use consistent full-width styling */}
       <div className="h-screen flex flex-col">
         <div className="w-full flex flex-col h-full">

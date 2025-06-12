@@ -38,7 +38,7 @@ const ProfileCard = ({
               />
               <label 
                 htmlFor="profile-picture"
-                className="flex cursor-pointer items-center justify-center rounded-full bg-primary-500 p-1.5 text-white hover:bg-primary-600 dark:bg-primary-600 dark:hover:bg-primary-700"
+                className="flex cursor-pointer items-center justify-center rounded-full bg-primary-500 p-1.5 text-white hover:bg-primary-600"
                 title={selectedFile ? `Selected: ${selectedFile.name}` : "Change profile picture"}
               >
                 <Camera className="h-4 w-4" />
@@ -47,24 +47,24 @@ const ProfileCard = ({
           )}
         </div>
         
-        <h2 className="mt-4 text-xl font-bold text-neutral-900 dark:text-neutral-100">
+        <h2 className="mt-4 text-xl font-bold text-neutral-900">
           {profileData.firstName} {profileData.lastName}
         </h2>
-        <p className="text-neutral-600 dark:text-neutral-400">
+        <p className="text-neutral-600">
           {user?.role?.[0]?.toUpperCase()}{user?.role?.slice(1)} User
         </p>
         
         <div className="mt-6 w-full">
-          <div className="flex items-center border-t border-neutral-200 py-3 dark:border-neutral-800">
+          <div className="flex items-center border-t border-neutral-200 py-3">
             <Mail className="h-5 w-5 text-neutral-500" />
-            <span className="ml-2 text-sm text-neutral-800 dark:text-neutral-200">{profileData.email}</span>
+            <span className="ml-2 text-sm text-neutral-800">{profileData.email}</span>
           </div>
         </div>
         
         {user?.role !== 'patient' && (
-          <div className="mt-6 w-full border-t border-neutral-200 pt-4 dark:border-neutral-800">
-            <h3 className="mb-2 text-sm font-medium text-neutral-900 dark:text-neutral-100">Bio</h3>
-            <p className="text-sm text-neutral-600 dark:text-neutral-400">
+          <div className="mt-6 w-full border-t border-neutral-200 pt-4">
+            <h3 className="mb-2 text-sm font-medium text-neutral-900">Bio</h3>
+            <p className="text-sm text-neutral-600">
               {profileData.bio || 'No bio added yet.'}
             </p>
         

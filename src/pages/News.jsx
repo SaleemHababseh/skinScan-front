@@ -67,8 +67,8 @@ const News = () => {
       <div className="flex flex-col space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">Health News & Updates</h1>
-            <p className="mt-2 text-neutral-600 dark:text-neutral-400">
+            <h1 className="text-3xl font-bold text-neutral-900">Health News & Updates</h1>
+            <p className="mt-2 text-neutral-600">
               Stay informed about the latest in medical research, health breakthroughs, and treatment advances.
             </p>
           </div>
@@ -86,9 +86,9 @@ const News = () => {
       </div>
         {/* Error State */}
       {error && (
-        <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20">
+        <Card className="border-red-200 bg-red-50">
           <div className="p-6 text-center">
-            <p className="text-red-800 dark:text-red-400 mb-4">
+            <p className="text-red-800 mb-4">
               Failed to load news: {error}
             </p>
             <Button
@@ -110,20 +110,20 @@ const News = () => {
               <div className="p-6">
                 <div className="animate-pulse">
                   <div className="mb-4 flex items-center justify-between">
-                    <div className="h-4 w-16 rounded bg-neutral-200 dark:bg-neutral-700"></div>
-                    <div className="h-3 w-20 rounded bg-neutral-200 dark:bg-neutral-700"></div>
+                    <div className="h-4 w-16 rounded bg-neutral-200"></div>
+                    <div className="h-3 w-20 rounded bg-neutral-200"></div>
                   </div>
-                  <div className="mb-3 h-6 rounded bg-neutral-200 dark:bg-neutral-700"></div>
+                  <div className="mb-3 h-6 rounded bg-neutral-200"></div>
                   <div className="mb-5 space-y-2">
-                    <div className="h-4 rounded bg-neutral-200 dark:bg-neutral-700"></div>
-                    <div className="h-4 w-3/4 rounded bg-neutral-200 dark:bg-neutral-700"></div>
+                    <div className="h-4 rounded bg-neutral-200"></div>
+                    <div className="h-4 w-3/4 rounded bg-neutral-200"></div>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <div className="h-7 w-7 rounded-full bg-neutral-200 dark:bg-neutral-700"></div>
-                      <div className="ml-2 h-4 w-20 rounded bg-neutral-200 dark:bg-neutral-700"></div>
+                      <div className="h-7 w-7 rounded-full bg-neutral-200"></div>
+                      <div className="ml-2 h-4 w-20 rounded bg-neutral-200"></div>
                     </div>
-                    <div className="h-8 w-20 rounded bg-neutral-200 dark:bg-neutral-700"></div>
+                    <div className="h-8 w-20 rounded bg-neutral-200"></div>
                   </div>
                 </div>
               </div>
@@ -149,10 +149,9 @@ const News = () => {
             {CATEGORIES.map(category => (
               <button
                 key={category.id}
-                onClick={() => setSelectedCategory(category.id)}
-                className={`mr-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors focus:outline-none
+                onClick={() => setSelectedCategory(category.id)}                className={`mr-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors focus:outline-none
                   ${selectedCategory === category.id 
-                    ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400' 
+                    ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
                     : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700'
                   }`}
               >
@@ -203,22 +202,22 @@ const News = () => {
                   </div>
                   <div className="flex flex-col justify-between p-8">
                     <div>
-                      <div className="mb-6 flex items-center justify-between text-sm text-neutral-500 dark:text-neutral-400">
+                      <div className="mb-6 flex items-center justify-between text-sm text-neutral-500">
                         <div className="flex items-center">
                           <Calendar className="mr-2 h-4 w-4" />
                           <span>{formatDate(featuredItem.date)}</span>
                         </div>
-                        <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium capitalize text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
+                        <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium capitalize text-neutral-700">
                           {featuredItem.category}
                         </span>
                       </div>
-                      <h2 className="mb-4 text-2xl font-bold text-neutral-900 dark:text-neutral-100 line-clamp-2">
+                      <h2 className="mb-4 text-2xl font-bold text-neutral-900 line-clamp-2">
                         {featuredItem.title}
                       </h2>
-                      <p className="mb-6 text-neutral-600 dark:text-neutral-400 line-clamp-3 text-base leading-relaxed">
+                      <p className="mb-6 text-neutral-600 line-clamp-3 text-base leading-relaxed">
                         {featuredItem.excerpt}
                       </p>
-                      <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                      <p className="text-sm text-neutral-500">
                         Source: {featuredItem.source}
                       </p>
                     </div>
@@ -232,10 +231,10 @@ const News = () => {
                           className="h-10 w-10"
                         />
                         <div className="ml-3">
-                          <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                          <p className="text-sm font-medium text-neutral-900">
                             {featuredItem.author.name}
                           </p>
-                          <p className="text-xs text-neutral-600 dark:text-neutral-400">
+                          <p className="text-xs text-neutral-600">
                             {featuredItem.author.role}
                           </p>
                         </div>
@@ -278,23 +277,23 @@ const News = () => {
                 
                 <div className="p-6">
                   <div className="mb-4 flex items-center justify-between">
-                    <span className="rounded-full bg-neutral-100 px-3 py-1.5 text-xs font-medium capitalize text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
+                    <span className="rounded-full bg-neutral-100 px-3 py-1.5 text-xs font-medium capitalize text-neutral-700">
                       {item.category}
                     </span>
-                    <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                    <span className="text-xs text-neutral-500">
                       {formatDate(item.date)}
                     </span>
                   </div>
                   
-                  <h3 className="mb-3 text-lg font-bold text-neutral-900 dark:text-neutral-100 line-clamp-2 leading-tight">
+                  <h3 className="mb-3 text-lg font-bold text-neutral-900 line-clamp-2 leading-tight">
                     {item.title}
                   </h3>
                   
-                  <p className="mb-4 text-sm text-neutral-600 dark:text-neutral-400 line-clamp-3 leading-relaxed">
+                  <p className="mb-4 text-sm text-neutral-600 line-clamp-3 leading-relaxed">
                     {item.excerpt}
                   </p>
                   
-                  <div className="mb-6 text-xs text-neutral-500 dark:text-neutral-400">
+                  <div className="mb-6 text-xs text-neutral-500">
                     Source: {item.source}
                   </div>
                   
@@ -306,7 +305,7 @@ const News = () => {
                         fallback={item.author.name[0]}
                         className="h-8 w-8 shrink-0"
                       />
-                      <span className="ml-3 text-sm font-medium text-neutral-800 dark:text-neutral-200 truncate">
+                      <span className="ml-3 text-sm font-medium text-neutral-800 truncate">
                         {item.author.name}
                       </span>
                     </div>
@@ -321,19 +320,19 @@ const News = () => {
                     </Button>
                   </div>
                   
-                  <div className="mt-6 border-t border-neutral-200 pt-4 dark:border-neutral-800">
+                  <div className="mt-6 border-t border-neutral-200 pt-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
-                        <button className="flex items-center text-xs text-neutral-600 hover:text-primary-600 dark:text-neutral-400 dark:hover:text-primary-400 transition-colors">
+                        <button className="flex items-center text-xs text-neutral-600 hover:text-primary-600 transition-colors">
                           <Heart className="mr-1 h-4 w-4" /> {item.stats.likes}
                         </button>
-                        <button className="flex items-center text-xs text-neutral-600 hover:text-primary-600 dark:text-neutral-400 dark:hover:text-primary-400 transition-colors">
+                        <button className="flex items-center text-xs text-neutral-600 hover:text-primary-600 transition-colors">
                           <MessageSquare className="mr-1 h-4 w-4" /> {item.stats.comments}
                         </button>
                       </div>
                       <div className="flex items-center space-x-2">
                         <button 
-                          className="rounded-full p-1.5 text-neutral-600 hover:bg-neutral-100 hover:text-primary-600 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-primary-400 transition-colors"
+                          className="rounded-full p-1.5 text-neutral-600 hover:bg-neutral-100 hover:text-primary-600 transition-colors"
                           onClick={() => {
                             if (navigator.share) {
                               navigator.share({
@@ -347,7 +346,7 @@ const News = () => {
                         >
                           <Share2 className="h-4 w-4" />
                         </button>
-                        <button className="rounded-full p-1.5 text-neutral-600 hover:bg-neutral-100 hover:text-primary-600 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-primary-400 transition-colors">
+                        <button className="rounded-full p-1.5 text-neutral-600 hover:bg-neutral-100 hover:text-primary-600 transition-colors">
                           <BookmarkPlus className="h-4 w-4" />
                         </button>
                       </div>
@@ -360,12 +359,12 @@ const News = () => {
       )}      
       {/* No Results */}
       {!isLoading && !error && filteredNews.length === 0 && (
-        <div className="flex h-48 flex-col items-center justify-center rounded-xl border border-dashed border-neutral-300 bg-neutral-50 p-8 text-center dark:border-neutral-700 dark:bg-neutral-900">
-          <div className="mb-4 rounded-full bg-neutral-200 p-4 dark:bg-neutral-700">
-            <Search className="h-8 w-8 text-neutral-500 dark:text-neutral-400" />
+        <div className="flex h-48 flex-col items-center justify-center rounded-xl border border-dashed border-neutral-300 bg-neutral-50 p-8 text-center">
+          <div className="mb-4 rounded-full bg-neutral-200 p-4">
+            <Search className="h-8 w-8 text-neutral-500" />
           </div>
-          <p className="mb-2 text-xl font-medium text-neutral-900 dark:text-neutral-100">No news found</p>
-          <p className="text-neutral-500 dark:text-neutral-400 max-w-md">
+          <p className="mb-2 text-xl font-medium text-neutral-900">No news found</p>
+          <p className="text-neutral-500 max-w-md">
             No news articles match your current search criteria. Try adjusting your filters or search terms.
           </p>
         </div>
@@ -373,15 +372,15 @@ const News = () => {
       
       {/* Newsletter Subscription */}
       {!isLoading && (
-        <Card className="mt-16 bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-primary-950/20 dark:to-secondary-950/20 border-primary-200 dark:border-primary-800">
+        <Card className="mt-16 bg-gradient-to-br from-primary-50 to-secondary-50 border-primary-200">
           <div className="flex flex-col items-center p-8 text-center">
-            <div className="mb-4 rounded-full bg-primary-100 p-3 dark:bg-primary-900/30">
-              <Heart className="h-8 w-8 text-primary-600 dark:text-primary-400" />
+            <div className="mb-4 rounded-full bg-primary-100 p-3">
+              <Heart className="h-8 w-8 text-primary-600" />
             </div>
-            <h3 className="mb-3 text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+            <h3 className="mb-3 text-2xl font-bold text-neutral-900">
               Subscribe to Health News Updates
             </h3>
-            <p className="mb-8 max-w-lg text-neutral-600 dark:text-neutral-400 text-lg">
+            <p className="mb-8 max-w-lg text-neutral-600 text-lg">
               Stay updated with the latest medical news, research findings, and health tips delivered straight to your inbox.
             </p>
             <div className="flex w-full max-w-md flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
@@ -394,7 +393,7 @@ const News = () => {
                 Subscribe
               </Button>
             </div>
-            <p className="mt-4 text-sm text-neutral-500 dark:text-neutral-400">
+            <p className="mt-4 text-sm text-neutral-500">
               By subscribing, you agree to our Privacy Policy and consent to receive health updates.
             </p>
           </div>

@@ -10,7 +10,7 @@ const Card = ({
   return (
     <div 
       className={cn(
-        'card rounded-xl bg-white p-6 shadow-md transition-all dark:bg-neutral-800',
+        'card rounded-xl bg-white p-6 shadow-md transition-all',
         hoverEffect && 'hover:shadow-lg hover:-translate-y-1 cursor-pointer',
         className
       )}
@@ -58,7 +58,7 @@ const CardDescription = ({
 }) => {
   return (
     <p 
-      className={cn('text-sm text-neutral-600 dark:text-neutral-400', className)}
+      className={cn('text-sm text-neutral-600', className)}
       {...props}
     >
       {children}

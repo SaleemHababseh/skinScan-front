@@ -22,7 +22,7 @@ const Avatar = ({
   return (
     <div 
       className={cn(
-        'relative flex shrink-0 overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800',
+        'relative flex shrink-0 overflow-hidden rounded-full bg-neutral-100',
         sizeClasses[size],
         className
       )}
@@ -35,11 +35,11 @@ const Avatar = ({
           className="h-full w-full object-cover"
         />
       ) : fallback ? (
-        <div className="flex h-full w-full items-center justify-center rounded-full bg-neutral-200 text-neutral-500 dark:bg-neutral-700 dark:text-neutral-300">
+        <div className="flex h-full w-full items-center justify-center rounded-full bg-neutral-200 text-neutral-500">
           {fallback}
         </div>
       ) : (
-        <div className="flex h-full w-full items-center justify-center rounded-full bg-neutral-200 text-neutral-500 dark:bg-neutral-700 dark:text-neutral-300">
+        <div className="flex h-full w-full items-center justify-center rounded-full bg-neutral-200 text-neutral-500">
           <User className="h-[60%] w-[60%]" />
         </div>
       )}

@@ -54,39 +54,39 @@ const Home = () => {
       <section className="py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">How SkinScan Works</h2>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-neutral-600 dark:text-neutral-400">
+            <h2 className="text-3xl font-bold text-neutral-900">How SkinScan Works</h2>
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-neutral-600">
               Our platform combines cutting-edge AI technology with expert dermatologists to provide accurate diagnosis and personalized care.
             </p>
           </div>
           
           <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
             <div className="flex flex-col items-center text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900">
-                <Upload className="h-8 w-8 text-primary-500 dark:text-primary-400" />
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-100">
+                <Upload className="h-8 w-8 text-primary-500" />
               </div>
-              <h3 className="mt-6 text-xl font-medium text-neutral-900 dark:text-neutral-100">Upload Images</h3>
-              <p className="mt-2 text-neutral-600 dark:text-neutral-400">
+              <h3 className="mt-6 text-xl font-medium text-neutral-900">Upload Images</h3>
+              <p className="mt-2 text-neutral-600">
                 Take clear photos of your skin concern and upload them securely to our platform.
               </p>
             </div>
             
             <div className="flex flex-col items-center text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900">
-                <Activity className="h-8 w-8 text-primary-500 dark:text-primary-400" />
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-100">
+                <Activity className="h-8 w-8 text-primary-500" />
               </div>
-              <h3 className="mt-6 text-xl font-medium text-neutral-900 dark:text-neutral-100">AI Analysis</h3>
-              <p className="mt-2 text-neutral-600 dark:text-neutral-400">
+              <h3 className="mt-6 text-xl font-medium text-neutral-900">AI Analysis</h3>
+              <p className="mt-2 text-neutral-600">
                 Our advanced AI instantly analyzes your skin images and provides an initial diagnosis.
               </p>
             </div>
             
             <div className="flex flex-col items-center text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900">
-                <MessageCircle className="h-8 w-8 text-primary-500 dark:text-primary-400" />
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-100">
+                <MessageCircle className="h-8 w-8 text-primary-500" />
               </div>
-              <h3 className="mt-6 text-xl font-medium text-neutral-900 dark:text-neutral-100">Expert Consultation</h3>
-              <p className="mt-2 text-neutral-600 dark:text-neutral-400">
+              <h3 className="mt-6 text-xl font-medium text-neutral-900">Expert Consultation</h3>
+              <p className="mt-2 text-neutral-600">
                 Connect with specialist dermatologists who review your case and provide professional advice.
               </p>
             </div>
@@ -95,44 +95,44 @@ const Home = () => {
       </section>
       
       {/* Features Section */}
-      <section className="bg-neutral-50 py-20 dark:bg-neutral-800">
+      <section className="bg-neutral-50 py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">
+            <h2 className="text-3xl font-bold text-neutral-900">
               Comprehensive Skin Care Platform
             </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-neutral-600 dark:text-neutral-400">
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-neutral-600">
               Our platform offers a range of features designed to provide you with the best possible skin care experience.
             </p>
           </div>
           
           <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             <Card className="transform transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-900">
-                <Shield className="h-6 w-6 text-primary-500 dark:text-primary-400" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-100">
+                <Shield className="h-6 w-6 text-primary-500" />
               </div>
-              <h3 className="mt-4 text-xl font-medium text-neutral-900 dark:text-neutral-100">Privacy & Security</h3>
-              <p className="mt-2 text-neutral-600 dark:text-neutral-400">
+              <h3 className="mt-4 text-xl font-medium text-neutral-900">Privacy & Security</h3>
+              <p className="mt-2 text-neutral-600">
                 Your data is protected with enterprise-grade security and strict privacy protocols.
               </p>
             </Card>
             
             <Card className="transform transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-900">
-                <Calendar className="h-6 w-6 text-primary-500 dark:text-primary-400" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-100">
+                <Calendar className="h-6 w-6 text-primary-500" />
               </div>
-              <h3 className="mt-4 text-xl font-medium text-neutral-900 dark:text-neutral-100">Easy Appointments</h3>
-              <p className="mt-2 text-neutral-600 dark:text-neutral-400">
+              <h3 className="mt-4 text-xl font-medium text-neutral-900">Easy Appointments</h3>
+              <p className="mt-2 text-neutral-600">
                 Book appointments with dermatologists directly through our platform with just a few clicks.
               </p>
             </Card>
             
             <Card className="transform transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-900">
-                <Award className="h-6 w-6 text-primary-500 dark:text-primary-400" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-100">
+                <Award className="h-6 w-6 text-primary-500" />
               </div>
-              <h3 className="mt-4 text-xl font-medium text-neutral-900 dark:text-neutral-100">Expert Dermatologists</h3>
-              <p className="mt-2 text-neutral-600 dark:text-neutral-400">
+              <h3 className="mt-4 text-xl font-medium text-neutral-900">Expert Dermatologists</h3>
+              <p className="mt-2 text-neutral-600">
                 Our network of board-certified dermatologists ensures you receive the highest quality care.
               </p>
             </Card>

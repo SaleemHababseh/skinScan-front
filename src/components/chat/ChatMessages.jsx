@@ -18,7 +18,7 @@ const ChatMessages = ({ messages, formatTime }) => {
         >
           {msg.type === 'system' ? (
             <div className="max-w-md text-center">
-              <p className="text-sm text-neutral-500 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800 rounded-lg px-4 py-2">
+              <p className="text-sm text-neutral-500 bg-neutral-100 rounded-lg px-4 py-2">
                 {msg.content}
               </p>
             </div>
@@ -28,12 +28,12 @@ const ChatMessages = ({ messages, formatTime }) => {
                 className={`rounded-2xl px-4 py-3 ${
                   msg.type === 'outgoing'
                     ? 'bg-primary-500 text-white'
-                    : 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border border-neutral-200 dark:border-neutral-700'
+                    : 'bg-white text-neutral-900 border border-neutral-200' 
                 }`}
               >
                 <p className="text-sm leading-relaxed">{msg.content}</p>
               </div>
-              <div className={`mt-1 text-xs text-neutral-500 dark:text-neutral-400 ${msg.type === 'outgoing' ? 'text-right' : 'text-left'}`}>
+              <div className={`mt-1 text-xs text-neutral-500 ${msg.type === 'outgoing' ? 'text-right' : 'text-left'}`}>
                 {formatTime(msg.timestamp)}
               </div>
             </div>

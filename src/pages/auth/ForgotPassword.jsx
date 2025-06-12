@@ -171,10 +171,10 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="flex min-h-screen flex-col justify-center bg-neutral-50 dark:bg-neutral-900">
-      <div className="absolute right-4 top-4">
+    <div className="flex min-h-screen flex-col justify-center bg-neutral-50">
+      {/* <div className="absolute right-4 top-4">
         <ThemeToggle />
-      </div>
+      </div> */}
       
       <div className="mx-auto w-full max-w-md px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex justify-center">
@@ -199,18 +199,18 @@ const ForgotPassword = () => {
         </div>
         
         <div className="mt-6">
-          <div className="bg-white px-6 py-8 shadow-md dark:bg-neutral-800 sm:rounded-lg sm:px-10">
+          <div className="bg-white px-6 py-8 shadow-md sm:rounded-lg sm:px-10">
             <div className="mb-6 text-center">
-              <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">{getTitle()}</h2>
-              <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+              <h2 className="text-2xl font-bold text-neutral-900">{getTitle()}</h2>
+              <p className="mt-1 text-sm text-neutral-600">
                 {getSubtitle()}
               </p>
             </div>
 
       <form onSubmit={getSubmitHandler()} className="space-y-6">
         {error && (
-          <div className="rounded-md bg-error-50 p-4 dark:bg-error-900/30">
-            <p className="text-sm text-error-500 dark:text-error-400">{error}</p>
+          <div className="rounded-md bg-error-50 p-4">
+            <p className="text-sm text-error-500">{error}</p>
           </div>
         )}
 
@@ -218,7 +218,7 @@ const ForgotPassword = () => {
           <div>
             <label 
               htmlFor="email" 
-              className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+              className="block text-sm font-medium text-neutral-700"
             >
               Email
             </label>
@@ -242,7 +242,7 @@ const ForgotPassword = () => {
           <div>
             <label 
               htmlFor="verificationCode" 
-              className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+              className="block text-sm font-medium text-neutral-700"
             >
               Verification Code
             </label>
@@ -258,7 +258,7 @@ const ForgotPassword = () => {
                 required
               />
             </div>
-            <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+            <p className="mt-2 text-sm text-neutral-600">
               Code sent to: {formData.email}
             </p>
           </div>
@@ -269,7 +269,7 @@ const ForgotPassword = () => {
             <div>
               <label 
                 htmlFor="newPassword" 
-                className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                className="block text-sm font-medium text-neutral-700"
               >
                 New Password
               </label>
@@ -290,7 +290,7 @@ const ForgotPassword = () => {
             <div>
               <label 
                 htmlFor="confirmPassword" 
-                className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                className="block text-sm font-medium text-neutral-700"
               >
                 Confirm New Password
               </label>
@@ -321,7 +321,7 @@ const ForgotPassword = () => {
         </div>
 
         <div className="text-center">
-          <p className="text-sm text-neutral-600 dark:text-neutral-400">
+          <p className="text-sm text-neutral-600">
             Remember your password?{' '}
             <Link 
               to="/login" 

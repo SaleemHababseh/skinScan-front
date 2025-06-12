@@ -84,7 +84,7 @@ const DoctorCVSection = () => {
   const getStatusText = () => {
     if (isLoadingStatus) return 'Loading status...';
     if (acceptationStatus === null) return 'If you have submitted your CV, please wait for review. If not, please submit your CV below.';
-    return acceptationStatus ? <span className="text-green-600 dark:text-green-400">Accepted</span> : 'Rejected';
+    return acceptationStatus ? <span className="text-green-600">Accepted</span> : 'Rejected';
   };
 
   // Only show this section for doctors
@@ -96,17 +96,17 @@ const DoctorCVSection = () => {
     <Card>
       <div className="p-6">
         <div className="flex items-center space-x-3 mb-4">
-          <FileText className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
-          <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+          <FileText className="h-5 w-5 text-neutral-600" />
+          <h3 className="text-lg font-semibold text-neutral-900">
             Doctor Verification
           </h3>
         </div>
 
         {/* Acceptation Status */}
-        <div className="mb-6 p-4 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
+        <div className="mb-6 p-4 bg-neutral-50 rounded-lg">
           <div className="flex items-center space-x-3 mb-2">
             {getStatusIcon()}
-            <span className="font-medium text-neutral-900 dark:text-neutral-100">
+            <span className="font-medium text-neutral-900">
               Verification Status
             </span>
           </div>
@@ -116,13 +116,13 @@ const DoctorCVSection = () => {
           
           {/* Additional guidance based on status */}
           {acceptationStatus === null && (
-            <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
+            <p className="text-xs text-blue-600 mt-2">
               💡 You can submit or resubmit your CV using the upload section below.
             </p>
           )}
           
           {acceptationStatus === false && (
-            <p className="text-xs text-orange-600 dark:text-orange-400 mt-2">
+            <p className="text-xs text-orange-600 mt-2">
               ⏳ If you have recently submitted your CV, please allow 2-3 business days for review.
             </p>
           )}
@@ -131,10 +131,10 @@ const DoctorCVSection = () => {
         {/* CV Upload Section */}
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+            <label className="block text-sm font-medium text-neutral-700 mb-2">
               Upload CV (PDF only)
             </label>
-            <p className="text-xs text-neutral-600 dark:text-neutral-400 mb-3">
+            <p className="text-xs text-neutral-600 mb-3">
               Please upload your CV to verify your medical credentials. Maximum file size: 10MB.
             </p>
             
@@ -144,21 +144,20 @@ const DoctorCVSection = () => {
                 type="file"
                 accept=".pdf"
                 onChange={handleFileSelect}
-                className="block w-full text-sm text-neutral-500 dark:text-neutral-400
+                className="block w-full text-sm text-neutral-500
                          file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0
                          file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700
-                         hover:file:bg-primary-100 dark:file:bg-primary-900 dark:file:text-primary-300
-                         dark:hover:file:bg-primary-800"
+                         hover:file:bg-primary-100"
               />
               
               {selectedCV && (
-                <div className="flex items-center justify-between p-3 bg-primary-50 dark:bg-primary-900 rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-primary-50 rounded-lg">
                   <div className="flex items-center space-x-2">
-                    <FileText className="h-4 w-4 text-primary-600 dark:text-primary-400" />
-                    <span className="text-sm text-primary-700 dark:text-primary-300">
+                    <FileText className="h-4 w-4 text-primary-600" />
+                    <span className="text-sm text-primary-700">
                       {selectedCV.name}
                     </span>
-                    <span className="text-xs text-primary-600 dark:text-primary-400">
+                    <span className="text-xs text-primary-600">
                       ({(selectedCV.size / 1024 / 1024).toFixed(2)} MB)
                     </span>
                   </div>
@@ -178,7 +177,7 @@ const DoctorCVSection = () => {
           </div>
 
           {/* Information about the verification process */}
-          <div className="text-xs text-neutral-600 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-800 p-3 rounded-lg">
+          <div className="text-xs text-neutral-600 bg-neutral-50 p-3 rounded-lg">
             <p className="font-medium mb-1">Verification Process:</p>
             <ul className="list-disc list-inside space-y-1">
               <li>Upload your CV with medical credentials and experience</li>

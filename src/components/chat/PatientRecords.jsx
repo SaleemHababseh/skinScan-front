@@ -45,22 +45,22 @@ const PatientRecords = ({ patientId, token, patientName }) => {
     if (!result) return 'bg-neutral-100 text-neutral-600';
     const lowerResult = result.toLowerCase();
     if (lowerResult.includes('positive') || lowerResult.includes('malignant') || lowerResult.includes('cancer')) {
-      return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      return 'bg-red-100 text-red-800'
     }
     if (lowerResult.includes('negative') || lowerResult.includes('benign') || lowerResult.includes('nev') || lowerResult.includes('normal')) {
-      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      return 'bg-green-100 text-green-800'
     }
-    return 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200';
+    return 'bg-amber-100 text-amber-800'
   };
 
   if (loading) {
     return (
       <div className="p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-6 bg-neutral-200 dark:bg-neutral-700 rounded w-3/4"></div>
+          <div className="h-6 bg-neutral-200 rounded w-3/4"></div>
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-20 bg-neutral-200 dark:bg-neutral-700 rounded"></div>
+              <div key={i} className="h-20 bg-neutral-200 rounded"></div>
             ))}
           </div>
         </div>
@@ -71,14 +71,14 @@ const PatientRecords = ({ patientId, token, patientName }) => {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="p-6 border-b border-neutral-200 dark:border-neutral-700">
+      <div className="p-6 border-b border-neutral-200">
         <div className="flex items-center space-x-3 mb-2">
           <User className="h-5 w-5 text-primary-600" />
-          <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+          <h3 className="text-lg font-semibold text-neutral-900">
             Patient Records
           </h3>
         </div>
-        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+        <p className="text-sm text-neutral-600">
           {patientName || 'Unknown Patient'}
         </p>
       </div>
@@ -96,7 +96,7 @@ const PatientRecords = ({ patientId, token, patientName }) => {
           <div className="flex items-center justify-center h-32">
             <div className="text-center">
               <FileText className="h-8 w-8 text-neutral-400 mx-auto mb-2" />
-              <p className="text-sm text-neutral-500 dark:text-neutral-400">
+              <p className="text-sm text-neutral-500">
                 No medical records found
               </p>
             </div>
@@ -104,7 +104,7 @@ const PatientRecords = ({ patientId, token, patientName }) => {
         ) : (
           <div className="space-y-4">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-sm text-neutral-600 dark:text-neutral-400">
+              <span className="text-sm text-neutral-600">
                 {records.length} record{records.length !== 1 ? 's' : ''} found
               </span>
             </div>
@@ -114,16 +114,16 @@ const PatientRecords = ({ patientId, token, patientName }) => {
               return (
                 <div 
                   key={recordInfo.img_id || index} 
-                  className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 hover:shadow-md transition-shadow"
+                  className="bg-white border border-neutral-200 rounded-lg p-4 hover:shadow-md transition-shadow"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center space-x-2">
                       <FileText className="h-4 w-4 text-primary-600" />
-                      <span className="font-medium text-neutral-900 dark:text-neutral-100">
+                      <span className="font-medium text-neutral-900">
                         Record #{recordInfo.img_id || index + 1}
                       </span>
                     </div>
-                    <span className="text-xs text-neutral-500 bg-neutral-100 dark:bg-neutral-700 px-2 py-1 rounded">
+                    <span className="text-xs text-neutral-500 bg-neutral-100 px-2 py-1 rounded">
                       ID: {recordInfo.img_id || 'N/A'}
                     </span>
                   </div>
@@ -131,7 +131,7 @@ const PatientRecords = ({ patientId, token, patientName }) => {
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <Calendar className="h-4 w-4 text-neutral-500" />
-                      <span className="text-sm text-neutral-600 dark:text-neutral-400">
+                      <span className="text-sm text-neutral-600">
                         {recordInfo.test_date ? formatDate(recordInfo.test_date) : 'Date not available'}
                       </span>
                     </div>

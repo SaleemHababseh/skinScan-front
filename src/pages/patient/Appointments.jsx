@@ -119,13 +119,13 @@ const PatientAppointments = () => {
     const getStatusColor = (status) => {
       switch (status) {
         case "accepted":
-          return "bg-success-50 text-success-500 dark:bg-success-900/30";
+          return "bg-success-50 text-success-500";
         case "pending":
-          return "bg-warning-50 text-warning-500 dark:bg-warning-900/30";
+          return "bg-warning-50 text-warning-500";
         case "cancelled":
-          return "bg-neutral-100 text-neutral-500 dark:bg-neutral-800";
+          return "bg-neutral-100 text-neutral-500";
         default:
-          return "bg-neutral-100 text-neutral-500 dark:bg-neutral-800";
+          return "bg-neutral-100 text-neutral-500";
       }
     };
 
@@ -136,7 +136,7 @@ const PatientAppointments = () => {
         case "pending":
           return "border-l-warning-500";
         case "cancelled":
-          return "border-l-neutral-300 dark:border-l-neutral-700";
+          return "border-l-neutral-300";
         default:
           return "border-l-primary-500";
       }
@@ -147,24 +147,24 @@ const PatientAppointments = () => {
       >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div className="mb-4 flex flex-1 items-start sm:mb-0">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30">
-              <Clock className="h-6 w-6 text-primary-600 dark:text-primary-400" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-100">
+              <Clock className="h-6 w-6 text-primary-600" />
             </div>
             <div className="ml-4">
               <div className="flex items-center">
-                <h3 className="font-medium text-neutral-900 dark:text-neutral-100">
+                <h3 className="font-medium text-neutral-900">
                   {appointment.doctorname}
                 </h3>
                 <span className={`ml-2 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusColor(appointment.status)}`}>
                   {appointment.status?.charAt(0).toUpperCase() + appointment.status?.slice(1) || 'Pending'}
                 </span>
               </div>
-              <div className="mt-1 flex items-center text-sm text-neutral-500 dark:text-neutral-400">
+              <div className="mt-1 flex items-center text-sm text-neutral-500">
                 <Calendar className="mr-1 h-4 w-4" />
                 <span>{formatDate(appointment.appointment_date)}</span>
               </div>
               {appointment.notes && (
-                <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+                <p className="mt-1 text-sm text-neutral-600">
                   {appointment.notes}
                 </p>
               )}
@@ -192,7 +192,7 @@ const PatientAppointments = () => {
                       }
                     });
                   }}
-                  className="text-primary-600 border-primary-200 hover:bg-primary-50 hover:border-primary-300 dark:text-primary-400 dark:border-primary-800 dark:hover:bg-primary-900/20"
+                  className="text-primary-600 border-primary-200 hover:bg-primary-50 hover:border-primary-300"
                 >
                   <MessageCircle className="mr-2 h-4 w-4" />
                   Start Chat
@@ -204,7 +204,7 @@ const PatientAppointments = () => {
                 size="sm"
                 onClick={() => handleCancelAppointment(appointment.appointment_id, appointment.doctorname)}
                 disabled={cancellingAppointments.has(appointment.appointment_id)}
-                className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/20"
+                className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
               >
                 {cancellingAppointments.has(appointment.appointment_id) ? (
                   <>
@@ -230,10 +230,10 @@ const PatientAppointments = () => {
       {/* Header */}
       <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+          <h1 className="text-2xl font-bold text-neutral-900">
             My Appointments
           </h1>
-          <p className="mt-1 text-neutral-600 dark:text-neutral-400">
+          <p className="mt-1 text-neutral-600">
             Schedule and manage your appointments with specialists
           </p>
         </div>        <Button onClick={() => setShowBookingForm(true)}>
@@ -243,8 +243,8 @@ const PatientAppointments = () => {
 
       {/* Booking Form */}
       {showBookingForm && (
-        <Card className="border-2 border-primary-100 dark:border-primary-900">
-          <div className="flex items-center justify-between border-b border-neutral-200 pb-4 dark:border-neutral-800">            <h2 className="text-lg font-medium text-neutral-900 dark:text-neutral-100">
+        <Card className="border-2 border-primary-100">
+          <div className="flex items-center justify-between border-b border-neutral-200 pb-4">            <h2 className="text-lg font-medium text-neutral-900">
               Request New Appointment
             </h2>
             <Button
@@ -259,7 +259,7 @@ const PatientAppointments = () => {
             <div>
               <label
                 htmlFor="doctor"
-                className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                className="mb-1 block text-sm font-medium text-neutral-700"
               >
                 Select Doctor
               </label>
@@ -273,7 +273,7 @@ const PatientAppointments = () => {
                     doctorId: e.target.value,
                   })
                 }
-                className="w-full rounded-md border border-neutral-300 bg-white py-2 pl-3 pr-10 text-sm dark:border-neutral-700 dark:bg-neutral-800"
+                className="w-full rounded-md border border-neutral-300 bg-white py-2 pl-3 pr-10 text-sm"
               >
                 <option value="">Select a specialist</option>
                 {doctors.map((doctor) => (
@@ -284,8 +284,8 @@ const PatientAppointments = () => {
               </select>
             </div>
 
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md">
-              <p className="text-sm text-blue-800 dark:text-blue-200">
+            <div className="bg-blue-50 p-4 rounded-md">
+              <p className="text-sm text-blue-800">
                 📝 <strong>Note:</strong> This will send an appointment request to the selected doctor. 
                 The doctor will contact you to schedule the specific date and time.
               </p>
@@ -320,7 +320,7 @@ const PatientAppointments = () => {
         <div className="flex items-center space-x-2">
           <Filter className="h-4 w-4 text-neutral-500" />
           <select
-            className="rounded-md border border-neutral-300 bg-white py-2 pl-3 pr-8 text-sm dark:border-neutral-700 dark:bg-neutral-800"
+            className="rounded-md border border-neutral-300 bg-white py-2 pl-3 pr-8 text-sm"
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
           >
@@ -347,7 +347,7 @@ const PatientAppointments = () => {
       ) : (
         <Card className="flex h-40 flex-col items-center justify-center text-center">
           <Calendar className="h-10 w-10 text-neutral-400" />
-          <p className="mt-2 text-neutral-600 dark:text-neutral-400">
+          <p className="mt-2 text-neutral-600">
             {searchTerm || filterStatus !== "all" 
               ? "No appointments found matching your criteria"
               : "No appointments found"
