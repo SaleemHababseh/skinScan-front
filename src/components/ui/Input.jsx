@@ -8,8 +8,8 @@ const Input = React.forwardRef(
         <input
           type={type}
           className={cn(
-            'input w-full rounded-lg border border-neutral-300 bg-white px-4 py-2 text-neutral-900 transition-colors focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500
-            error && 'border-error-500 focus:border-error-500 focus:ring-error-500
+            'input w-full rounded-lg border border-neutral-300 bg-white px-4 py-2 text-neutral-900 transition-colors focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500',
+            error && 'border-error-500 focus:border-error-500 focus:ring-error-500',
             className
           )}
           ref={ref}

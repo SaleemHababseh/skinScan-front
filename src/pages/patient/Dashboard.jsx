@@ -168,10 +168,10 @@ const PatientDashboard = () => {
                   </div>
                   <span className={`px-2 py-1 text-xs rounded-full ${
                     appointment.status === 'accepted' 
-                      ? 'bg-green-100 text-green-800
+                      ? 'bg-green-100 text-green-800'
                       : appointment.status === 'pending'
-                      ? 'bg-yellow-100 text-yellow-800
-                      : 'bg-red-100 text-red-800
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : 'bg-red-100 text-red-80'
                   }`}>
                     {appointment.status || 'pending'}
                   </span>
@@ -211,10 +211,10 @@ const PatientDashboard = () => {
                   </div>
                   <span className={`px-2 py-1 text-xs rounded-full ${
                     record.test_result === 'normal' || record.test_result === 'nev'
-                      ? 'bg-green-100 text-green-800
+                      ? 'bg-green-100 text-green-800'
                       : record.test_result === 'bkl' || record.test_result === 'bcc'
-                      ? 'bg-yellow-100 text-yellow-800
-                      : 'bg-blue-100 text-blue-800
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : 'bg-blue-100 text-blue-800'
                   }`}>
                     {record.test_result || 'analyzed'}
                   </span>

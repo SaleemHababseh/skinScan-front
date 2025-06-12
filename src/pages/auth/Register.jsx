@@ -3,7 +3,6 @@ import { useNavigate, Link } from "react-router-dom";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import ThemeToggle from "../../components/ui/ThemeToggle";
-import ThemeToggle from "../../components/ui/ThemeToggle";
 import useAuthStore from "../../store/auth-store";
 import useAppointmentsStore from "../../store/appointments-store";
 import { createUser } from "../../api/createuser";

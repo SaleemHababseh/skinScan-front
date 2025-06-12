@@ -112,11 +112,11 @@ const DoctorAppointments = () => {
                       <h3 className="font-medium text-neutral-900">
                         {appointment.patientname || appointment.patientName || appointment.patient_name || 'Unknown Patient'}
                       </h3>                      <span className={`ml-3 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        appointment.status === 'accepted' ? 'bg-success-50 text-success-700 :
-                        appointment.status === 'pending' ? 'bg-warning-50 text-warning-700 :
-                        appointment.status === 'completed' ? 'bg-info-50 text-info-700 :
-                        appointment.status === 'cancelled' ? 'bg-neutral-100 text-neutral-700 :
-                        'bg-neutral-100 text-neutral-700
+                        appointment.status === 'accepted' ? 'bg-success-50 text-success-700' :
+                        appointment.status === 'pending' ? 'bg-warning-50 text-warning-700' :
+                        appointment.status === 'completed' ? 'bg-info-50 text-info-700' :
+                        appointment.status === 'cancelled' ? 'bg-neutral-100 text-neutral-700' :
+                        'bg-neutral-100 text-neutral-700'
                       }`}>
                         {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
                       </span>

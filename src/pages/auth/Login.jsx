@@ -109,8 +109,8 @@ const Login = () => {
         )}        {error && (
           <div className={`rounded-md p-4 ${
             error.toLowerCase().includes('suspended') 
-              ? 'bg-warning-50 border border-warning-200
-              : 'bg-error-50
+              ? 'bg-warning-50 border border-warning-200'
+              : 'bg-error-50'
           }`}>
             <div className="flex">
               {error.toLowerCase().includes('suspended') && (
@@ -123,8 +123,8 @@ const Login = () => {
               <div className={error.toLowerCase().includes('suspended') ? 'ml-3' : ''}>
                 <p className={`text-sm ${
                   error.toLowerCase().includes('suspended')
-                    ? 'text-warning-700
-                    : 'text-error-500
+                    ? 'text-warning-700'
+                    : 'text-error-500'
                 }`}>
                   {error}
                 </p>

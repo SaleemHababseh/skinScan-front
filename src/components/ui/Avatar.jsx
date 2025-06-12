@@ -22,7 +22,7 @@ const Avatar = ({
   return (
     <div 
       className={cn(
-        'relative flex shrink-0 overflow-hidden rounded-full bg-neutral-100
+        'relative flex shrink-0 overflow-hidden rounded-full bg-neutral-100',
         sizeClasses[size],
         className
       )}

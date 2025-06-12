@@ -28,7 +28,7 @@ const ChatMessages = ({ messages, formatTime }) => {
                 className={`rounded-2xl px-4 py-3 ${
                   msg.type === 'outgoing'
                     ? 'bg-primary-500 text-white'
-                    : 'bg-white text-neutral-900 border border-neutral-200
+                    : 'bg-white text-neutral-900 border border-neutral-200' 
                 }`}
               >
                 <p className="text-sm leading-relaxed">{msg.content}</p>

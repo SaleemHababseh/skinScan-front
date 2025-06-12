@@ -112,8 +112,8 @@ const PatientDiagnoses = () => {
                         <h3 className="font-medium text-neutral-900">{diagnosis.bodyPart}</h3>
                         <span className={`ml-2 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                           diagnosis.diagnosisStatus === 'completed'
-                            ? 'bg-success-50 text-success-500
-                            : 'bg-warning-50 text-warning-500
+                            ? 'bg-success-50 text-success-500'
+                            : 'bg-warning-50 text-warning-500'
                         }`}>
                           {diagnosis.diagnosisStatus === 'completed' ? 'Completed' : 'Processing'}
                         </span>

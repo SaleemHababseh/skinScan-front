@@ -45,12 +45,12 @@ const PatientRecords = ({ patientId, token, patientName }) => {
     if (!result) return 'bg-neutral-100 text-neutral-600';
     const lowerResult = result.toLowerCase();
     if (lowerResult.includes('positive') || lowerResult.includes('malignant') || lowerResult.includes('cancer')) {
-      return 'bg-red-100 text-red-800
+      return 'bg-red-100 text-red-800'
     }
     if (lowerResult.includes('negative') || lowerResult.includes('benign') || lowerResult.includes('nev') || lowerResult.includes('normal')) {
-      return 'bg-green-100 text-green-800
+      return 'bg-green-100 text-green-800'
     }
-    return 'bg-amber-100 text-amber-800
+    return 'bg-amber-100 text-amber-800'
   };
 
   if (loading) {

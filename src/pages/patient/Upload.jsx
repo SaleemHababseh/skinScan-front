@@ -186,9 +186,9 @@ const PatientUpload = () => {
                   {...getRootProps()}
                   className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
                     isDragActive 
-                      ? 'border-primary-500 bg-primary-50 
-                      : 'border-neutral-300
-                  } ${imagePreview ? 'bg-neutral-50 : ''}`}
+                      ? 'border-primary-500 bg-primary-50' 
+                      : 'border-neutral-300'
+                  } ${imagePreview ? 'bg-neutral-50' : ''}`}
                 >
                   <input {...getInputProps()} />
                   

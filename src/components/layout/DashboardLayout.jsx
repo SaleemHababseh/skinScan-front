@@ -95,14 +95,14 @@ const DashboardLayout = ({ children }) => {
                   to={link.href}
                   className={`group flex items-center rounded-md px-3 py-2 text-sm font-medium ${
                     isActive
-                      ? 'bg-primary-50 text-primary-500
-                      : 'text-neutral-700 hover:bg-neutral-50
+                      ? 'bg-primary-50 text-primary-500'
+                      : 'text-neutral-700 hover:bg-neutral-50'
                   }`}
                 >
                   <Icon className={`mr-3 h-5 w-5 ${
                     isActive
-                      ? 'text-primary-500
-                      : 'text-neutral-500 group-hover:text-neutral-700
+                      ? 'text-primary-500'
+                      : 'text-neutral-500 group-hover:text-neutral-700'
                   }`} />
                   {link.name}
                 </Link>
@@ -123,8 +123,8 @@ const DashboardLayout = ({ children }) => {
                 to={link.href}
                 className={`flex flex-col items-center justify-center space-y-1 ${
                   isActive
-                    ? 'text-primary-500
-                    : 'text-neutral-700
+                    ? 'text-primary-500'
+                    : 'text-neutral-700'
                 }`}
               >
                 <Icon className="h-5 w-5" />
