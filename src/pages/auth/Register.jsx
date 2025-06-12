@@ -157,9 +157,9 @@ const Register = () => {
   };
   return (
     <div className="flex min-h-screen flex-col justify-center bg-neutral-50 dark:bg-neutral-900">
-      <div className="absolute right-4 top-4">
+      {/* <div className="absolute right-4 top-4">
         <ThemeToggle />
-      </div>
+      </div> */}
 
       <div className="mx-auto w-full max-w-md px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex justify-center">
