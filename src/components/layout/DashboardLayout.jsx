@@ -62,9 +62,10 @@ const DashboardLayout = ({ children }) => {
         { name: 'Appointments', href: '/doctor/appointments', icon: Calendar },
         { name: 'Diagnoses', href: '/doctor/diagnoses', icon: FileText },
         { name: 'Upload Image', href: '/doctor/upload', icon: Upload },
+        { name: 'News', href: '/news', icon: Activity },
         { name: 'Profile', href: '/profile', icon: User },
       ];
-    }      if (user?.role === 'admin') {
+    }if (user?.role === 'admin') {
       return [
         { name: 'Dashboard', href: '/admin/dashboard', icon: Home },
         { name: 'Users', href: '/admin/users', icon: Users },
