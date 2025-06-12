@@ -61,7 +61,7 @@ const ExampleComponent = () => {
         </Button>
       </div>
 
-      <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-md">
+      <div className="mt-6 p-4 bg-gray-50 rounded-md">
         <h3 className="font-semibold mb-2">Usage:</h3>
         <pre className="text-sm">
           {`import { useToast } from '../hooks/useToast';

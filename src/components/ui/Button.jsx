@@ -15,8 +15,8 @@ const Button = React.forwardRef(
     const variantClasses = {
       primary: 'bg-primary-500 text-white hover:bg-primary-600 focus:ring-primary-500',
       secondary: 'bg-secondary-500 text-white hover:bg-secondary-600 focus:ring-secondary-500',
-      outline: 'border border-neutral-300 bg-transparent hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-800',
-      ghost: 'bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800',
+      outline: 'border border-neutral-300 bg-transparent hover:bg-neutral-50
+      ghost: 'bg-transparent hover:bg-neutral-100
       destructive: 'bg-error-500 text-white hover:bg-error-600 focus:ring-error-500',
     };
     

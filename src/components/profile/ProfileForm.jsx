@@ -12,14 +12,14 @@ const ProfileForm = ({
   return (
     <Card className="md:col-span-2">
       <div className="p-6">
-        <h2 className="text-lg font-medium text-neutral-900 dark:text-neutral-100">
+        <h2 className="text-lg font-medium text-neutral-900">
           {isEditing ? 'Edit Profile Information' : 'Profile Information'}
         </h2>
         
         <div className="mt-6 space-y-6">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="firstName" className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              <label htmlFor="firstName" className="mb-1 block text-sm font-medium text-neutral-700">
                 First Name
               </label>
               <Input
@@ -32,7 +32,7 @@ const ProfileForm = ({
               />
             </div>
             <div>
-              <label htmlFor="lastName" className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              <label htmlFor="lastName" className="mb-1 block text-sm font-medium text-neutral-700">
                 Last Name
               </label>
               <Input
@@ -47,7 +47,7 @@ const ProfileForm = ({
           </div>
           
           <div>
-            <label htmlFor="email" className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+            <label htmlFor="email" className="mb-1 block text-sm font-medium text-neutral-700">
               Email Address
             </label>
             <div className="relative">
@@ -67,7 +67,7 @@ const ProfileForm = ({
           
           {user?.role !== 'patient' && (
             <div>
-              <label htmlFor="bio" className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              <label htmlFor="bio" className="mb-1 block text-sm font-medium text-neutral-700">
                 Bio
               </label>
               <textarea
@@ -78,7 +78,7 @@ const ProfileForm = ({
                 onChange={onChange}
                 disabled={!isEditing}
                 placeholder="Tell us about yourself"
-                className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 dark:focus:border-primary-500"
+                className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
           )}

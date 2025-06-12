@@ -132,56 +132,56 @@ const AdminDashboard = () => {
         <>
           {/* Main Stats Row */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Card className="bg-primary-50 dark:bg-transparent dark:border dark:border-primary-900">
+            <Card className="bg-primary-50">
               <div className="flex items-center space-x-4">
-                <div className="rounded-full bg-primary-100 p-3 dark:bg-primary-900">
-                  <Users className="h-6 w-6 text-primary-600 dark:text-primary-400" />
+                <div className="rounded-full bg-primary-100 p-3">
+                  <Users className="h-6 w-6 text-primary-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-primary-700 dark:text-primary-400">Total Users</p>
-                  <p className="text-2xl font-bold text-primary-900 dark:text-primary-50">
+                  <p className="text-sm text-primary-700">Total Users</p>
+                  <p className="text-2xl font-bold text-primary-900">
                     {stats?.totalUsers || 0}
                   </p>
                 </div>
               </div>
             </Card>
 
-            <Card className="bg-secondary-50 dark:bg-transparent dark:border dark:border-secondary-900">
+            <Card className="bg-secondary-50">
               <div className="flex items-center space-x-4">
-                <div className="rounded-full bg-secondary-100 p-3 dark:bg-secondary-900">
-                  <FileText className="h-6 w-6 text-secondary-600 dark:text-secondary-400" />
+                <div className="rounded-full bg-secondary-100 p-3">
+                  <FileText className="h-6 w-6 text-secondary-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-secondary-700 dark:text-secondary-400">Total Diagnoses</p>
-                  <p className="text-2xl font-bold text-secondary-900 dark:text-secondary-50">
+                  <p className="text-sm text-secondary-700">Total Diagnoses</p>
+                  <p className="text-2xl font-bold text-secondary-900">
                     {stats?.totalDiagnoses || 0}
                   </p>
                 </div>
               </div>
             </Card>
 
-            <Card className="bg-success-50 dark:bg-transparent dark:border dark:border-success-900">
+            <Card className="bg-success-50">
               <div className="flex items-center space-x-4">
-                <div className="rounded-full bg-success-100 p-3 dark:bg-success-900">
-                  <UserCheck className="h-6 w-6 text-success-600 dark:text-success-400" />
+                <div className="rounded-full bg-success-100 p-3">
+                  <UserCheck className="h-6 w-6 text-success-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-success-700 dark:text-success-400">Active Doctors</p>
-                  <p className="text-2xl font-bold text-success-900 dark:text-success-50">
+                  <p className="text-sm text-success-700">Active Doctors</p>
+                  <p className="text-2xl font-bold text-success-900">
                     {stats?.totalDoctors || 0}
                   </p>
                 </div>
               </div>
             </Card>
 
-            <Card className="bg-warning-50 dark:bg-transparent dark:border dark:border-warning-900">
+            <Card className="bg-warning-50">
               <div className="flex items-center space-x-4">
-                <div className="rounded-full bg-warning-100 p-3 dark:bg-warning-900">
-                  <UserX className="h-6 w-6 text-warning-600 dark:text-warning-400" />
+                <div className="rounded-full bg-warning-100 p-3">
+                  <UserX className="h-6 w-6 text-warning-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-warning-700 dark:text-warning-400">Pending Doctors</p>
-                  <p className="text-2xl font-bold text-warning-900 dark:text-warning-50">
+                  <p className="text-sm text-warning-700">Pending Doctors</p>
+                  <p className="text-2xl font-bold text-warning-900">
                     {stats?.pendingDoctors || 0}
                   </p>
                 </div>
@@ -191,42 +191,42 @@ const AdminDashboard = () => {
 
           {/* Additional Stats Row */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Card className="bg-info-50 dark:bg-transparent dark:border dark:border-info-900">
+            <Card className="bg-info-50">
               <div className="flex items-center space-x-4">
-                <div className="rounded-full bg-info-100 p-3 dark:bg-info-900">
-                  <Users className="h-6 w-6 text-info-600 dark:text-info-400" />
+                <div className="rounded-full bg-info-100 p-3">
+                  <Users className="h-6 w-6 text-info-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-info-700 dark:text-info-400">Total Patients</p>
-                  <p className="text-2xl font-bold text-info-900 dark:text-info-50">
+                  <p className="text-sm text-info-700">Total Patients</p>
+                  <p className="text-2xl font-bold text-info-900">
                     {stats?.totalPatients || 0}
                   </p>
                 </div>
               </div>
             </Card>
 
-            <Card className="bg-error-50 dark:bg-transparent dark:border dark:border-error-900">
+            <Card className="bg-error-50">
               <div className="flex items-center space-x-4">
-                <div className="rounded-full bg-error-100 p-3 dark:bg-error-900">
-                  <AlertTriangle className="h-6 w-6 text-error-600 dark:text-error-400" />
+                <div className="rounded-full bg-error-100 p-3">
+                  <AlertTriangle className="h-6 w-6 text-error-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-error-700 dark:text-error-400">Pending Reports</p>
-                  <p className="text-2xl font-bold text-error-900 dark:text-error-50">
+                  <p className="text-sm text-error-700">Pending Reports</p>
+                  <p className="text-2xl font-bold text-error-900">
                     {stats?.pendingReports || 0}
                   </p>
                 </div>
               </div>
             </Card>
 
-            <Card className="bg-neutral-50 dark:bg-transparent dark:border dark:border-neutral-800">
+            <Card className="bg-neutral-50">
               <div className="flex items-center space-x-4">
-                <div className="rounded-full bg-neutral-200 p-3 dark:bg-neutral-800">
-                  <BarChart2 className="h-6 w-6 text-neutral-700 dark:text-neutral-300" />
+                <div className="rounded-full bg-neutral-200 p-3">
+                  <BarChart2 className="h-6 w-6 text-neutral-700" />
                 </div>
                 <div>
-                  <p className="text-sm text-neutral-700 dark:text-neutral-400">System Health</p>
-                  <p className="text-2xl font-bold text-neutral-900 dark:text-neutral-50">
+                  <p className="text-sm text-neutral-700">System Health</p>
+                  <p className="text-2xl font-bold text-neutral-900">
                     {stats?.systemHealth || 0}%
                   </p>
                 </div>
@@ -239,7 +239,7 @@ const AdminDashboard = () => {
       {/* System Alerts */}
       <div>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">System Alerts</h2>
+          <h2 className="text-xl font-bold text-neutral-900">System Alerts</h2>
           <Button variant="outline" size="sm" onClick={loadAdminData}>
             <Activity className="mr-2 h-4 w-4" /> Refresh
           </Button>
@@ -268,10 +268,10 @@ const AdminDashboard = () => {
                       'text-info-500'
                     }`} />
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                      <p className="text-sm font-medium text-neutral-900">
                         {alert.message}
                       </p>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                      <p className="text-xs text-neutral-500">
                         Priority: {alert.priority}
                       </p>
                     </div>
@@ -290,8 +290,8 @@ const AdminDashboard = () => {
         ) : (
           <Card className="flex h-40 flex-col items-center justify-center text-center">
             <AlertTriangle className="h-8 w-8 text-neutral-400" />
-            <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">No alerts at this time</p>
-            <p className="text-xs text-neutral-500 dark:text-neutral-500">System is running smoothly</p>
+            <p className="mt-2 text-sm text-neutral-600">No alerts at this time</p>
+            <p className="text-xs text-neutral-500">System is running smoothly</p>
           </Card>
         )}
       </div>
@@ -300,8 +300,8 @@ const AdminDashboard = () => {
       <Card>
         <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div>
-            <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Quick Actions</h3>
-            <p className="text-sm text-neutral-600 dark:text-neutral-400">Common administrative tasks</p>
+            <h3 className="text-lg font-semibold text-neutral-900">Quick Actions</h3>
+            <p className="text-sm text-neutral-600">Common administrative tasks</p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link to="/admin/users">

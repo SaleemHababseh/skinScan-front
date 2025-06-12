@@ -85,11 +85,11 @@ const PatientDashboard = () => {
   const QuickActionCard = ({ icon: Icon, title, description, onClick, color = "blue" }) => (
     <Card className="hover:shadow-lg transition-all cursor-pointer" onClick={onClick}>
       <div className="text-center">
-        <div className={`mx-auto w-12 h-12 bg-${color}-100 dark:bg-${color}-900/20 rounded-lg flex items-center justify-center mb-4`}>
-          <Icon className={`h-6 w-6 text-${color}-600 dark:text-${color}-400`} />
+        <div className={`mx-auto w-12 h-12 bg-${color}-100}-900/20 rounded-lg flex items-center justify-center mb-4`}>
+          <Icon className={`h-6 w-6 text-${color}-600}-400`} />
         </div>
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{title}</h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400">{description}</p>
+        <h3 className="font-semibold text-gray-900 mb-2">{title}</h3>
+        <p className="text-sm text-gray-600">{description}</p>
       </div>
     </Card>
   );
@@ -112,7 +112,7 @@ const PatientDashboard = () => {
 
       {/* Quick Actions */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <QuickActionCard
             icon={Calendar}
@@ -143,7 +143,7 @@ const PatientDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">        {/* Recent Appointments */}
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Appointments</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Recent Appointments</h3>
             <Button 
               variant="outline" 
               size="sm"
@@ -155,29 +155,29 @@ const PatientDashboard = () => {
           <div className="space-y-3">
             {recentAppointments.length > 0 ? (
               recentAppointments.map((appointment, index) => (
-                <div key={index} className="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div className="flex-shrink-0 w-10 h-10 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center mr-3">
-                    <Heart className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
+                  <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                    <Heart className="h-5 w-5 text-blue-600" />
                   </div>                  <div className="flex-1">
-                    <p className="font-medium text-gray-900 dark:text-white">
+                    <p className="font-medium text-gray-900">
                       {appointment.doctorname || 'Unknown Doctor'}
                     </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-gray-600">
                       {formatDate(appointment.appointment_date)}
                     </p>
                   </div>
                   <span className={`px-2 py-1 text-xs rounded-full ${
                     appointment.status === 'accepted' 
-                      ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                      ? 'bg-green-100 text-green-800
                       : appointment.status === 'pending'
-                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-                      : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+                      ? 'bg-yellow-100 text-yellow-800
+                      : 'bg-red-100 text-red-800
                   }`}>
                     {appointment.status || 'pending'}
                   </span>
                 </div>
               ))            ) : (
-              <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+              <p className="text-gray-500 text-center py-4">
                 No appointments available
               </p>
             )}
@@ -187,7 +187,7 @@ const PatientDashboard = () => {
         {/* Recent Records */}
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Scan Records</h3>            <Button 
+            <h3 className="text-lg font-semibold text-gray-900">Recent Scan Records</h3>            <Button 
               variant="outline" 
               size="sm"
               onClick={() => navigate('/patient/diagnoses')}
@@ -198,30 +198,30 @@ const PatientDashboard = () => {
           <div className="space-y-3">
             {recentRecords.length > 0 ? (
               recentRecords.map((record, index) => (
-                <div key={index} className="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div className="flex-shrink-0 w-10 h-10 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center mr-3">
-                    <FileText className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
+                  <div className="flex-shrink-0 w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                    <FileText className="h-5 w-5 text-purple-600" />
                   </div>                  <div className="flex-1">
-                    <p className="font-medium text-gray-900 dark:text-white">
+                    <p className="font-medium text-gray-900">
                       {record.test_result || 'Skin Analysis'}
                     </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-gray-600">
                       {formatDate(record.test_date)}
                     </p>
                   </div>
                   <span className={`px-2 py-1 text-xs rounded-full ${
                     record.test_result === 'normal' || record.test_result === 'nev'
-                      ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                      ? 'bg-green-100 text-green-800
                       : record.test_result === 'bkl' || record.test_result === 'bcc'
-                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-                      : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                      ? 'bg-yellow-100 text-yellow-800
+                      : 'bg-blue-100 text-blue-800
                   }`}>
                     {record.test_result || 'analyzed'}
                   </span>
                 </div>
               ))
             ) : (
-              <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+              <p className="text-gray-500 text-center py-4">
                 No scan records available
               </p>
             )}
@@ -231,23 +231,23 @@ const PatientDashboard = () => {
 
       {/* Health Tips */}
       <Card>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Skin Health Tips</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Skin Health Tips</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-            <h4 className="font-medium text-blue-900 dark:text-blue-300 mb-2">Daily Protection</h4>
-            <p className="text-sm text-blue-700 dark:text-blue-400">
+          <div className="p-4 bg-blue-50 rounded-lg">
+            <h4 className="font-medium text-blue-900 mb-2">Daily Protection</h4>
+            <p className="text-sm text-blue-700">
               Apply sunscreen with SPF 30+ daily, even on cloudy days.
             </p>
           </div>
-          <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-            <h4 className="font-medium text-green-900 dark:text-green-300 mb-2">Regular Checks</h4>
-            <p className="text-sm text-green-700 dark:text-green-400">
+          <div className="p-4 bg-green-50 rounded-lg">
+            <h4 className="font-medium text-green-900 mb-2">Regular Checks</h4>
+            <p className="text-sm text-green-700">
               Examine your skin monthly for any changes in moles or spots.
             </p>
           </div>
-          <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-            <h4 className="font-medium text-purple-900 dark:text-purple-300 mb-2">Stay Hydrated</h4>
-            <p className="text-sm text-purple-700 dark:text-purple-400">
+          <div className="p-4 bg-purple-50 rounded-lg">
+            <h4 className="font-medium text-purple-900 mb-2">Stay Hydrated</h4>
+            <p className="text-sm text-purple-700">
               Drink plenty of water and moisturize regularly.
             </p>
           </div>

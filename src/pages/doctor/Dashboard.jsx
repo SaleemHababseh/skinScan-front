@@ -70,11 +70,11 @@ const DoctorDashboard = () => {
   const QuickActionCard = ({ icon: Icon, title, description, onClick, color = "blue" }) => (
     <Card className="hover:shadow-lg transition-all cursor-pointer" onClick={onClick}>
       <div className="text-center">
-        <div className={`mx-auto w-12 h-12 bg-${color}-100 dark:bg-${color}-900/20 rounded-lg flex items-center justify-center mb-4`}>
-          <Icon className={`h-6 w-6 text-${color}-600 dark:text-${color}-400`} />
+        <div className={`mx-auto w-12 h-12 bg-${color}-100}-900/20 rounded-lg flex items-center justify-center mb-4`}>
+          <Icon className={`h-6 w-6 text-${color}-600}-400`} />
         </div>
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{title}</h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400">{description}</p>
+        <h3 className="font-semibold text-gray-900 mb-2">{title}</h3>
+        <p className="text-sm text-gray-600">{description}</p>
       </div>
     </Card>
   );
@@ -96,7 +96,7 @@ const DoctorDashboard = () => {
 
       {/* Quick Actions */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <QuickActionCard
             icon={Calendar}
@@ -127,7 +127,7 @@ const DoctorDashboard = () => {
       <div>        {/* Recent Appointments */}
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Appointments</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Recent Appointments</h3>
             <Button 
               variant="outline" 
               size="sm"
@@ -138,27 +138,26 @@ const DoctorDashboard = () => {
           </div>
           <div className="space-y-3">            {recentAppointments.length > 0 ? (
               recentAppointments.map((appointment, index) => (
-                <div key={index} className="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
                   <div className="flex-1">
-                    <p className="font-medium text-gray-900 dark:text-white">
+                    <p className="font-medium text-gray-900">
                       {appointment.patientname || 'Unknown Patient'}
                     </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-gray-600">
                       {formatDate(appointment.appointment_date)}
                     </p>
-                  </div>
-                  <span className={`px-2 py-1 text-xs rounded-full ${
+                  </div>                  <span className={`px-2 py-1 text-xs rounded-full ${
                     appointment.status === 'accepted' 
-                      ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                      ? 'bg-success-50 text-success-700 dark:bg-success-900/20 dark:text-success-400'
                       : appointment.status === 'pending'
-                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-                      : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+                        ? 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400'
+                        : 'bg-error-50 text-error-700 dark:bg-error-900/20 dark:text-error-400'
                   }`}>
                     {appointment.status || 'pending'}
                   </span>
                 </div>
               ))
-            ) : (              <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+            ) : (              <p className="text-gray-500 text-center py-4">
                 No appointments available
               </p>
             )}

@@ -88,9 +88,9 @@ const ReportModal = ({ isOpen, onClose, onSubmit, systemReportsOnly = false }) =
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 w-full max-w-md">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+          <h3 className="text-lg font-semibold text-neutral-900">
             {showSuccess ? "Report Submitted" : "Report Issue"}
           </h3>
           <Button 
@@ -106,34 +106,34 @@ const ReportModal = ({ isOpen, onClose, onSubmit, systemReportsOnly = false }) =
         {showSuccess ? (
           <div className="text-center py-8">
             <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-            <h4 className="text-lg font-medium text-neutral-900 dark:text-neutral-100 mb-2">
+            <h4 className="text-lg font-medium text-neutral-900 mb-2">
               Report Submitted Successfully
             </h4>
-            <p className="text-sm text-neutral-600 dark:text-neutral-400">
+            <p className="text-sm text-neutral-600">
               Thank you for your feedback. We'll review your report and take appropriate action.
             </p>
           </div>
         ) : (
           <>
             {error && (
-              <div className="mb-4 p-3 rounded-md bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+              <div className="mb-4 p-3 rounded-md bg-red-50 border border-red-200">
                 <div className="flex items-center">
                   <AlertCircle className="h-4 w-4 text-red-500 mr-2" />
-                  <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
+                  <p className="text-sm text-red-700">{error}</p>
                 </div>
               </div>
             )}
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
                   Report Type
                 </label>
                 <select
                   value={reportType}
                   onChange={(e) => setReportType(e.target.value)}
                   disabled={isLoading}
-                  className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-md bg-white text-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <option value="">Select a reason</option>
                   {systemReportsOnly ? (
@@ -179,7 +179,7 @@ const ReportModal = ({ isOpen, onClose, onSubmit, systemReportsOnly = false }) =
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
                   Description
                 </label>
                 <textarea
@@ -188,7 +188,7 @@ const ReportModal = ({ isOpen, onClose, onSubmit, systemReportsOnly = false }) =
                   placeholder="Please provide details about the issue..."
                   rows={4}
                   disabled={isLoading}
-                  className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-md bg-white text-neutral-900 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
                   maxLength={500}
                 />
                 <p className="text-xs text-neutral-500 mt-1">

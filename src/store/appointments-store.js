@@ -81,10 +81,12 @@ const useUserStore = create((set, get) => ({
     try {
       const result = await cancelAppointment(appointment_id, token);
       
-      // Remove the appointment from the store
+      // Update the appointment status instead of removing it
       set(state => ({
-        appointments: state.appointments.filter(apt => 
-          apt.appointment_id !== appointment_id
+        appointments: state.appointments.map(apt => 
+          apt.appointment_id === appointment_id
+            ? { ...apt, status: 'cancelled' }
+            : apt
         ),
         isLoading: false
       }));
@@ -175,8 +177,15 @@ const useUserStore = create((set, get) => ({
   clearError: () => set({ error: null }),
   
   clearAppointments: () => set({ appointments: [] }),
+    clearDoctors: () => set({ doctors: [] }),
   
-  clearDoctors: () => set({ doctors: [] }),
+  // Reset all state
+  reset: () => set({ 
+    appointments: [],
+    doctors: [],
+    isLoading: false,
+    error: null 
+  }),
 }));
 
 export default useUserStore;

@@ -71,8 +71,8 @@ const PatientDiagnoses = () => {
       {/* Header */}
       <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">My Diagnoses</h1>
-          <p className="mt-1 text-neutral-600 dark:text-neutral-400">View and track all your skin analyses</p>
+          <h1 className="text-2xl font-bold text-neutral-900">My Diagnoses</h1>
+          <p className="mt-1 text-neutral-600">View and track all your skin analyses</p>
         </div>
         <Link to="/patient/upload">
           <Button>
@@ -84,8 +84,8 @@ const PatientDiagnoses = () => {
       {error ? (
         <Card className="flex h-64 flex-col items-center justify-center text-center">
           <FileText className="h-12 w-12 text-red-400" />
-          <p className="mt-4 text-lg font-medium text-red-600 dark:text-red-400">Error loading diagnoses</p>
-          <p className="mt-1 text-neutral-600 dark:text-neutral-400">{error}</p>
+          <p className="mt-4 text-lg font-medium text-red-600">Error loading diagnoses</p>
+          <p className="mt-1 text-neutral-600">{error}</p>
           <Button 
             onClick={() => window.location.reload()} 
             className="mt-4"
@@ -102,42 +102,42 @@ const PatientDiagnoses = () => {
           {diagnoses.map((diagnosis) => (
             <Card key={diagnosis.id} className="overflow-hidden">
               <div className="flex flex-col sm:flex-row">
-                <div className="h-48 w-full sm:h-auto sm:w-48 bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center">
+                <div className="h-48 w-full sm:h-auto sm:w-48 bg-neutral-100 flex items-center justify-center">
                   <FileText className="h-12 w-12 text-neutral-400" />
                 </div>
                 <div className="flex flex-1 flex-col p-4">
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <div className="flex items-center">
-                        <h3 className="font-medium text-neutral-900 dark:text-neutral-100">{diagnosis.bodyPart}</h3>
+                        <h3 className="font-medium text-neutral-900">{diagnosis.bodyPart}</h3>
                         <span className={`ml-2 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                           diagnosis.diagnosisStatus === 'completed'
-                            ? 'bg-success-50 text-success-500 dark:bg-success-900/30 dark:text-success-500'
-                            : 'bg-warning-50 text-warning-500 dark:bg-warning-900/30 dark:text-warning-500'
+                            ? 'bg-success-50 text-success-500
+                            : 'bg-warning-50 text-warning-500
                         }`}>
                           {diagnosis.diagnosisStatus === 'completed' ? 'Completed' : 'Processing'}
                         </span>
                       </div>
-                      <div className="mt-1 flex items-center text-xs text-neutral-500 dark:text-neutral-400">
+                      <div className="mt-1 flex items-center text-xs text-neutral-500">
                         <Calendar className="mr-1 h-3 w-3" />
                         <span>{safeFormatDate(diagnosis.uploadDate)}</span>
                       </div>
                     </div>
                     {diagnosis.doctorName && (
                       <div className="mt-2 sm:mt-0">
-                        <span className="text-xs text-neutral-500 dark:text-neutral-400">Reviewed by</span>
-                        <p className="font-medium text-neutral-900 dark:text-neutral-100">{diagnosis.doctorName}</p>
+                        <span className="text-xs text-neutral-500">Reviewed by</span>
+                        <p className="font-medium text-neutral-900">{diagnosis.doctorName}</p>
                       </div>
                     )}
                   </div>
                   
-                  <p className="mt-3 text-sm text-neutral-600 dark:text-neutral-400">
+                  <p className="mt-3 text-sm text-neutral-600">
                     {diagnosis.concernDescription}
                   </p>
                     {diagnosis.diagnosisResult && (
-                    <div className="mt-3 rounded-md bg-neutral-50 p-3 dark:bg-neutral-800/50">
-                      <h4 className="font-medium text-neutral-900 dark:text-neutral-100">Diagnosis:</h4>
-                      <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+                    <div className="mt-3 rounded-md bg-neutral-50 p-3">
+                      <h4 className="font-medium text-neutral-900">Diagnosis:</h4>
+                      <p className="mt-1 text-sm text-neutral-600">
                         {diagnosis.diagnosisResult.toUpperCase()}
                       </p>
                     </div>
@@ -149,8 +149,8 @@ const PatientDiagnoses = () => {
         </div>
       ) : (        <Card className="flex h-64 flex-col items-center justify-center text-center">
           <FileText className="h-12 w-12 text-neutral-400" />
-          <p className="mt-4 text-lg font-medium text-neutral-900 dark:text-neutral-100">No diagnoses found</p>
-          <p className="mt-1 text-neutral-600 dark:text-neutral-400">
+          <p className="mt-4 text-lg font-medium text-neutral-900">No diagnoses found</p>
+          <p className="mt-1 text-neutral-600">
             Upload your first skin image for analysis
           </p>
           <Link to="/patient/upload" className="mt-4">

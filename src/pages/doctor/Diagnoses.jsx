@@ -80,21 +80,21 @@ const DoctorDiagnoses = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Your Diagnoses</h1>
-        <p className="mt-1 text-neutral-600 dark:text-neutral-400">Review and manage medical records and diagnoses</p>
+        <h1 className="text-2xl font-bold text-neutral-900">Your Diagnoses</h1>
+        <p className="mt-1 text-neutral-600">Review and manage medical records and diagnoses</p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
    
-        <Card className="bg-neutral-50 dark:bg-transparent dark:border dark:border-neutral-700">
+        <Card className="bg-neutral-50">
           <div className="flex items-center space-x-4">
-            <div className="rounded-full bg-neutral-200 p-3 dark:bg-neutral-800">
-              <FileText className="h-6 w-6 text-neutral-700 dark:text-neutral-300" />
+            <div className="rounded-full bg-neutral-200 p-3">
+              <FileText className="h-6 w-6 text-neutral-700" />
             </div>
             <div>
-              <p className="text-sm text-neutral-700 dark:text-neutral-400">Total Records</p>
-              <p className="text-2xl font-bold text-neutral-900 dark:text-neutral-50">{patientRecords.length}</p>
+              <p className="text-sm text-neutral-700">Total Records</p>
+              <p className="text-2xl font-bold text-neutral-900">{patientRecords.length}</p>
             </div>
           </div>
         </Card>
@@ -118,23 +118,23 @@ const DoctorDiagnoses = () => {
             return (
               <Card 
                 key={imgId || diagnosis.id}
-                className="hover:border-primary-200 hover:bg-primary-50/50 dark:hover:border-primary-800 dark:hover:bg-primary-900/10 transition-colors"
+                className="hover:border-primary-200 hover:bg-primary-50/50 transition-colors"
               >
                 <div className="flex flex-col">
                   {/* Header with status */}
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex-1">
-                      <h3 className="font-medium text-neutral-900 dark:text-neutral-100">
+                      <h3 className="font-medium text-neutral-900">
                         Test Date: {safeFormatDate(testDate)}
                       </h3>
                     </div>
-                    <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-success-50 text-success-500 dark:bg-success-900/30 dark:text-success-500">
+                    <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-success-50 text-success-500">
                       Completed
                     </span>
                   </div>
                   
                   {/* Image placeholder */}
-                  <div className="h-32 bg-neutral-100 dark:bg-neutral-800 rounded-lg flex items-center justify-center mb-3">
+                  <div className="h-32 bg-neutral-100 rounded-lg flex items-center justify-center mb-3">
                     <div className="text-center">
                       <FileText className="h-8 w-8 text-neutral-400 mx-auto mb-1" />
                       <span className="text-xs text-neutral-500">Image ID: {imgId}</span>
@@ -144,10 +144,10 @@ const DoctorDiagnoses = () => {
                   {/* Diagnosis info */}
                   <div className="space-y-2">
                     <div>
-                      <p className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                      <p className="text-sm font-medium text-neutral-700">
                         Diagnosis: {getDiagnosisFullName(testResult)}
                       </p>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                      <p className="text-xs text-neutral-500">
                         Result Code: {testResult?.toUpperCase()}
                       </p>
                     </div>
@@ -160,8 +160,8 @@ const DoctorDiagnoses = () => {
       ) : (
         <Card className="flex h-40 flex-col items-center justify-center text-center">
           <FileText className="h-10 w-10 text-neutral-400" />
-          <p className="mt-2 text-neutral-600 dark:text-neutral-400">No diagnoses found</p>
-          <p className="text-sm text-neutral-500 dark:text-neutral-500">
+          <p className="mt-2 text-neutral-600">No diagnoses found</p>
+          <p className="text-sm text-neutral-500">
             Patient records will appear here when uploaded
           </p>
         </Card>

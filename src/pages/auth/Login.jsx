@@ -91,26 +91,26 @@ const Login = () => {
         </div>
         
         <div className="mt-6">
-          <div className="bg-white px-6 py-8 shadow-md dark:bg-neutral-800 sm:rounded-lg sm:px-10">
+          <div className="bg-white px-6 py-8 shadow-md sm:rounded-lg sm:px-10">
             <div className="mb-6 text-center">
-              <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Welcome back</h2>
-              <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+              <h2 className="text-2xl font-bold text-neutral-900">Welcome back</h2>
+              <p className="mt-1 text-sm text-neutral-600">
                 Log in to your account to continue
               </p>
             </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">{" "}
         {registrationMessage && (
-          <div className="rounded-md bg-success-50 p-4 dark:bg-success-900/30">
-            <p className="text-sm text-success-600 dark:text-success-400">
+          <div className="rounded-md bg-success-50 p-4">
+            <p className="text-sm text-success-600">
               {registrationMessage}
             </p>
           </div>
         )}        {error && (
           <div className={`rounded-md p-4 ${
             error.toLowerCase().includes('suspended') 
-              ? 'bg-warning-50 dark:bg-warning-900/30 border border-warning-200 dark:border-warning-800'
-              : 'bg-error-50 dark:bg-error-900/30'
+              ? 'bg-warning-50 border border-warning-200
+              : 'bg-error-50
           }`}>
             <div className="flex">
               {error.toLowerCase().includes('suspended') && (
@@ -123,14 +123,14 @@ const Login = () => {
               <div className={error.toLowerCase().includes('suspended') ? 'ml-3' : ''}>
                 <p className={`text-sm ${
                   error.toLowerCase().includes('suspended')
-                    ? 'text-warning-700 dark:text-warning-400'
-                    : 'text-error-500 dark:text-error-400'
+                    ? 'text-warning-700
+                    : 'text-error-500
                 }`}>
                   {error}
                 </p>
                 {error.toLowerCase().includes('suspended') && (
                   <div className="mt-2">
-                    <p className="text-xs text-warning-600 dark:text-warning-500">
+                    <p className="text-xs text-warning-600">
                       If you believe this is an error, please contact our support team.
                     </p>
                   </div>
@@ -143,7 +143,7 @@ const Login = () => {
         <div>
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+            className="block text-sm font-medium text-neutral-700"
           >
             Email
           </label>
@@ -165,7 +165,7 @@ const Login = () => {
         <div>
           <label
             htmlFor="password"
-            className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+            className="block text-sm font-medium text-neutral-700"
           >
             Password
           </label>
@@ -199,7 +199,7 @@ const Login = () => {
       </form>
       
       <div className="mt-6 text-center text-sm">
-        <p className="text-neutral-600 dark:text-neutral-400">
+        <p className="text-neutral-600">
           Don't have an account?{' '}
           <Link to="/register" className="font-medium text-primary-500 hover:text-primary-600">
             Sign up

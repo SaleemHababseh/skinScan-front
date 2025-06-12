@@ -20,7 +20,7 @@ const ChatHeader = ({ navigate, chatPartner, isConnected, connectionStatus, onRa
   }, []);
 
   return (
-    <div className="sticky top-0 z-10 bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700">
+    <div className="sticky top-0 z-10 bg-white border-b border-neutral-200">
       <div className="flex items-center p-4">
         <Button
           variant="ghost"
@@ -33,19 +33,19 @@ const ChatHeader = ({ navigate, chatPartner, isConnected, connectionStatus, onRa
         
         <div className="flex items-center space-x-3 flex-1">
           <div className="relative">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900">
-              <User className="h-8 w-8 text-primary-600 dark:text-primary-400" />
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-100">
+              <User className="h-8 w-8 text-primary-600" />
             </div>
             {isConnected && (
-              <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-green-500 border-2 border-white dark:border-neutral-800"></div>
+              <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-green-500 border-2 border-white"></div>
             )}
           </div>
           
           <div className="flex-1">
-            <h2 className="font-semibold text-lg text-neutral-900 dark:text-neutral-100">
+            <h2 className="font-semibold text-lg text-neutral-900">
               {chatPartner?.name || 'Unknown User'}
             </h2>
-            <p className="text-sm text-neutral-500 dark:text-neutral-400 flex items-center">
+            <p className="text-sm text-neutral-500 flex items-center">
               {isConnected ? (
                 <>
                   <Wifi className="h-4 w-4 mr-2 text-green-500" />
@@ -72,14 +72,14 @@ const ChatHeader = ({ navigate, chatPartner, isConnected, connectionStatus, onRa
           </Button>
 
           {showMenu && (
-            <div className="absolute right-0 top-12 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-lg py-2 min-w-48 z-20">
+            <div className="absolute right-0 top-12 bg-white border border-neutral-200 rounded-lg shadow-lg py-2 min-w-48 z-20">
               {userRole === 'doctor' && (
                 <button
                   onClick={() => {
                     onViewRecords?.();
                     setShowMenu(false);
                   }}
-                  className="lg:hidden w-full px-4 py-2 text-left hover:bg-neutral-50 dark:hover:bg-neutral-700 flex items-center space-x-3"
+                  className="lg:hidden w-full px-4 py-2 text-left hover:bg-neutral-50 flex items-center space-x-3"
                 >
                   <FileText className="h-5 w-5" />
                   <span>View Patient Records</span>
@@ -91,7 +91,7 @@ const ChatHeader = ({ navigate, chatPartner, isConnected, connectionStatus, onRa
                     onRate();
                     setShowMenu(false);
                   }}
-                  className="w-full px-4 py-2 text-left hover:bg-neutral-50 dark:hover:bg-neutral-700 flex items-center space-x-3"
+                  className="w-full px-4 py-2 text-left hover:bg-neutral-50 flex items-center space-x-3"
                 >
                   <Star className="h-5 w-5" />
                   <span>Rate Doctor</span>
@@ -102,7 +102,7 @@ const ChatHeader = ({ navigate, chatPartner, isConnected, connectionStatus, onRa
                   onReport();
                   setShowMenu(false);
                 }}
-                className="w-full px-4 py-2 text-left hover:bg-neutral-50 dark:hover:bg-neutral-700 flex items-center space-x-3 text-red-600"
+                className="w-full px-4 py-2 text-left hover:bg-neutral-50 flex items-center space-x-3 text-red-600"
               >
                 <Flag className="h-5 w-5" />
                 <span>Report</span>

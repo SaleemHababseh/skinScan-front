@@ -16,16 +16,16 @@ const SecuritySettings = ({
   return (
     <Card className="md:col-span-3">
       <div className="p-6">
-        <h2 className="text-lg font-medium text-neutral-900 dark:text-neutral-100">Security Settings</h2>
+        <h2 className="text-lg font-medium text-neutral-900">Security Settings</h2>
         
         <div className="mt-6 space-y-6">
-          <div className="flex items-center justify-between border-b border-neutral-200 pb-4 dark:border-neutral-800">
+          <div className="flex items-center justify-between border-b border-neutral-200 pb-4">
             <div>
               <div className="flex items-center">
                 <Lock className="mr-2 h-5 w-5 text-neutral-500" />
-                <h3 className="text-base font-medium text-neutral-900 dark:text-neutral-100">Password</h3>
+                <h3 className="text-base font-medium text-neutral-900">Password</h3>
               </div>
-              <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+              <p className="mt-1 text-sm text-neutral-600">
                 Update your password to keep your account secure
               </p>
             </div>
@@ -38,9 +38,9 @@ const SecuritySettings = ({
           </div>
           
           {showPasswordChange && (
-            <div className="space-y-4 rounded-md border border-neutral-200 p-4 dark:border-neutral-700">
+            <div className="space-y-4 rounded-md border border-neutral-200 p-4">
               <div>
-                <label htmlFor="oldPassword" className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                <label htmlFor="oldPassword" className="mb-1 block text-sm font-medium text-neutral-700">
                   Current Password
                 </label>
                 <Input
@@ -53,7 +53,7 @@ const SecuritySettings = ({
                 />
               </div>
               <div>
-                <label htmlFor="newPassword" className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                <label htmlFor="newPassword" className="mb-1 block text-sm font-medium text-neutral-700">
                   New Password
                 </label>
                 <Input
@@ -66,7 +66,7 @@ const SecuritySettings = ({
                 />
               </div>
               <div>
-                <label htmlFor="confirmPassword" className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                <label htmlFor="confirmPassword" className="mb-1 block text-sm font-medium text-neutral-700">
                   Confirm New Password
                 </label>
                 <Input

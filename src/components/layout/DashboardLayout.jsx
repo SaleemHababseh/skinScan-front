@@ -81,9 +81,9 @@ const DashboardLayout = ({ children }) => {
     <div className="flex min-h-screen flex-col">
       <Navbar />
       
-      <div className="flex flex-1 bg-neutral-100 dark:bg-neutral-900">
+      <div className="flex flex-1 bg-neutral-100">
         {/* Sidebar */}
-        <aside className="fixed inset-y-0 left-0 z-40 mt-16 hidden w-64 transform overflow-y-auto border-r border-neutral-200 bg-white pt-5 transition-all dark:border-neutral-800 dark:bg-neutral-900 md:block">
+        <aside className="fixed inset-y-0 left-0 z-40 mt-16 hidden w-64 transform overflow-y-auto border-r border-neutral-200 bg-white pt-5 transition-all md:block">
           <div className="space-y-1 px-2">
             {sidebarLinks.map((link) => {
               const isActive = location.pathname === link.href;
@@ -95,14 +95,14 @@ const DashboardLayout = ({ children }) => {
                   to={link.href}
                   className={`group flex items-center rounded-md px-3 py-2 text-sm font-medium ${
                     isActive
-                      ? 'bg-primary-50 text-primary-500 dark:bg-primary-950 dark:text-primary-400'
-                      : 'text-neutral-700 hover:bg-neutral-50 dark:text-neutral-300 dark:hover:bg-neutral-800'
+                      ? 'bg-primary-50 text-primary-500
+                      : 'text-neutral-700 hover:bg-neutral-50
                   }`}
                 >
                   <Icon className={`mr-3 h-5 w-5 ${
                     isActive
-                      ? 'text-primary-500 dark:text-primary-400'
-                      : 'text-neutral-500 group-hover:text-neutral-700 dark:text-neutral-400 dark:group-hover:text-neutral-300'
+                      ? 'text-primary-500
+                      : 'text-neutral-500 group-hover:text-neutral-700
                   }`} />
                   {link.name}
                 </Link>
@@ -112,7 +112,7 @@ const DashboardLayout = ({ children }) => {
         </aside>
         
         {/* Mobile menu */}
-        <div className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between border-t border-neutral-200 bg-white px-4 py-2 dark:border-neutral-800 dark:bg-neutral-900 md:hidden">
+        <div className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between border-t border-neutral-200 bg-white px-4 py-2 md:hidden">
           {sidebarLinks.slice(0, 5).map((link) => {
             const isActive = location.pathname === link.href;
             const Icon = link.icon;
@@ -123,8 +123,8 @@ const DashboardLayout = ({ children }) => {
                 to={link.href}
                 className={`flex flex-col items-center justify-center space-y-1 ${
                   isActive
-                    ? 'text-primary-500 dark:text-primary-400'
-                    : 'text-neutral-700 dark:text-neutral-300'
+                    ? 'text-primary-500
+                    : 'text-neutral-700
                 }`}
               >
                 <Icon className="h-5 w-5" />

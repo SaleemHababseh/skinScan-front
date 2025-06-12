@@ -3,7 +3,9 @@ import { useNavigate, Link } from "react-router-dom";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import ThemeToggle from "../../components/ui/ThemeToggle";
+import ThemeToggle from "../../components/ui/ThemeToggle";
 import useAuthStore from "../../store/auth-store";
+import useAppointmentsStore from "../../store/appointments-store";
 import { createUser } from "../../api/createuser";
 
 const Register = () => {
@@ -19,9 +21,9 @@ const Register = () => {
     sex: "",
     role: "patient",
   });
-  const [formErrors, setFormErrors] = useState({});
-  const { sendVerificationCode, validateVerificationCode, error, clearError } =
+  const [formErrors, setFormErrors] = useState({});  const { sendVerificationCode, validateVerificationCode, error, clearError } =
     useAuthStore();
+  const { reset: resetAppointments } = useAppointmentsStore();
 
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -130,17 +132,8 @@ const Register = () => {
     if (!validateFinalForm()) return;
 
     setIsLoading(true);
-    console.log("👤 Creating user account:", {
-      email: formData.email,
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      role: formData.role,
-      age: formData.age,
-      sex: formData.sex
-    });
     
     try {
-      // Register user
       const result = await createUser({
         f_name: formData.firstName,
         l_name: formData.lastName,
@@ -152,21 +145,13 @@ const Register = () => {
       });
       
       console.log("✅ User registration successful:", result);
+      resetAppointments(); // Reset appointments state when registering
       
-      // Navigate to login page after successful registration
       navigate("/login", {
         state: { message: "Registration successful! Please log in." },
       });
     } catch (err) {
-      console.error("❌ Registration failed:", {
-        error: err.message,
-        formData: {
-          email: formData.email,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          role: formData.role
-        }
-      });
+      console.error("❌ Registration failed:", err);
     } finally {
       setIsLoading(false);
     }
@@ -189,12 +174,12 @@ const Register = () => {
         </div>
 
         <div className="mt-6">
-          <div className="bg-white px-6 py-8 shadow-md dark:bg-neutral-800 sm:rounded-lg sm:px-10">
+          <div className="bg-white px-6 py-8 shadow-md sm:rounded-lg sm:px-10">
             <div className="mb-6 text-center">
-              <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+              <h2 className="text-2xl font-bold text-neutral-900">
                 Create your account
               </h2>
-              <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+              <p className="mt-1 text-sm text-neutral-600">
                 Sign up to start managing your skin health
               </p>
             </div>
@@ -204,8 +189,8 @@ const Register = () => {
               className="space-y-5"
             >
               {error && (
-                <div className="rounded-md bg-error-50 p-4 dark:bg-error-900/30">
-                  <p className="text-sm text-error-500 dark:text-error-400">
+                <div className="rounded-md bg-error-50 p-4">
+                  <p className="text-sm text-error-500">
                     {error}
                   </p>
                 </div>
@@ -214,7 +199,7 @@ const Register = () => {
                 <div>
                   <label
                     htmlFor="email"
-                    className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                    className="block text-sm font-medium text-neutral-700"
                   >
                     Email
                   </label>
@@ -237,7 +222,7 @@ const Register = () => {
                 <div>
                   <label
                     htmlFor="verificationCode"
-                    className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                    className="block text-sm font-medium text-neutral-700"
                   >
                     Verification Code
                   </label>
@@ -262,7 +247,7 @@ const Register = () => {
                     <div>
                       <label
                         htmlFor="firstName"
-                        className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                        className="block text-sm font-medium text-neutral-700"
                       >
                         First Name
                       </label>
@@ -282,7 +267,7 @@ const Register = () => {
                     <div>
                       <label
                         htmlFor="lastName"
-                        className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                        className="block text-sm font-medium text-neutral-700"
                       >
                         Last Name
                       </label>
@@ -304,7 +289,7 @@ const Register = () => {
                     <div>
                       <label
                         htmlFor="age"
-                        className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                        className="block text-sm font-medium text-neutral-700"
                       >
                         Age
                       </label>
@@ -326,7 +311,7 @@ const Register = () => {
                     <div>
                       <label
                         htmlFor="sex"
-                        className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                        className="block text-sm font-medium text-neutral-700"
                       >
                         Gender
                       </label>
@@ -336,13 +321,12 @@ const Register = () => {
                           name="sex"
                           value={formData.sex}
                           onChange={handleChange}
-                          className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm placeholder-neutral-500 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white dark:placeholder-neutral-400"
+                          className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm placeholder-neutral-500 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                           required
                         >
                           <option value="">Select gender</option>
                           <option value="male">Male</option>
                           <option value="female">Female</option>
-                          <option value="other">Other</option>
                         </select>
                         {formErrors.sex && (
                           <p className="mt-1 text-sm text-error-500">
@@ -355,7 +339,7 @@ const Register = () => {
                   <div>
                     <label
                       htmlFor="password"
-                      className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                      className="block text-sm font-medium text-neutral-700"
                     >
                       Password
                     </label>
@@ -375,7 +359,7 @@ const Register = () => {
                   <div>
                     <label
                       htmlFor="confirmPassword"
-                      className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                      className="block text-sm font-medium text-neutral-700"
                     >
                       Confirm Password
                     </label>
@@ -402,9 +386,9 @@ const Register = () => {
                             role: e.target.checked ? "doctor" : "patient",
                           })
                         }
-                        className="mr-2 h-4 w-4 rounded border-neutral-300 text-primary-600 focus:ring-primary-500 dark:border-neutral-600 dark:bg-neutral-700 dark:focus:ring-primary-500"
+                        className="mr-2 h-4 w-4 rounded border-neutral-300 text-primary-600 focus:ring-primary-500"
                       />
-                      <label className="text-sm text-neutral-700 dark:text-neutral-300">
+                      <label className="text-sm text-neutral-700">
                         Register as Doctor
                       </label>
                     </div>
@@ -423,7 +407,7 @@ const Register = () => {
             </form>
 
             <div className="mt-6 text-center text-sm">
-              <p className="text-neutral-600 dark:text-neutral-400">
+              <p className="text-neutral-600">
                 Already have an account?{" "}
                 <Link
                   to="/login"

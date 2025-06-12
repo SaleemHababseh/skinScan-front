@@ -15,10 +15,10 @@ const PatientRecordsModal = ({ isOpen, onClose, patientId, token, patientName })
       />
       
       {/* Modal */}
-      <div className="absolute inset-x-4 top-4 bottom-4 bg-white dark:bg-neutral-800 rounded-lg shadow-xl flex flex-col">
+      <div className="absolute inset-x-4 top-4 bottom-4 bg-white rounded-lg shadow-xl flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-neutral-200 dark:border-neutral-700">
-          <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+        <div className="flex items-center justify-between p-4 border-b border-neutral-200">
+          <h2 className="text-lg font-semibold text-neutral-900">
             Patient Records
           </h2>
           <Button

@@ -100,22 +100,22 @@ const PatientUpload = () => {
               <div className="p-6 md:w-2/3">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-bold">Analysis Results</h2>
-                  <span className="px-3 py-1 rounded-full bg-success-50 text-success-500 text-sm dark:bg-success-900/30">
+                  <span className="px-3 py-1 rounded-full bg-success-50 text-success-500 text-sm">
                     <CheckCircle className="w-4 h-4 inline mr-1" />
                     Completed
                   </span>
                 </div>                <div className="mb-6">
                   <h3 className="font-medium mb-2">ML Analysis Result</h3>
-                  <div className="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg">
+                  <div className="bg-neutral-50 p-4 rounded-lg">
                     <div className="space-y-3">
-                      <div>                        <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Classification:</span>
-                        <p className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mt-1">
+                      <div>                        <span className="text-sm font-medium text-neutral-600">Classification:</span>
+                        <p className="text-lg font-semibold text-neutral-900 mt-1">
                           {getClassificationDisplay(scanResult.response)}
                         </p>
                       </div>
                       {scanResult.ratio && (
                         <div>
-                          <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Confidence Level:</span>
+                          <span className="text-sm font-medium text-neutral-600">Confidence Level:</span>
                           <div className="mt-1">
                             <div className="flex justify-between text-sm mb-1">
                               <span>{(scanResult.ratio * 100).toFixed(1)}%</span>
@@ -128,7 +128,7 @@ const PatientUpload = () => {
                                  scanResult.ratio >= 0.6 ? 'Medium' : 'Low'}
                               </span>
                             </div>
-                            <div className="w-full bg-neutral-200 rounded-full h-2 dark:bg-neutral-700">
+                            <div className="w-full bg-neutral-200 rounded-full h-2">
                               <div 
                                 className={`h-2 rounded-full transition-all duration-500 ${
                                   scanResult.ratio >= 0.8 ? 'bg-success-500' : 
@@ -164,12 +164,12 @@ const PatientUpload = () => {
             </div>
           </Card>
           
-          <div className="bg-neutral-50 p-4 rounded-lg border border-neutral-200 dark:bg-neutral-800 dark:border-neutral-700">
+          <div className="bg-neutral-50 p-4 rounded-lg border border-neutral-200">
             <h3 className="font-medium mb-2 flex items-center">
               <AlertCircle className="w-5 h-5 mr-2 text-primary-500" />
               Disclaimer
             </h3>
-            <p className="text-sm text-neutral-600 dark:text-neutral-400">
+            <p className="text-sm text-neutral-600">
               This AI analysis is for informational purposes only and does not constitute medical advice. 
               Please consult with a healthcare professional for proper diagnosis and treatment. 
               The accuracy of the analysis is not guaranteed and should be verified by a healthcare provider.
@@ -186,9 +186,9 @@ const PatientUpload = () => {
                   {...getRootProps()}
                   className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
                     isDragActive 
-                      ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/10' 
-                      : 'border-neutral-300 dark:border-neutral-700'
-                  } ${imagePreview ? 'bg-neutral-50 dark:bg-neutral-800' : ''}`}
+                      ? 'border-primary-500 bg-primary-50 
+                      : 'border-neutral-300
+                  } ${imagePreview ? 'bg-neutral-50 : ''}`}
                 >
                   <input {...getInputProps()} />
                   
@@ -216,7 +216,7 @@ const PatientUpload = () => {
                       <p className="text-base">
                         Drag and drop an image, or <span className="text-primary-500">browse</span>
                       </p>
-                      <p className="text-xs text-neutral-500 mt-1 dark:text-neutral-400">
+                      <p className="text-xs text-neutral-500 mt-1">
                         Supported formats: JPEG, PNG, WebP (Max 10MB)
                       </p>
                     </div>
@@ -254,14 +254,14 @@ const PatientUpload = () => {
             </div>
           </Card>
           
-          <Card className="bg-neutral-50 dark:bg-neutral-800">
+          <Card className="bg-neutral-50">
             <div className="flex items-start">
               <div className="flex-shrink-0 pt-1">
                 <Image className="h-5 w-5 text-primary-500" />
               </div>
               <div className="ml-3">
                 <h3 className="font-medium">Image Guidelines</h3>
-                <ul className="mt-2 list-disc list-inside space-y-1 text-sm text-neutral-600 dark:text-neutral-400">
+                <ul className="mt-2 list-disc list-inside space-y-1 text-sm text-neutral-600">
                   <li>Take a clear, well-lit photo of the affected area</li>
                   <li>Include the full area of concern and some surrounding skin</li>
                   <li>Avoid using filters or editing the image</li>
@@ -277,7 +277,7 @@ const PatientUpload = () => {
             <Card>
               <h3 className="font-medium mb-4">Recent Scans</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">                {scanHistory.slice(0, 6).map((scan) => (
-                  <div key={scan.id} className="border rounded-lg p-3 hover:bg-neutral-50 dark:hover:bg-neutral-800 cursor-pointer">
+                  <div key={scan.id} className="border rounded-lg p-3 hover:bg-neutral-50 cursor-pointer">
                     <img 
                       src={scan.imagePreview} 
                       alt={scan.fileName}
@@ -288,11 +288,11 @@ const PatientUpload = () => {
                       {new Date(scan.timestamp).toLocaleDateString()}
                     </p>
                     {scan.result && (
-                      <div className="text-xs space-y-1">                        <p className="text-neutral-600 dark:text-neutral-400">
+                      <div className="text-xs space-y-1">                        <p className="text-neutral-600">
                           <span className="font-medium">Result:</span> {getClassificationDisplay(scan.result.response)}
                         </p>
                         {scan.result.ratio && (
-                          <p className="text-neutral-600 dark:text-neutral-400">
+                          <p className="text-neutral-600">
                             <span className="font-medium">Confidence:</span> {(scan.result.ratio * 100).toFixed(1)}%
                           </p>
                         )}

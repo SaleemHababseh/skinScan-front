@@ -7,40 +7,40 @@ const Toast = ({ toast }) => {
   const getToastStyles = (type) => {
     const baseStyles = "rounded-md p-4 shadow-lg transition-all duration-300 border";
     const typeStyles = {
-      success: "bg-success-50 border-success-200 dark:bg-success-900/30 dark:border-success-800",
-      error: "bg-error-50 border-error-200 dark:bg-error-900/30 dark:border-error-800",
-      warning: "bg-warning-50 border-warning-200 dark:bg-warning-900/30 dark:border-warning-800",
-      info: "bg-info-50 border-info-200 dark:bg-info-900/30 dark:border-info-800"
+      success: "bg-success-50 border-success-200",
+      error: "bg-error-50 border-error-200",
+      warning: "bg-warning-50 border-warning-200",
+      info: "bg-info-50 border-info-200"
     };
     return `${baseStyles} ${typeStyles[type] || typeStyles.info}`;
   };
 
   const getIconStyles = (type) => {
     const iconStyles = {
-      success: "text-success-600 dark:text-success-400",
-      error: "text-error-600 dark:text-error-400",
-      warning: "text-warning-600 dark:text-warning-400",
-      info: "text-info-600 dark:text-info-400"
+      success: "text-success-600",
+      error: "text-error-600",
+      warning: "text-warning-600",
+      info: "text-info-600"
     };
     return iconStyles[type] || iconStyles.info;
   };
 
   const getTextStyles = (type) => {
     const textStyles = {
-      success: "text-success-800 dark:text-success-200",
-      error: "text-error-800 dark:text-error-200",
-      warning: "text-warning-800 dark:text-warning-200",
-      info: "text-info-800 dark:text-info-200"
+      success: "text-success-800",
+      error: "text-error-800",
+      warning: "text-warning-800",
+      info: "text-info-800"
     };
     return textStyles[type] || textStyles.info;
   };
 
   const getButtonStyles = (type) => {
     const buttonStyles = {
-      success: "text-success-500 hover:bg-success-100 focus:ring-success-600 dark:text-success-400 dark:hover:bg-success-900/50",
-      error: "text-error-500 hover:bg-error-100 focus:ring-error-600 dark:text-error-400 dark:hover:bg-error-900/50",
-      warning: "text-warning-500 hover:bg-warning-100 focus:ring-warning-600 dark:text-warning-400 dark:hover:bg-warning-900/50",
-      info: "text-info-500 hover:bg-info-100 focus:ring-info-600 dark:text-info-400 dark:hover:bg-info-900/50"
+      success: "text-success-500 hover:bg-success-100 focus:ring-success-600",
+      error: "text-error-500 hover:bg-error-100 focus:ring-error-600",
+      warning: "text-warning-500 hover:bg-warning-100 focus:ring-warning-600",
+      info: "text-info-500 hover:bg-info-100 focus:ring-info-600"
     };
     return buttonStyles[type] || buttonStyles.info;
   };

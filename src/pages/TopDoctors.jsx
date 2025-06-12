@@ -82,7 +82,7 @@ const TopDoctors = () => {
       <div className="flex items-center justify-center p-8">
         <div className="text-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-500 border-t-transparent"></div>
-          <p className="mt-2 text-neutral-600 dark:text-neutral-400">Loading top doctors...</p>
+          <p className="mt-2 text-neutral-600">Loading top doctors...</p>
         </div>
       </div>
     );
@@ -92,15 +92,15 @@ const TopDoctors = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Top Rated Doctors</h1>
-        <p className="mt-1 text-neutral-600 dark:text-neutral-400">
+        <h1 className="text-2xl font-bold text-neutral-900">Top Rated Doctors</h1>
+        <p className="mt-1 text-neutral-600">
           Browse and connect with our highest-rated medical professionals
         </p>
       </div>
 
       {error && (
-        <div className="rounded-md bg-red-50 p-4 dark:bg-red-900/20">
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        <div className="rounded-md bg-red-50 p-4">
+          <p className="text-sm text-red-600">{error}</p>
         </div>
       )}
 
@@ -118,10 +118,10 @@ const TopDoctors = () => {
                     className="h-16 w-16"
                   />
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+                    <h3 className="text-lg font-semibold text-neutral-900">
                       Dr. {doctor.name}
                     </h3>
-                    <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                    <p className="text-sm text-neutral-600">
                       General Practitioner
                     </p>
                     <div className="mt-1 flex items-center">
@@ -135,7 +135,7 @@ const TopDoctors = () => {
                           }`}
                         />
                       ))}
-                      <span className="ml-2 text-sm text-neutral-600 dark:text-neutral-400">
+                      <span className="ml-2 text-sm text-neutral-600">
                         {doctor.rating_avg?.toFixed(1) || 'No rating'}
                       </span>
                     </div>
@@ -144,7 +144,7 @@ const TopDoctors = () => {
 
                 {doctor.doctor_bio && (
                   <div className="mt-4">
-                    <p className="text-sm text-neutral-600 dark:text-neutral-400 line-clamp-3">
+                    <p className="text-sm text-neutral-600 line-clamp-3">
                       {doctor.doctor_bio}
                     </p>
                   </div>
@@ -176,8 +176,8 @@ const TopDoctors = () => {
         ) : (
           <div className="col-span-full text-center py-12">
             <User className="mx-auto h-12 w-12 text-neutral-400" />
-            <h3 className="mt-2 text-sm font-medium text-neutral-900 dark:text-neutral-100">No doctors found</h3>
-            <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+            <h3 className="mt-2 text-sm font-medium text-neutral-900">No doctors found</h3>
+            <p className="mt-1 text-sm text-neutral-500">
               There are no top-rated doctors available at the moment.
             </p>
           </div>
@@ -187,11 +187,11 @@ const TopDoctors = () => {
       {/* Rating Modal */}
       {showRatingModal && selectedDoctor && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg dark:bg-neutral-800">
-            <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+            <h3 className="text-lg font-semibold text-neutral-900">
               Rate Dr. {selectedDoctor.name}
             </h3>
-            <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+            <p className="mt-2 text-sm text-neutral-600">
               How would you rate your experience with this doctor?
             </p>
 
@@ -200,10 +200,9 @@ const TopDoctors = () => {
                 <button
                   key={star}
                   onClick={() => setRating(star)}
-                  className="rounded p-1 hover:bg-neutral-100 dark:hover:bg-neutral-700"
+                  className="rounded p-1 hover:bg-neutral-100"
                 >
-                  <Star
-                    className={`h-8 w-8 ${
+                  <Star                    className={`h-8 w-8 ${
                       star <= rating
                         ? 'fill-yellow-400 text-yellow-400'
                         : 'text-neutral-300 dark:text-neutral-600'
